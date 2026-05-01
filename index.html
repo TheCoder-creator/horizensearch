@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizon OS | Pro Edition</title>
+    <style>
+        :root { 
+            --bg: #050505; 
+            --nav: #121212; 
+            --accent: #00eb84; 
+            --card: rgba(20, 20, 20, 0.95); 
+            --text: #ffffff;
+            --border: #333;
+        }
+        
+        body { 
+            margin: 0; font-family: 'Inter', sans-serif; background: var(--bg);
+            background-size: cover; background-position: center; color: var(--text); 
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden; 
+            transition: background 0.5s ease;
+        }
+
+        #tab-bar { background: rgba(18, 18, 18, 0.8); backdrop-filter: blur(10px); display: flex; padding: 8px 10px 0; gap: 5px; border-bottom: 1px solid var(--border); min-height: 40px; z-index: 10001; }
+        .tab { background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 8px 8px 0 0; font-size: 12px; cursor: pointer; border: 1px solid var(--border); border-bottom: none; color: #888; min-width: 120px; display: flex; align-items: center; justify-content: space-between; }
+        .tab.active { background: var(--bg); border-color: var(--accent); color: var(--accent); font-weight: bold; }
+        .close-tab { margin-left: 10px; font-weight: bold; opacity: 0.5; cursor: pointer; }
+
+        #nav-tools { background: var(--nav); padding: 10px; display: flex; gap: 10px; border-bottom: 1px solid var(--border); z-index: 10001; align-items: center; }
+        #addr-bar { flex-grow: 1; padding: 10px 20px; border-radius: 20px; border: 1px solid var(--border); background: #1a1a1a; color: white; outline: none; }
+
+        #status-bar { display: flex; gap: 15px; padding: 0 15px; font-size: 13px; color: #aaa; font-weight: 500; white-space: nowrap; }
+        .status-item { display: flex; align-items: center; gap: 5px; }
+        #time { color: var(--accent); font-weight: bold; }
+
+        #viewport { flex-grow: 1; position: relative; }
+        .view-pane { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; }
+        .view-pane.active { display: block; }
+        iframe { width: 100%; height: 100%; border: none; background: #fff; }
+
+        #home-view { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; height: 100%; padding-top: 10vh; backdrop-filter: brightness(0.5); overflow-y: auto; }
+        .logo { font-size: 5rem; font-weight: 900; color: var(--accent); letter-spacing: -4px; text-shadow: 0 0 30px rgba(0,235,132,0.3); }
+        .mid-search { width: 90%; max-width: 550px; background: var(--card); padding: 12px 25px; border-radius: 50px; border: 1px solid var(--border); display: flex; gap: 10px; margin-top: 20px;}
+        .mid-search input { flex-grow: 1; background: none; border: none; color: white; outline: none; font-size: 1.1rem; }
+
+        .popular-section { margin-top: 40px; width: 90%; max-width: 600px; text-align: center; }
+        .popular-title { font-size: 13px; color: #666; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .popular-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .popular-link { background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 10px 20px; border-radius: 12px; color: #ccc; text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .popular-link:hover { border-color: var(--accent); color: var(--accent); background: rgba(0, 235, 132, 0.05); transform: translateY(-2px); }
+        .popular-link i { font-size: 16px; }
+
+        #context-menu { position: fixed; display: none; background: var(--nav); border: 1px solid var(--accent); border-radius: 8px; z-index: 20000; padding: 5px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.8); min-width: 150px; }
+        .menu-item { padding: 10px 20px; cursor: pointer; font-size: 13px; color: white; }
+        .menu-item:hover { background: var(--accent); color: black; }
+
+        #wp-picker { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 700px; height: 70vh; background: var(--card); border: 1px solid var(--accent); border-radius: 24px; display: none; flex-direction: column; padding: 25px; z-index: 10002; backdrop-filter: blur(30px); }
+        #wp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; overflow-y: auto; margin-top: 15px; }
+        .wp-item { width: 100%; height: 90px; border-radius: 10px; cursor: pointer; object-fit: cover; }
+
+        .btn { background: var(--accent); color: black; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; cursor: pointer; }
+        
+        .results-wrapper { max-width: 800px; margin: 0 auto; padding: 20px; height: 100%; overflow-y: auto; }
+        .filter-bar { display: flex; gap: 5px; border-bottom: 1px solid var(--border); margin-bottom: 25px; }
+        .filter-btn { background: none; border: none; padding: 12px 15px; font-size: 13px; color: #888; cursor: pointer; border-bottom: 2px solid transparent; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .filter-btn:hover { color: white; }
+        .filter-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+
+        .ai-overview-container { margin-bottom: 30px; }
+        .ai-overview-box { background: #12151c; border: 1px solid #2a2e3a; border-radius: 16px; overflow: hidden; }
+        .ai-overview-header { padding: 15px 20px; background: #1a1e28; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: var(--accent); border-bottom: 1px solid #2a2e3a; }
+        .ai-overview-content { padding: 20px; min-height: 100px; color: #ccc; line-height: 1.6; }
+        
+        .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+        .image-grid img { width: 100%; height: 140px; object-fit: cover; border-radius: 10px; cursor: pointer; transition: transform 0.2s; }
+        .image-grid img:hover { transform: scale(1.03); }
+
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body oncontextmenu="handleGlobalContextMenu(event)">
+
+    <div id="context-menu">
+        <div class="menu-item" onclick="toggleWPPicker()">Change Wallpaper</div>
+        <div class="menu-item" onclick="resetBG()">Reset Wallpaper</div>
+        <div class="menu-item" onclick="location.reload()">Restart OS</div>
+    </div>
+
+    <div id="tab-bar">
+        <div class="tab active" id="tab-home" onclick="switchTab('home')">🏠 Horizon</div>
+        <div class="tab" id="tab-results" onclick="switchTab('results')" style="display:none;">🔍 Search</div>
+    </div>
+
+    <div id="nav-tools">
+        <button onclick="switchTab('home')" style="background:none; border:none; color:white; font-size:22px; cursor:pointer;">🏠</button>
+        <input type="text" id="addr-bar" placeholder="Search Horizon or type a URL...">
+        <button class="btn" onclick="handleTopBar()">Go</button>
+        
+        <div id="status-bar">
+            <div class="status-item" id="weather">☀️ Sunny</div>
+            <div class="status-item" id="battery">🔋 --%</div>
+            <div class="status-item" id="time">00:00</div>
+        </div>
+    </div>
+
+    <div id="viewport">
+        <div id="view-home" class="view-pane active">
+            <div id="home-view">
+                <div class="logo">HORIZON</div>
+                <div class="mid-search">
+                    <input type="text" id="search-input" placeholder="Search anything...">
+                    <button class="btn" onclick="performSearch()">Search</button>
+                </div>
+
+                <!-- Popular Websites Section -->
+                <div class="popular-section">
+                    <div class="popular-title">Popular Horizon Websites</div>
+                    <div class="popular-grid">
+                        <div class="popular-link" onclick="openUrl('https://horizensearch.com', 'Main Search')">
+                            <i class="fas fa-globe"></i> Main Search
+                        </div>
+                        <div class="popular-link" onclick="openUrl('https://ai.horizensearch.com', 'Horizen AI')">
+                            <i class="fas fa-brain"></i> Horizen AI
+                        </div>
+                        <div class="popular-link" onclick="openUrl('https://minecraft.horizensearch.com', 'Eagtek MC')">
+                            <i class="fas fa-cube"></i> Eagtek MC
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="wp-picker">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Wallpaper Engine</h3>
+                <button class="btn" onclick="toggleWPPicker()">X</button>
+            </div>
+            <input type="text" id="wp-search" placeholder="Search Pexels..." style="width:100%; padding:10px; margin-top:10px; background:#111; color:white; border:1px solid #444;">
+            <div id="wp-grid"></div>
+        </div>
+
+        <div id="view-results" class="view-pane">
+            <div class="results-wrapper">
+                <h2 id="search-title" style="color:#aaa; font-size:16px; margin-bottom:20px;"></h2>
+                
+                <div class="filter-bar">
+                    <button class="filter-btn active" onclick="switchFilter('all', this)">All</button>
+                    <button class="filter-btn" onclick="switchFilter('images', this)">Images</button>
+                    <button class="filter-btn" onclick="switchFilter('facts', this)">Facts</button>
+                </div>
+
+                <div id="content-all" class="content-section active">
+                    <div class="ai-overview-container" id="inline-ai-box"></div>
+                    <div id="all-images-preview" class="image-grid"></div>
+                </div>
+
+                <div id="content-images" class="content-section">
+                    <div id="full-images-grid" class="image-grid"></div>
+                </div>
+
+                <div id="content-facts" class="content-section">
+                    <div id="facts-only-box" class="ai-overview-box">
+                        <div class="ai-overview-header"><i class="fas fa-sparkles"></i> AI Fact Overview</div>
+                        <div class="ai-overview-content" id="facts-content">Generating facts...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PEXELS_KEY = 'QmebQALowGk9LoYQqUGaPhQ5zUMQWwd1mRaFTV4HvNQyYS1i6v9H5V68';
+        
+        let openTabs = [];
+        let currentSearchQuery = "";
+
+        function updateStatus() {
+            const now = new Date();
+            document.getElementById('time').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            if (navigator.getBattery) {
+                navigator.getBattery().then(bat => {
+                    document.getElementById('battery').innerText = `🔋 ${Math.round(bat.level * 100)}%`;
+                });
+            }
+        }
+        setInterval(updateStatus, 1000);
+
+        function handleGlobalContextMenu(e) {
+            e.preventDefault();
+            const menu = document.getElementById('context-menu');
+            menu.style.display = 'block';
+            menu.style.left = e.pageX + 'px';
+            menu.style.top = e.pageY + 'px';
+        }
+
+        window.onclick = () => document.getElementById('context-menu').style.display = 'none';
+
+        function switchTab(id) {
+            document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('view-' + id).classList.add('active');
+            document.getElementById('tab-' + id).classList.add('active');
+            document.getElementById('tab-' + id).style.display = 'flex';
+        }
+
+        // FORCE OPEN URL IN TAB
+        function openUrl(url, tabName) {
+            createNewTab(tabName, null, url);
+        }
+
+        function handleTopBar() {
+            const val = document.getElementById('addr-bar').value.trim();
+            if (!val) return;
+
+            if (val.startsWith("http://") || val.startsWith("https://")) {
+                createNewTab(val, null, val);
+            } else if (val.includes(".")) {
+                createNewTab(val, null, "https://" + val);
+            } else {
+                performSearch(val);
+            }
+        }
+
+        function createNewTab(name, html, url) {
+            const safeId = name.replace(/[^a-z0-9]/gi, '_');
+            if(openTabs.includes(safeId)) return switchTab(safeId);
+            
+            const tab = document.createElement('div');
+            tab.className = 'tab'; tab.id = 'tab-' + safeId;
+            tab.innerHTML = `🌐 ${name} <span class="close-tab" onclick="closeTab(event, '${safeId}')">×</span>`;
+            tab.onclick = () => switchTab(safeId);
+            document.getElementById('tab-bar').appendChild(tab);
+            
+            const pane = document.createElement('div');
+            pane.className = 'view-pane'; pane.id = 'view-' + safeId;
+            const ifr = document.createElement('iframe');
+            
+            // Strictly check if it's a URL
+            if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
+                ifr.src = url; 
+            } else {
+                ifr.srcdoc = html;
+            }
+
+            pane.appendChild(ifr); 
+            document.getElementById('viewport').appendChild(pane);
+            openTabs.push(safeId); 
+            switchTab(safeId);
+        }
+
+        function closeTab(e, id) {
+            e.stopPropagation(); 
+            document.getElementById('tab-' + id).remove(); 
+            document.getElementById('view-' + id).remove();
+            openTabs = openTabs.filter(t => t !== id); 
+            switchTab('home');
+        }
+
+        function switchFilter(filterId, btnElem) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            btnElem.classList.add('active');
+            document.getElementById('content-' + filterId).classList.add('active');
+        }
+
+        async function performSearch(customQuery) {
+            const q = customQuery || document.getElementById('search-input').value;
+            if(!q) return;
+            currentSearchQuery = q;
+            
+            switchTab('results');
+            document.getElementById('search-title').innerText = "Results for: " + q;
+            
+            document.getElementById('inline-ai-box').innerHTML = '';
+            document.getElementById('all-images-preview').innerHTML = '';
+            document.getElementById('full-images-grid').innerHTML = '';
+            document.getElementById('facts-content').innerText = "Generating facts...";
+            
+            switchFilter('all', document.querySelector('.filter-btn'));
+
+            fetch(`https://api.pexels.com/v1/search?query=${q}&per_page=12`, { headers: { Authorization: PEXELS_KEY } })
+                .then(r => r.json()).then(d => {
+                    const imgs = d.photos.map(p => `<img src="${p.src.medium}" onclick="setBG('${p.src.large2x}')" title="Click to set as wallpaper">`).join('');
+                    document.getElementById('all-images-preview').innerHTML = imgs;
+                    document.getElementById('full-images-grid').innerHTML = imgs;
+                });
+
+            fetchAIFacts(q, 'inline-ai-box', false);
+            fetchAIFacts(q, 'facts-content', true);
+        }
+
+        async function fetchAIFacts(query, targetId, isPlainText) {
+            const SUPABASE_URL = 'https://xlisbmtenekjmundxbcn.supabase.co';
+            const SUPABASE_KEY = 'sb_publishable_Cvs-AiKPTHrC_tfGfwlpSQ_4Hir5Cva';
+            
+            const iframe = document.createElement('iframe');
+            iframe.style.width = '100%';
+            iframe.style.border = 'none';
+            iframe.style.minHeight = '150px';
+            iframe.style.background = 'transparent';
+            
+            const targetDiv = document.getElementById(targetId);
+            if(!isPlainText) {
+                targetDiv.innerHTML = `
+                    <div class="ai-overview-box">
+                        <div class="ai-overview-header"><i class="fas fa-sparkles"></i> AI Overview</div>
+                        <div class="ai-overview-content" id="${targetId}-iframe-holder"></div>
+                    </div>`;
+                document.getElementById(`${targetId}-iframe-holder`).appendChild(iframe);
+            } else {
+                targetDiv.appendChild(iframe);
+            }
+
+            iframe.srcdoc = `
+                <html>
+                <head>
+                    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>
+                    <style>
+                        body { font-family: 'Inter', sans-serif; background: transparent; color: #ccc; padding: 0; margin: 0; font-size: 14px; line-height: 1.6; }
+                        .loading { color: #00eb84; }
+                    </style>
+                </head>
+                <body>
+                    <div class="loading">Generating AI summary for "${query}"...</div>
+                    <div id="res"></div>
+                    <script>
+                        const _sb = supabase.createClient('${SUPABASE_URL}', '${SUPABASE_KEY}');
+                        async function run() {
+                            try {
+                                const { data: keys } = await _sb.from('api_keys').select('key_value').eq('key_name', 'groq').single();
+                                if(!keys) throw new Error("No API Key");
+                                
+                                const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                                    method: 'POST',
+                                    headers: { 'Authorization': 'Bearer ' + keys.key_value, 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ 
+                                        model: 'llama-3.3-70b-versatile', 
+                                        messages: [{role: 'system', content: 'Give a concise 3-4 sentence factual summary.'}, {role: 'user', content: '${query}'}], 
+                                        temperature: 0.2 
+                                    })
+                                });
+                                const data = await res.json();
+                                document.querySelector('.loading').style.display = 'none';
+                                document.getElementById('res').innerText = data.choices[0].message.content;
+                                
+                                if(window.parent) {
+                                    const height = document.body.scrollHeight;
+                                    window.parent.postMessage({ type: 'resize-iframe', id: '${targetId}', height: height }, '*');
+                                }
+                            } catch(e) {
+                                document.querySelector('.loading').innerText = "Could not load AI facts.";
+                            }
+                        }
+                        run();
+                    <\/script>
+                </body>
+                </html>
+            `;
+        }
+
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'resize-iframe') {
+                const iframe = document.querySelector(`#${event.data.id}-iframe-holder iframe`) || document.querySelector(`#${event.data.id} iframe`);
+                if (iframe) {
+                    iframe.style.height = event.data.height + 'px';
+                }
+            }
+        });
+
+        function toggleWPPicker() {
+            const p = document.getElementById('wp-picker');
+            p.style.display = (p.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function setBG(url) { 
+            document.body.style.backgroundImage = `url('${url}')`; 
+            localStorage.setItem('horizon_bg', url); 
+        }
+
+        function resetBG() { 
+            document.body.style.backgroundImage = 'none'; 
+            localStorage.removeItem('horizon_bg'); 
+        }
+
+        window.onload = () => {
+            updateStatus();
+            const savedBG = localStorage.getItem('horizon_bg');
+            if(savedBG) setBG(savedBG); 
+        };
+        
+        document.getElementById('wp-search').onkeypress = e => { 
+            if(e.key==='Enter') {
+                fetch(`https://api.pexels.com/v1/search?query=${e.target.value}&per_page=20`, { headers: { Authorization: PEXELS_KEY } })
+                    .then(r => r.json()).then(d => { 
+                        document.getElementById('wp-grid').innerHTML = d.photos.map(p => `<img src="${p.src.medium}" class="wp-item" onclick="setBG('${p.src.large2x}')">`).join(''); 
+                    });
+            }
+        };
+
+        document.getElementById('addr-bar').onkeypress = e => { if(e.key==='Enter') handleTopBar(); };
+        document.getElementById('search-input').onkeypress = e => { if(e.key==='Enter') performSearch(); };
+    </script>
+</body>
+</html>
