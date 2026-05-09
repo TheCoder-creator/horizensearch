@@ -90,6 +90,32 @@
         .image-grid img { width: 100%; height: 140px; object-fit: cover; border-radius: 10px; cursor: pointer; transition: transform 0.2s; }
         .image-grid img:hover { transform: scale(1.03); }
 
+        /* HORIZEN ADDRESS DISPLAY */
+        #hz-addr-display {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(10, 10, 15, 0.85);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #666;
+            z-index: 9999;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #hz-addr-display:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(10, 10, 15, 0.95);
+        }
+        #hz-addr-display i { font-size: 10px; }
+
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
@@ -99,6 +125,12 @@
         <div class="menu-item" onclick="toggleWPPicker()">Change Wallpaper</div>
         <div class="menu-item" onclick="resetBG()">Reset Wallpaper</div>
         <div class="menu-item" onclick="location.reload()">Restart OS</div>
+    </div>
+
+    <!-- Address Display (Bottom Left) -->
+    <div id="hz-addr-display" onclick="copyAddress()" title="Click to copy">
+        <i class="fas fa-fingerprint"></i>
+        <span id="hz-addr-text">Loading...</span>
     </div>
 
     <div id="tab-bar">
@@ -188,9 +220,80 @@
 
     <script>
         const PEXELS_KEY = 'QmebQALowGk9LoYQqUGaPhQ5zUMQWwd1mRaFTV4HvNQyYS1i6v9H5V68';
+        const SUPABASE_URL = 'https://xlisbmtenekjmundxbcn.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_Cvs-AiKPTHrC_tfGfwlpSQ_4Hir5Cva';
         
         let openTabs = [];
         let currentSearchQuery = "";
+        let myAddress = "";
+
+        // ==========================================
+        // HORIZEN BLOCKER SYSTEM
+        // ==========================================
+        async function initHorizenBlocker() {
+            let address = localStorage.getItem('horizen_address');
+            
+            // If they don't have an address, generate one and save to Supabase
+            if (!address) {
+                const digits = Math.floor(100000 + Math.random() * 900000);
+                address = `horizen.play://${digits}`;
+                localStorage.setItem('horizen_address', address);
+                
+                // Send to Supabase so admin can see it
+                await fetch(`${SUPABASE_URL}/rest/v1/users`, {
+                    method: 'POST',
+                    headers: { 
+                        'apikey': SUPABASE_KEY, 
+                        'Content-Type': 'application/json', 
+                        'Prefer': 'return=minimal' 
+                    },
+                    body: JSON.stringify({ address: address, nickname: 'Unknown', is_blocked: false })
+                });
+            }
+
+            // Show address in UI
+            myAddress = address;
+            document.getElementById('hz-addr-text').innerText = address;
+
+            // Check if they are blocked in Supabase
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/users?address=eq.${encodeURIComponent(address)}&select=is_blocked`, {
+                    headers: { 'apikey': SUPABASE_KEY }
+                });
+                const data = await res.json();
+                
+                // If blocked, redirect them out immediately
+                if (data.length > 0 && data[0].is_blocked === true) {
+                    window.location.href = 'https://blocked.horizensearch.com';
+                    return false; 
+                }
+            } catch (e) {
+                // If Supabase fails, let them in anyway so the OS doesn't break
+            }
+            return true;
+        }
+
+        function copyAddress() {
+            navigator.clipboard.writeText(myAddress).then(() => {
+                const el = document.getElementById('hz-addr-text');
+                el.innerText = "Copied!";
+                setTimeout(() => { el.innerText = myAddress; }, 1500);
+            });
+        }
+
+        // Start OS
+        window.onload = async () => {
+            updateStatus();
+            const savedBG = localStorage.getItem('horizon_bg');
+            if(savedBG) setBG(savedBG); 
+            
+            // Check block status before loading anything else
+            const isAllowed = await initHorizenBlocker();
+            
+            if (!isAllowed) {
+                document.body.style.display = 'none'; 
+            }
+        };
 
         function updateStatus() {
             const now = new Date();
@@ -308,9 +411,6 @@
         }
 
         async function fetchAIFacts(query, targetId, isPlainText) {
-            const SUPABASE_URL = 'https://xlisbmtenekjmundxbcn.supabase.co';
-            const SUPABASE_KEY = 'sb_publishable_Cvs-AiKPTHrC_tfGfwlpSQ_4Hir5Cva';
-            
             const iframe = document.createElement('iframe');
             iframe.style.width = '100%';
             iframe.style.border = 'none';
@@ -399,12 +499,6 @@
             document.body.style.backgroundImage = 'none'; 
             localStorage.removeItem('horizon_bg'); 
         }
-
-        window.onload = () => {
-            updateStatus();
-            const savedBG = localStorage.getItem('horizon_bg');
-            if(savedBG) setBG(savedBG); 
-        };
         
         document.getElementById('wp-search').onkeypress = e => { 
             if(e.key==='Enter') {
