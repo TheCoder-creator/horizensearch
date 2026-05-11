@@ -1,1355 +1,559 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<title>Horizon OS | Pro Edition</title>
-
-<link rel="icon"
-type="image/png"
-href="/icon.png">
-
-<meta name="description"
-content="Horizon OS - The AI-powered operating system in your browser.">
-
-<meta property="og:title"
-content="Horizon OS">
-
-<meta property="og:description"
-content="The AI-powered operating system in your browser.">
-
-<meta property="og:image"
-content="/preview-image.png">
-
-<meta property="og:url"
-content="https://horizensearch.com/">
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-<style>
-:root{
-    --bg:#050505;
-    --nav:#121212;
-    --accent:#00eb84;
-    --card:rgba(20,20,20,0.95);
-    --text:#ffffff;
-    --border:#333;
-}
-
-*{
-    box-sizing:border-box;
-}
-
-body{
-    margin:0;
-    font-family:Inter,sans-serif;
-    background:var(--bg);
-    background-size:cover;
-    background-position:center;
-    color:white;
-    height:100vh;
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
-}
-
-/* TABS */
-
-#tab-bar{
-    background:rgba(18,18,18,0.88);
-    backdrop-filter:blur(12px);
-    display:flex;
-    padding:8px 10px 0;
-    gap:5px;
-    border-bottom:1px solid var(--border);
-    min-height:42px;
-    z-index:10001;
-}
-
-.tab{
-    background:rgba(255,255,255,0.05);
-    padding:8px 15px;
-    border-radius:8px 8px 0 0;
-    font-size:12px;
-    cursor:pointer;
-    border:1px solid var(--border);
-    border-bottom:none;
-    color:#888;
-    min-width:120px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-}
-
-.tab.active{
-    background:var(--bg);
-    border-color:var(--accent);
-    color:var(--accent);
-    font-weight:bold;
-}
-
-.close-tab{
-    margin-left:10px;
-    cursor:pointer;
-}
-
-/* NAV */
-
-#nav-tools{
-    background:var(--nav);
-    padding:10px;
-    display:flex;
-    gap:10px;
-    border-bottom:1px solid var(--border);
-    align-items:center;
-    z-index:10001;
-}
-
-#addr-bar{
-    flex-grow:1;
-    padding:10px 20px;
-    border-radius:20px;
-    border:1px solid var(--border);
-    background:#1a1a1a;
-    color:white;
-    outline:none;
-}
-
-.btn{
-    background:var(--accent);
-    color:black;
-    border:none;
-    padding:10px 18px;
-    border-radius:30px;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-/* STATUS */
-
-#status-bar{
-    display:flex;
-    gap:15px;
-    padding:0 15px;
-    font-size:13px;
-    color:#aaa;
-    white-space:nowrap;
-}
-
-.status-item{
-    display:flex;
-    align-items:center;
-    gap:5px;
-}
-
-#time{
-    color:var(--accent);
-    font-weight:bold;
-}
-
-/* VIEW */
-
-#viewport{
-    flex-grow:1;
-    position:relative;
-}
-
-.view-pane{
-    position:absolute;
-    inset:0;
-    display:none;
-}
-
-.view-pane.active{
-    display:block;
-}
-
-iframe{
-    width:100%;
-    height:100%;
-    border:none;
-    background:white;
-}
-
-/* HOME */
-
-#home-view{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:flex-start;
-    height:100%;
-    padding-top:10vh;
-    overflow-y:auto;
-    backdrop-filter:brightness(0.55);
-}
-
-.logo{
-    font-size:5rem;
-    font-weight:900;
-    color:var(--accent);
-    letter-spacing:-4px;
-    text-shadow:0 0 30px rgba(0,235,132,0.3);
-}
-
-.mid-search{
-    width:90%;
-    max-width:560px;
-    background:var(--card);
-    padding:12px 25px;
-    border-radius:50px;
-    border:1px solid var(--border);
-    display:flex;
-    gap:10px;
-    margin-top:20px;
-}
-
-.mid-search input{
-    flex-grow:1;
-    background:none;
-    border:none;
-    color:white;
-    outline:none;
-    font-size:1.05rem;
-}
-
-/* POPULAR */
-
-.popular-section{
-    margin-top:40px;
-    width:90%;
-    max-width:700px;
-    text-align:center;
-}
-
-.popular-title{
-    font-size:13px;
-    color:#777;
-    margin-bottom:15px;
-    text-transform:uppercase;
-    letter-spacing:1px;
-}
-
-.popular-grid{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    justify-content:center;
-}
-
-.popular-link{
-    background:rgba(255,255,255,0.05);
-    border:1px solid var(--border);
-    padding:10px 18px;
-    border-radius:14px;
-    color:#ccc;
-    cursor:pointer;
-    transition:0.2s;
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
-
-.popular-link:hover{
-    border-color:var(--accent);
-    color:var(--accent);
-    transform:translateY(-2px);
-}
-
-/* RESULTS */
-
-.results-wrapper{
-    max-width:850px;
-    margin:0 auto;
-    padding:20px;
-    overflow-y:auto;
-    height:100%;
-}
-
-.filter-bar{
-    display:flex;
-    gap:5px;
-    border-bottom:1px solid var(--border);
-    margin-bottom:25px;
-}
-
-.filter-btn{
-    background:none;
-    border:none;
-    padding:12px 15px;
-    color:#888;
-    cursor:pointer;
-    border-bottom:2px solid transparent;
-}
-
-.filter-btn.active{
-    color:var(--accent);
-    border-bottom-color:var(--accent);
-}
-
-.content-section{
-    display:none;
-}
-
-.content-section.active{
-    display:block;
-}
-
-.ai-overview-box{
-    background:#12151c;
-    border:1px solid #2a2e3a;
-    border-radius:16px;
-    overflow:hidden;
-    margin-bottom:25px;
-}
-
-.ai-overview-header{
-    padding:15px 20px;
-    background:#1a1e28;
-    display:flex;
-    gap:10px;
-    color:var(--accent);
-    border-bottom:1px solid #2a2e3a;
-}
-
-.ai-overview-content{
-    padding:20px;
-    color:#ccc;
-    line-height:1.7;
-}
-
-.image-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
-    gap:10px;
-}
-
-.image-grid img{
-    width:100%;
-    height:140px;
-    object-fit:cover;
-    border-radius:10px;
-    cursor:pointer;
-    transition:0.2s;
-}
-
-.image-grid img:hover{
-    transform:scale(1.03);
-}
-
-/* CONTEXT */
-
-#context-menu{
-    position:fixed;
-    display:none;
-    background:var(--nav);
-    border:1px solid var(--accent);
-    border-radius:10px;
-    z-index:20000;
-    min-width:170px;
-    overflow:hidden;
-}
-
-.menu-item{
-    padding:12px 20px;
-    cursor:pointer;
-}
-
-.menu-item:hover{
-    background:var(--accent);
-    color:black;
-}
-
-/* WALLPAPER */
-
-#wp-picker{
-    position:fixed;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    width:80%;
-    max-width:720px;
-    height:70vh;
-    background:var(--card);
-    border:1px solid var(--accent);
-    border-radius:24px;
-    display:none;
-    flex-direction:column;
-    padding:25px;
-    z-index:10002;
-    backdrop-filter:blur(30px);
-}
-
-#wp-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
-    gap:10px;
-    overflow-y:auto;
-    margin-top:15px;
-}
-
-.wp-item{
-    width:100%;
-    height:90px;
-    object-fit:cover;
-    border-radius:10px;
-    cursor:pointer;
-}
-
-/* ADDRESS */
-
-#hz-addr-display{
-    position:fixed;
-    bottom:15px;
-    left:15px;
-    background:rgba(10,10,15,0.88);
-    border:1px solid #333;
-    border-radius:8px;
-    padding:8px 14px;
-    font-family:monospace;
-    font-size:12px;
-    color:#777;
-    z-index:9999;
-    cursor:pointer;
-    transition:0.2s;
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
-
-#hz-addr-display:hover{
-    border-color:var(--accent);
-    color:var(--accent);
-}
-
-/* BROADCAST */
-
-#hz-top-broadcast{
-    position:fixed;
-    top:-120px;
-    left:50%;
-    transform:translateX(-50%);
-    min-width:340px;
-    max-width:80%;
-    background:rgba(15,15,15,0.96);
-    border:1px solid var(--accent);
-    border-radius:18px;
-    padding:15px 18px;
-    display:flex;
-    align-items:center;
-    gap:14px;
-    z-index:999999;
-    transition:0.4s ease;
-}
-
-#hz-top-broadcast.show{
-    top:20px;
-}
-
-#hz-top-dot{
-    width:14px;
-    height:14px;
-    border-radius:50%;
-    background:var(--accent);
-}
-
-#hz-top-message{
-    flex:1;
-    font-size:14px;
-}
-
-#hz-dismiss-btn{
-    width:34px;
-    height:34px;
-    border:none;
-    border-radius:10px;
-    background:#1f1f1f;
-    color:#aaa;
-    cursor:pointer;
-}
-
-#hz-dismiss-btn:hover{
-    background:#2a2a2a;
-    color:white;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizon OS | Pro Edition</title>
+    
+    <!-- ICON & SEO SETTINGS -->
+    <link rel="icon" type="image/png" href="/icon.png">
+    <meta name="description" content="Horizon OS - The AI-powered operating system in your browser. Featuring live search, AI facts, and a built-in app ecosystem.">
+    <meta property="og:title" content="Horizon OS">
+    <meta property="og:description" content="The AI-powered operating system in your browser.">
+    <meta property="og:image" content="/preview-image.png">
+    <meta property="og:url" content="https://horizensearch.com/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <!-- END ICON & SEO SETTINGS -->
+
+    <style>
+        :root { 
+            --bg: #050505; 
+            --nav: #121212; 
+            --accent: #00eb84; 
+            --card: rgba(20, 20, 20, 0.95); 
+            --text: #ffffff;
+            --border: #333;
+        }
+        
+        body { 
+            margin: 0; font-family: 'Inter', sans-serif; background: var(--bg);
+            background-size: cover; background-position: center; color: var(--text); 
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden; 
+            transition: background 0.5s ease;
+        }
+
+        #tab-bar { background: rgba(18, 18, 18, 0.8); backdrop-filter: blur(10px); display: flex; padding: 8px 10px 0; gap: 5px; border-bottom: 1px solid var(--border); min-height: 40px; z-index: 10001; }
+        .tab { background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 8px 8px 0 0; font-size: 12px; cursor: pointer; border: 1px solid var(--border); border-bottom: none; color: #888; min-width: 120px; display: flex; align-items: center; justify-content: space-between; }
+        .tab.active { background: var(--bg); border-color: var(--accent); color: var(--accent); font-weight: bold; }
+        .close-tab { margin-left: 10px; font-weight: bold; opacity: 0.5; cursor: pointer; }
+
+        #nav-tools { background: var(--nav); padding: 10px; display: flex; gap: 10px; border-bottom: 1px solid var(--border); z-index: 10001; align-items: center; }
+        #addr-bar { flex-grow: 1; padding: 10px 20px; border-radius: 20px; border: 1px solid var(--border); background: #1a1a1a; color: white; outline: none; }
+
+        #status-bar { display: flex; gap: 15px; padding: 0 15px; font-size: 13px; color: #aaa; font-weight: 500; white-space: nowrap; }
+        .status-item { display: flex; align-items: center; gap: 5px; }
+        #time { color: var(--accent); font-weight: bold; }
+
+        #viewport { flex-grow: 1; position: relative; }
+        .view-pane { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; }
+        .view-pane.active { display: block; }
+        iframe { width: 100%; height: 100%; border: none; background: #fff; }
+
+        #home-view { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; height: 100%; padding-top: 10vh; backdrop-filter: brightness(0.5); overflow-y: auto; }
+        .logo { font-size: 5rem; font-weight: 900; color: var(--accent); letter-spacing: -4px; text-shadow: 0 0 30px rgba(0,235,132,0.3); }
+        .mid-search { width: 90%; max-width: 550px; background: var(--card); padding: 12px 25px; border-radius: 50px; border: 1px solid var(--border); display: flex; gap: 10px; margin-top: 20px;}
+        .mid-search input { flex-grow: 1; background: none; border: none; color: white; outline: none; font-size: 1.1rem; }
+
+        .popular-section { margin-top: 40px; width: 90%; max-width: 600px; text-align: center; }
+        .popular-title { font-size: 13px; color: #666; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .popular-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .popular-link { background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 10px 20px; border-radius: 12px; color: #ccc; text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .popular-link:hover { border-color: var(--accent); color: var(--accent); background: rgba(0, 235, 132, 0.05); transform: translateY(-2px); }
+        .popular-link i { font-size: 16px; }
+
+        #context-menu { position: fixed; display: none; background: var(--nav); border: 1px solid var(--accent); border-radius: 8px; z-index: 20000; padding: 5px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.8); min-width: 150px; }
+        .menu-item { padding: 10px 20px; cursor: pointer; font-size: 13px; color: white; }
+        .menu-item:hover { background: var(--accent); color: black; }
+
+        #wp-picker { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 700px; height: 70vh; background: var(--card); border: 1px solid var(--accent); border-radius: 24px; display: none; flex-direction: column; padding: 25px; z-index: 10002; backdrop-filter: blur(30px); }
+        #wp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; overflow-y: auto; margin-top: 15px; }
+        .wp-item { width: 100%; height: 90px; border-radius: 10px; cursor: pointer; object-fit: cover; }
+
+        .btn { background: var(--accent); color: black; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; cursor: pointer; }
+        
+        .results-wrapper { max-width: 800px; margin: 0 auto; padding: 20px; height: 100%; overflow-y: auto; }
+        .filter-bar { display: flex; gap: 5px; border-bottom: 1px solid var(--border); margin-bottom: 25px; }
+        .filter-btn { background: none; border: none; padding: 12px 15px; font-size: 13px; color: #888; cursor: pointer; border-bottom: 2px solid transparent; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .filter-btn:hover { color: white; }
+        .filter-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+
+        .ai-overview-container { margin-bottom: 30px; }
+        .ai-overview-box { background: #12151c; border: 1px solid #2a2e3a; border-radius: 16px; overflow: hidden; }
+        .ai-overview-header { padding: 15px 20px; background: #1a1e28; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: var(--accent); border-bottom: 1px solid #2a2e3a; }
+        .ai-overview-content { padding: 20px; min-height: 100px; color: #ccc; line-height: 1.6; }
+        
+        .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+        .image-grid img { width: 100%; height: 140px; object-fit: cover; border-radius: 10px; cursor: pointer; transition: transform 0.2s; }
+        .image-grid img:hover { transform: scale(1.03); }
+
+        /* HORIZEN ADDRESS DISPLAY */
+        #hz-addr-display {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(10, 10, 15, 0.85);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #666;
+            z-index: 9999;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #hz-addr-display:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(10, 10, 15, 0.95);
+        }
+        #hz-addr-display i { font-size: 10px; }
+
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
-
 <body oncontextmenu="handleGlobalContextMenu(event)">
 
-<div id="context-menu">
-<div class="menu-item"
-onclick="toggleWPPicker()">
-Change Wallpaper
-</div>
-
-<div class="menu-item"
-onclick="resetBG()">
-Reset Wallpaper
-</div>
-
-<div class="menu-item"
-onclick="location.reload()">
-Restart OS
-</div>
-</div>
-
-<div id="hz-addr-display"
-onclick="copyAddress()">
-<i class="fas fa-fingerprint"></i>
-<span id="hz-addr-text">
-Loading...
-</span>
-</div>
-
-<div id="hz-top-broadcast">
-
-<div id="hz-top-dot"></div>
-
-<div id="hz-top-message">
-Loading broadcast...
-</div>
-
-<button id="hz-dismiss-btn">
-✕
-</button>
-
-</div>
-
-<div id="tab-bar">
-
-<div class="tab active"
-id="tab-home"
-onclick="switchTab('home')">
-🏠 Horizon
-</div>
-
-<div class="tab"
-id="tab-results"
-onclick="switchTab('results')"
-style="display:none;">
-🔍 Search
-</div>
-
-</div>
-
-<div id="nav-tools">
-
-<button onclick="switchTab('home')"
-style="background:none;border:none;color:white;font-size:22px;cursor:pointer;">
-🏠
-</button>
-
-<input type="text"
-id="addr-bar"
-placeholder="Search Horizon or type a URL...">
-
-<button class="btn"
-onclick="handleTopBar()">
-Go
-</button>
-
-<div id="status-bar">
-
-<div class="status-item"
-id="weather">
-☀️ Sunny
-</div>
-
-<div class="status-item"
-id="battery">
-🔋 --%
-</div>
-
-<div class="status-item"
-id="time">
-00:00
-</div>
-
-</div>
-</div>
-
-<div id="viewport">
-
-<div id="view-home"
-class="view-pane active">
-
-<div id="home-view">
-
-<div class="logo">
-HORIZON
-</div>
-
-<div class="mid-search">
-
-<input type="text"
-id="search-input"
-placeholder="Search anything...">
-
-<button class="btn"
-onclick="performSearch()">
-Search
-</button>
-
-</div>
-
-<div class="popular-section">
-
-<div class="popular-title">
-Popular Horizon Websites
-</div>
-
-<div class="popular-grid">
-
-<div class="popular-link"
-onclick="openUrl('https://horizensearch.com','Main Search')">
-<i class="fas fa-globe"></i>
-Main Search
-</div>
-
-<div class="popular-link"
-onclick="openUrl('https://ai.horizensearch.com','Horizen AI')">
-<i class="fas fa-brain"></i>
-Horizen AI
-</div>
-
-</div>
-</div>
-</div>
-</div>
-
-<div id="wp-picker">
-
-<div style="display:flex;justify-content:space-between;align-items:center;">
-
-<h3>
-Wallpaper Engine
-</h3>
-
-<button class="btn"
-onclick="toggleWPPicker()">
-X
-</button>
-
-</div>
-
-<input type="text"
-id="wp-search"
-placeholder="Search Pexels..."
-style="width:100%;padding:10px;margin-top:10px;background:#111;color:white;border:1px solid #444;">
-
-<div id="wp-grid"></div>
-
-</div>
-
-<div id="view-results"
-class="view-pane">
-
-<div class="results-wrapper">
-
-<h2 id="search-title"
-style="color:#aaa;font-size:16px;margin-bottom:20px;">
-</h2>
-
-<div class="filter-bar">
-
-<button class="filter-btn active"
-onclick="switchFilter('all',this)">
-All
-</button>
-
-<button class="filter-btn"
-onclick="switchFilter('images',this)">
-Images
-</button>
-
-<button class="filter-btn"
-onclick="switchFilter('facts',this)">
-Facts
-</button>
-
-</div>
-
-<div id="content-all"
-class="content-section active">
-
-<div id="inline-ai-box"></div>
-
-<div id="all-images-preview"
-class="image-grid"></div>
-
-</div>
-
-<div id="content-images"
-class="content-section">
-
-<div id="full-images-grid"
-class="image-grid"></div>
-
-</div>
-
-<div id="content-facts"
-class="content-section">
-
-<div class="ai-overview-box">
-
-<div class="ai-overview-header">
-<i class="fas fa-sparkles"></i>
-AI Fact Overview
-</div>
-
-<div class="ai-overview-content"
-id="facts-content">
-Generating facts...
-</div>
-
-</div>
-</div>
-</div>
-</div>
-
-</div>
-
-<script>
-const PEXELS_KEY=
-'QmebQALowGk9LoYQqUGaPhQ5zUMQWwd1mRaFTV4HvNQyYS1i6v9H5V68';
-
-const SUPABASE_URL=
-'https://xlisbmtenekjmundxbcn.supabase.co';
-
-const SUPABASE_KEY=
-'sb_publishable_Cvs-AiKPTHrC_tfGfwlpSQ_4Hir5Cva';
-
-let openTabs=[];
-let myAddress="";
-let currentBroadcast="";
-let dismissedBroadcast=
-localStorage.getItem(
-'dismissed_broadcast'
-)||"";
-
-/* STATUS */
-
-function updateStatus(){
-
-const now=new Date();
-
-document.getElementById(
-'time'
-).innerText=
-now.toLocaleTimeString([],{
-hour:'2-digit',
-minute:'2-digit'
-});
-
-if(navigator.getBattery){
-
-navigator.getBattery().then(bat=>{
-
-document.getElementById(
-'battery'
-).innerText=
-`🔋 ${Math.round(bat.level*100)}%`;
-
-});
-}
-}
-
-setInterval(updateStatus,1000);
-
-/* GLOBAL COOKIE */
-
-function setCookie(name,value,days){
-
-let expires="";
-
-if(days){
-
-const date=new Date();
-
-date.setTime(
-date.getTime()+
-(days*24*60*60*1000)
-);
-
-expires=
-"; expires="+
-date.toUTCString();
-}
-
-document.cookie=
-name+"="+value+
-expires+
-"; path=/; domain=.horizensearch.com";
-}
-
-function getCookie(name){
-
-const nameEQ=name+"=";
-
-const ca=document.cookie.split(';');
-
-for(let i=0;i<ca.length;i++){
-
-let c=ca[i];
-
-while(c.charAt(0)==' '){
-
-c=c.substring(1,c.length);
-}
-
-if(c.indexOf(nameEQ)==0){
-
-return c.substring(
-nameEQ.length,
-c.length
-);
-}
-}
-
-return null;
-}
-
-/* BLOCKER */
-
-async function initHorizenBlocker(){
-
-let address=
-getCookie(
-'horizen_global_address'
-);
-
-if(!address){
-
-const digits=
-Math.floor(
-100000+
-Math.random()*900000
-);
-
-address=
-`horizen.play://${digits}`;
-
-setCookie(
-'horizen_global_address',
-address,
-3650
-);
-
-try{
-
-await fetch(
-`${SUPABASE_URL}/rest/v1/users`,
-{
-method:'POST',
-headers:{
-'apikey':SUPABASE_KEY,
-'Content-Type':'application/json',
-'Prefer':'return=minimal'
-},
-body:JSON.stringify({
-address:address,
-nickname:'Unknown',
-is_blocked:false
-})
-}
-);
-
-}catch(e){}
-}
-
-myAddress=address;
-
-document.getElementById(
-'hz-addr-text'
-).innerText=address;
-
-checkBlocked();
-}
-
-async function checkBlocked(){
-
-try{
-
-const res=await fetch(
-`${SUPABASE_URL}/rest/v1/users?address=eq.${encodeURIComponent(myAddress)}&select=is_blocked`,
-{
-headers:{
-'apikey':SUPABASE_KEY
-}
-}
-);
-
-const data=await res.json();
-
-if(
-data.length>0 &&
-data[0].is_blocked===true
-){
-
-window.location.href=
-'https://blocked.horizensearch.com';
-}
-
-}catch(e){}
-}
-
-setInterval(checkBlocked,10000);
-
-/* BROADCAST */
-
-async function checkBroadcast(){
-
-try{
-
-const res=await fetch(
-`${SUPABASE_URL}/rest/v1/broadcasts?enabled=eq.true&select=message`,
-{
-headers:{
-'apikey':SUPABASE_KEY
-}
-}
-);
-
-const data=await res.json();
-
-if(data.length>0){
-
-const msg=data[0].message;
-
-currentBroadcast=msg;
-
-if(msg!==dismissedBroadcast){
-
-showBroadcast(msg);
-}
-
-}else{
-
-hideBroadcast();
-
-localStorage.removeItem(
-'dismissed_broadcast'
-);
-}
-
-}catch(e){}
-}
-
-function showBroadcast(message){
-
-document.getElementById(
-'hz-top-message'
-).innerText=message;
-
-document.getElementById(
-'hz-top-broadcast'
-).classList.add('show');
-}
-
-function hideBroadcast(){
-
-document.getElementById(
-'hz-top-broadcast'
-).classList.remove('show');
-}
-
-document.getElementById(
-'hz-dismiss-btn'
-).onclick=()=>{
-
-dismissedBroadcast=
-currentBroadcast;
-
-localStorage.setItem(
-'dismissed_broadcast',
-currentBroadcast
-);
-
-hideBroadcast();
-};
-
-setInterval(checkBroadcast,5000);
-
-/* CONTEXT */
-
-function handleGlobalContextMenu(e){
-
-e.preventDefault();
-
-const menu=
-document.getElementById(
-'context-menu'
-);
-
-menu.style.display='block';
-
-menu.style.left=e.pageX+'px';
-
-menu.style.top=e.pageY+'px';
-}
-
-window.onclick=()=>{
-
-document.getElementById(
-'context-menu'
-).style.display='none';
-};
-
-/* TABS */
-
-function switchTab(id){
-
-document.querySelectorAll(
-'.view-pane'
-).forEach(
-p=>p.classList.remove('active')
-);
-
-document.querySelectorAll(
-'.tab'
-).forEach(
-t=>t.classList.remove('active')
-);
-
-document.getElementById(
-'view-'+id
-).classList.add('active');
-
-document.getElementById(
-'tab-'+id
-).classList.add('active');
-
-document.getElementById(
-'tab-'+id
-).style.display='flex';
-}
-
-function openUrl(url,name){
-
-createNewTab(name,null,url);
-}
-
-function createNewTab(name,html,url){
-
-const safeId=
-name.replace(/[^a-z0-9]/gi,'_');
-
-if(openTabs.includes(safeId))
-return switchTab(safeId);
-
-const tab=document.createElement('div');
-
-tab.className='tab';
-
-tab.id='tab-'+safeId;
-
-tab.innerHTML=
-`🌐 ${name}
-<span class="close-tab"
-onclick="closeTab(event,'${safeId}')">
-×
-</span>`;
-
-tab.onclick=
-()=>switchTab(safeId);
-
-document.getElementById(
-'tab-bar'
-).appendChild(tab);
-
-const pane=document.createElement('div');
-
-pane.className='view-pane';
-
-pane.id='view-'+safeId;
-
-const ifr=document.createElement('iframe');
-
-if(url){
-ifr.src=url;
-}else{
-ifr.srcdoc=html;
-}
-
-pane.appendChild(ifr);
-
-document.getElementById(
-'viewport'
-).appendChild(pane);
-
-openTabs.push(safeId);
-
-switchTab(safeId);
-}
-
-function closeTab(e,id){
-
-e.stopPropagation();
-
-document.getElementById(
-'tab-'+id
-).remove();
-
-document.getElementById(
-'view-'+id
-).remove();
-
-openTabs=
-openTabs.filter(t=>t!==id);
-
-switchTab('home');
-}
-
-/* SEARCH */
-
-function handleTopBar(){
-
-const val=
-document.getElementById(
-'addr-bar'
-).value.trim();
-
-if(!val)return;
-
-if(
-val.startsWith('http://')||
-val.startsWith('https://')
-){
-
-createNewTab(val,null,val);
-
-}else if(val.includes(".")){
-
-createNewTab(
-val,
-null,
-"https://"+val
-);
-
-}else{
-
-performSearch(val);
-}
-}
-
-function switchFilter(id,btn){
-
-document.querySelectorAll(
-'.filter-btn'
-).forEach(
-b=>b.classList.remove('active')
-);
-
-document.querySelectorAll(
-'.content-section'
-).forEach(
-s=>s.classList.remove('active')
-);
-
-btn.classList.add('active');
-
-document.getElementById(
-'content-'+id
-).classList.add('active');
-}
-
-async function performSearch(customQuery){
-
-const q=
-customQuery||
-document.getElementById(
-'search-input'
-).value;
-
-if(!q)return;
-
-switchTab('results');
-
-document.getElementById(
-'search-title'
-).innerText=
-"Results for: "+q;
-
-fetch(
-`https://api.pexels.com/v1/search?query=${q}&per_page=12`,
-{
-headers:{
-Authorization:PEXELS_KEY
-}
-}
-)
-.then(r=>r.json())
-.then(d=>{
-
-const imgs=
-d.photos.map(
-p=>`
-<img
-src="${p.src.medium}"
-onclick="setBG('${p.src.large2x}')">
-`
-).join('');
-
-document.getElementById(
-'all-images-preview'
-).innerHTML=imgs;
-
-document.getElementById(
-'full-images-grid'
-).innerHTML=imgs;
-});
-
-document.getElementById(
-'inline-ai-box'
-).innerHTML=
-`
-<div class="ai-overview-box">
-
-<div class="ai-overview-header">
-<i class="fas fa-sparkles"></i>
-AI Overview
-</div>
-
-<div class="ai-overview-content">
-AI summaries enabled.
-</div>
-
-</div>
-`;
-}
-
-/* WALLPAPER */
-
-function toggleWPPicker(){
-
-const p=
-document.getElementById(
-'wp-picker'
-);
-
-p.style.display=
-(p.style.display==='flex')
-?'none'
-:'flex';
-}
-
-function setBG(url){
-
-document.body.style.backgroundImage=
-`url('${url}')`;
-
-localStorage.setItem(
-'horizon_bg',
-url
-);
-}
-
-function resetBG(){
-
-document.body.style.backgroundImage=
-'none';
-
-localStorage.removeItem(
-'horizon_bg'
-);
-}
-
-document.getElementById(
-'wp-search'
-).onkeypress=e=>{
-
-if(e.key==='Enter'){
-
-fetch(
-`https://api.pexels.com/v1/search?query=${e.target.value}&per_page=20`,
-{
-headers:{
-Authorization:PEXELS_KEY
-}
-}
-)
-.then(r=>r.json())
-.then(d=>{
-
-document.getElementById(
-'wp-grid'
-).innerHTML=
-d.photos.map(
-p=>`
-<img
-src="${p.src.medium}"
-class="wp-item"
-onclick="setBG('${p.src.large2x}')">
-`
-).join('');
-});
-}
-};
-
-/* COPY */
-
-function copyAddress(){
-
-navigator.clipboard.writeText(
-myAddress
-);
-
-const el=
-document.getElementById(
-'hz-addr-text'
-);
-
-el.innerText='Copied!';
-
-setTimeout(()=>{
-
-el.innerText=myAddress;
-
-},1500);
-}
-
-/* ENTER */
-
-document.getElementById(
-'addr-bar'
-).onkeypress=e=>{
-
-if(e.key==='Enter')
-handleTopBar();
-};
-
-document.getElementById(
-'search-input'
-).onkeypress=e=>{
-
-if(e.key==='Enter')
-performSearch();
-};
-
-/* START */
-
-window.onload=async()=>{
-
-updateStatus();
-
-const savedBG=
-localStorage.getItem(
-'horizon_bg'
-);
-
-if(savedBG){
-setBG(savedBG);
-}
-
-await initHorizenBlocker();
-
-checkBroadcast();
-};
-</script>
-
+    <div id="context-menu">
+        <div class="menu-item" onclick="toggleWPPicker()">Change Wallpaper</div>
+        <div class="menu-item" onclick="resetBG()">Reset Wallpaper</div>
+        <div class="menu-item" onclick="location.reload()">Restart OS</div>
+    </div>
+
+    <!-- Address Display (Bottom Left) -->
+    <div id="hz-addr-display" onclick="copyAddress()" title="Click to copy">
+        <i class="fas fa-fingerprint"></i>
+        <span id="hz-addr-text">Loading fingerprint...</span>
+    </div>
+
+    <div id="tab-bar">
+        <div class="tab active" id="tab-home" onclick="switchTab('home')">🏠 Horizon</div>
+        <div class="tab" id="tab-results" onclick="switchTab('results')" style="display:none;">🔍 Search</div>
+    </div>
+
+    <div id="nav-tools">
+        <button onclick="switchTab('home')" style="background:none; border:none; color:white; font-size:22px; cursor:pointer;">🏠</button>
+        <input type="text" id="addr-bar" placeholder="Search Horizon or type a URL...">
+        <button class="btn" onclick="handleTopBar()">Go</button>
+        
+        <div id="status-bar">
+            <div class="status-item" id="weather">☀️ Sunny</div>
+            <div class="status-item" id="battery">🔋 --%</div>
+            <div class="status-item" id="time">00:00</div>
+        </div>
+    </div>
+
+    <div id="viewport">
+        <div id="view-home" class="view-pane active">
+            <div id="home-view">
+                <div class="logo">HORIZON</div>
+                <div class="mid-search">
+                    <input type="text" id="search-input" placeholder="Search anything...">
+                    <button class="btn" onclick="performSearch()">Search</button>
+                </div>
+
+                <!-- Popular Websites Section -->
+                <div class="popular-section">
+                    <div class="popular-title">Popular Horizon Websites</div>
+                    <div class="popular-grid">
+                        <div class="popular-link" onclick="openUrl('https://horizensearch.com', 'Main Search')">
+                            <i class="fas fa-globe"></i> Main Search
+                        </div>
+                        <div class="popular-link" onclick="openUrl('https://ai.horizensearch.com', 'Horizen AI')">
+                            <i class="fas fa-brain"></i> Horizen AI
+                        </div>
+                        <div class="popular-link" onclick="openUrl('https://gd.horizensearch.com', 'Geometry Dash')">
+                            <i class="fas fa-gamepad"></i> Geometry Dash
+                        </div>
+                        <div class="popular-link" onclick="openUrl('https://minecraft.horizensearch.com', 'Eagtek MC')">
+                            <i class="fas fa-cube"></i> Eagtek MC
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="wp-picker">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Wallpaper Engine</h3>
+                <button class="btn" onclick="toggleWPPicker()">X</button>
+            </div>
+            <input type="text" id="wp-search" placeholder="Search Pexels..." style="width:100%; padding:10px; margin-top:10px; background:#111; color:white; border:1px solid #444;">
+            <div id="wp-grid"></div>
+        </div>
+
+        <div id="view-results" class="view-pane">
+            <div class="results-wrapper">
+                <h2 id="search-title" style="color:#aaa; font-size:16px; margin-bottom:20px;"></h2>
+                
+                <div class="filter-bar">
+                    <button class="filter-btn active" onclick="switchFilter('all', this)">All</button>
+                    <button class="filter-btn" onclick="switchFilter('images', this)">Images</button>
+                    <button class="filter-btn" onclick="switchFilter('facts', this)">Facts</button>
+                </div>
+
+                <div id="content-all" class="content-section active">
+                    <div class="ai-overview-container" id="inline-ai-box"></div>
+                    <div id="all-images-preview" class="image-grid"></div>
+                </div>
+
+                <div id="content-images" class="content-section">
+                    <div id="full-images-grid" class="image-grid"></div>
+                </div>
+
+                <div id="content-facts" class="content-section">
+                    <div id="facts-only-box" class="ai-overview-box">
+                        <div class="ai-overview-header"><i class="fas fa-sparkles"></i> AI Fact Overview</div>
+                        <div class="ai-overview-content" id="facts-content">Generating facts...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PEXELS_KEY = 'QmebQALowGk9LoYQqUGaPhQ5zUMQWwd1mRaFTV4HvNQyYS1i6v9H5V68';
+        const SUPABASE_URL = 'https://xlisbmtenekjmundxbcn.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_Cvs-AiKPTHrC_tfGfwlpSQ_4Hir5Cva';
+        
+        let openTabs = [];
+        let currentSearchQuery = "";
+        let myAddress = "";
+
+        // ==========================================
+        // HORIZEN FINGERPRINT BLOCKER SYSTEM
+        // ==========================================
+        async function generateFingerprint() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.textBaseline = 'top';
+            ctx.font = '14px Arial';
+            ctx.fillText('HorizonFP', 2, 2);
+            
+            // Combine hardware and browser specs to create a unique machine ID
+            const raw = canvas.toDataURL() + 
+                navigator.hardwareConcurrency + 
+                screen.width + screen.height + 
+                screen.colorDepth + 
+                new Date().getTimezoneOffset() + 
+                navigator.language;
+
+            // Create a quick hash out of the raw data
+            let hash = 0;
+            for (let i = 0; i < raw.length; i++) {
+                const char = raw.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            
+            // Format it like a clean ID
+            return `hz-pc-${Math.abs(hash).toString(36).toUpperCase()}`;
+        }
+
+        async function initHorizenBlocker() {
+            let computerId = localStorage.getItem('horizen_computer_id');
+            
+            // If they don't have an ID saved locally, generate one
+            if (!computerId) {
+                computerId = await generateFingerprint();
+                localStorage.setItem('horizen_computer_id', computerId);
+            }
+
+            // Show ID in UI (Bottom left corner)
+            myAddress = computerId;
+            document.getElementById('hz-addr-text').innerText = computerId;
+
+            // 1. Check if they are blocked FIRST
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/users?computer_id=eq.${encodeURIComponent(computerId)}&select=is_blocked`, {
+                    headers: { 'apikey': SUPABASE_KEY }
+                });
+                const data = await res.json();
+                
+                // If they exist in the database AND are blocked, kick them out
+                if (data.length > 0 && data[0].is_blocked === true) {
+                    window.location.href = 'https://blocked.horizensearch.com';
+                    return false; 
+                }
+            } catch (e) {
+                // If database check fails, let them in so the site doesn't break
+            }
+
+            // 2. If they passed the block check, make sure they are registered in Supabase
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/users?computer_id=eq.${encodeURIComponent(computerId)}&select=id`, {
+                    headers: { 'apikey': SUPABASE_KEY }
+                });
+                const data = await res.json();
+
+                // If they are completely new (not in database), add them
+                if (data.length === 0) {
+                    await fetch(`${SUPABASE_URL}/rest/v1/users`, {
+                        method: 'POST',
+                        headers: { 
+                            'apikey': SUPABASE_KEY, 
+                            'Content-Type': 'application/json', 
+                            'Prefer': 'return=minimal' 
+                        },
+                        body: JSON.stringify({ 
+                            computer_id: computerId, 
+                            nickname: 'Unknown', 
+                            is_blocked: false 
+                        })
+                    });
+                }
+            } catch (e) {
+                // Silent fail for registration
+            }
+
+            return true;
+        }
+
+        function copyAddress() {
+            navigator.clipboard.writeText(myAddress).then(() => {
+                const el = document.getElementById('hz-addr-text');
+                el.innerText = "Copied!";
+                setTimeout(() => { el.innerText = myAddress; }, 1500);
+            });
+        }
+
+        // Start OS
+        window.onload = async () => {
+            updateStatus();
+            const savedBG = localStorage.getItem('horizon_bg');
+            if(savedBG) setBG(savedBG); 
+            
+            // Check block status before loading anything else
+            const isAllowed = await initHorizenBlocker();
+            
+            if (!isAllowed) {
+                document.body.style.display = 'none'; 
+            }
+        };
+
+        function updateStatus() {
+            const now = new Date();
+            document.getElementById('time').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            if (navigator.getBattery) {
+                navigator.getBattery().then(bat => {
+                    document.getElementById('battery').innerText = `🔋 ${Math.round(bat.level * 100)}%`;
+                });
+            }
+        }
+        setInterval(updateStatus, 1000);
+
+        function handleGlobalContextMenu(e) {
+            e.preventDefault();
+            const menu = document.getElementById('context-menu');
+            menu.style.display = 'block';
+            menu.style.left = e.pageX + 'px';
+            menu.style.top = e.pageY + 'px';
+        }
+
+        window.onclick = () => document.getElementById('context-menu').style.display = 'none';
+
+        function switchTab(id) {
+            document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('view-' + id).classList.add('active');
+            document.getElementById('tab-' + id).classList.add('active');
+            document.getElementById('tab-' + id).style.display = 'flex';
+        }
+
+        // FORCE OPEN URL IN TAB
+        function openUrl(url, tabName) {
+            createNewTab(tabName, null, url);
+        }
+
+        function handleTopBar() {
+            const val = document.getElementById('addr-bar').value.trim();
+            if (!val) return;
+
+            if (val.startsWith("http://") || val.startsWith("https://")) {
+                createNewTab(val, null, val);
+            } else if (val.includes(".")) {
+                createNewTab(val, null, "https://" + val);
+            } else {
+                performSearch(val);
+            }
+        }
+
+        function createNewTab(name, html, url) {
+            const safeId = name.replace(/[^a-z0-9]/gi, '_');
+            if(openTabs.includes(safeId)) return switchTab(safeId);
+            
+            const tab = document.createElement('div');
+            tab.className = 'tab'; tab.id = 'tab-' + safeId;
+            tab.innerHTML = `🌐 ${name} <span class="close-tab" onclick="closeTab(event, '${safeId}')">×</span>`;
+            tab.onclick = () => switchTab(safeId);
+            document.getElementById('tab-bar').appendChild(tab);
+            
+            const pane = document.createElement('div');
+            pane.className = 'view-pane'; pane.id = 'view-' + safeId;
+            const ifr = document.createElement('iframe');
+            
+            // Strictly check if it's a URL
+            if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
+                ifr.src = url; 
+            } else {
+                ifr.srcdoc = html;
+            }
+
+            pane.appendChild(ifr); 
+            document.getElementById('viewport').appendChild(pane);
+            openTabs.push(safeId); 
+            switchTab(safeId);
+        }
+
+        function closeTab(e, id) {
+            e.stopPropagation(); 
+            document.getElementById('tab-' + id).remove(); 
+            document.getElementById('view-' + id).remove();
+            openTabs = openTabs.filter(t => t !== id); 
+            switchTab('home');
+        }
+
+        function switchFilter(filterId, btnElem) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            btnElem.classList.add('active');
+            document.getElementById('content-' + filterId).classList.add('active');
+        }
+
+        async function performSearch(customQuery) {
+            const q = customQuery || document.getElementById('search-input').value;
+            if(!q) return;
+            currentSearchQuery = q;
+            
+            switchTab('results');
+            document.getElementById('search-title').innerText = "Results for: " + q;
+            
+            document.getElementById('inline-ai-box').innerHTML = '';
+            document.getElementById('all-images-preview').innerHTML = '';
+            document.getElementById('full-images-grid').innerHTML = '';
+            document.getElementById('facts-content').innerText = "Generating facts...";
+            
+            switchFilter('all', document.querySelector('.filter-btn'));
+
+            fetch(`https://api.pexels.com/v1/search?query=${q}&per_page=12`, { headers: { Authorization: PEXELS_KEY } })
+                .then(r => r.json()).then(d => {
+                    const imgs = d.photos.map(p => `<img src="${p.src.medium}" onclick="setBG('${p.src.large2x}')" title="Click to set as wallpaper">`).join('');
+                    document.getElementById('all-images-preview').innerHTML = imgs;
+                    document.getElementById('full-images-grid').innerHTML = imgs;
+                });
+
+            fetchAIFacts(q, 'inline-ai-box', false);
+            fetchAIFacts(q, 'facts-content', true);
+        }
+
+        async function fetchAIFacts(query, targetId, isPlainText) {
+            const iframe = document.createElement('iframe');
+            iframe.style.width = '100%';
+            iframe.style.border = 'none';
+            iframe.style.minHeight = '150px';
+            iframe.style.background = 'transparent';
+            
+            const targetDiv = document.getElementById(targetId);
+            if(!isPlainText) {
+                targetDiv.innerHTML = `
+                    <div class="ai-overview-box">
+                        <div class="ai-overview-header"><i class="fas fa-sparkles"></i> AI Overview</div>
+                        <div class="ai-overview-content" id="${targetId}-iframe-holder"></div>
+                    </div>`;
+                document.getElementById(`${targetId}-iframe-holder`).appendChild(iframe);
+            } else {
+                targetDiv.appendChild(iframe);
+            }
+
+            iframe.srcdoc = `
+                <html>
+                <head>
+                    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>
+                    <style>
+                        body { font-family: 'Inter', sans-serif; background: transparent; color: #ccc; padding: 0; margin: 0; font-size: 14px; line-height: 1.6; }
+                        .loading { color: #00eb84; }
+                    </style>
+                </head>
+                <body>
+                    <div class="loading">Generating AI summary for "${query}"...</div>
+                    <div id="res"></div>
+                    <script>
+                        const _sb = supabase.createClient('${SUPABASE_URL}', '${SUPABASE_KEY}');
+                        async function run() {
+                            try {
+                                const { data: keys } = await _sb.from('api_keys').select('key_value').eq('key_name', 'groq').single();
+                                if(!keys) throw new Error("No API Key");
+                                
+                                const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                                    method: 'POST',
+                                    headers: { 'Authorization': 'Bearer ' + keys.key_value, 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ 
+                                        model: 'llama-3.3-70b-versatile', 
+                                        messages: [{role: 'system', content: 'Give a concise 3-4 sentence factual summary.'}, {role: 'user', content: '${query}'}], 
+                                        temperature: 0.2 
+                                    })
+                                });
+                                const data = await res.json();
+                                document.querySelector('.loading').style.display = 'none';
+                                document.getElementById('res').innerText = data.choices[0].message.content;
+                                
+                                if(window.parent) {
+                                    const height = document.body.scrollHeight;
+                                    window.parent.postMessage({ type: 'resize-iframe', id: '${targetId}', height: height }, '*');
+                                }
+                            } catch(e) {
+                                document.querySelector('.loading').innerText = "Could not load AI facts.";
+                            }
+                        }
+                        run();
+                    <\/script>
+                </body>
+                </html>
+            `;
+        }
+
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'resize-iframe') {
+                const iframe = document.querySelector(`#${event.data.id}-iframe-holder iframe`) || document.querySelector(`#${event.data.id} iframe`);
+                if (iframe) {
+                    iframe.style.height = event.data.height + 'px';
+                }
+            }
+        });
+
+        function toggleWPPicker() {
+            const p = document.getElementById('wp-picker');
+            p.style.display = (p.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function setBG(url) { 
+            document.body.style.backgroundImage = `url('${url}')`; 
+            localStorage.setItem('horizon_bg', url); 
+        }
+
+        function resetBG() { 
+            document.body.style.backgroundImage = 'none'; 
+            localStorage.removeItem('horizon_bg'); 
+        }
+        
+        document.getElementById('wp-search').onkeypress = e => { 
+            if(e.key==='Enter') {
+                fetch(`https://api.pexels.com/v1/search?query=${e.target.value}&per_page=20`, { headers: { Authorization: PEXELS_KEY } })
+                    .then(r => r.json()).then(d => { 
+                        document.getElementById('wp-grid').innerHTML = d.photos.map(p => `<img src="${p.src.medium}" class="wp-item" onclick="setBG('${p.src.large2x}')">`).join(''); 
+                    });
+            }
+        };
+
+        document.getElementById('addr-bar').onkeypress = e => { if(e.key==='Enter') handleTopBar(); };
+        document.getElementById('search-input').onkeypress = e => { if(e.key==='Enter') performSearch(); };
+    </script>
 </body>
 </html>
