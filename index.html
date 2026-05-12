@@ -163,8 +163,8 @@
                 <div class="popular-section">
                     <div class="popular-title">Popular Horizon Websites</div>
                     <div class="popular-grid">
-                        <div class="popular-link" onclick="openUrl('https://horizensearch.com', 'Main Search')">
-                            <i class="fas fa-globe"></i> Main Search
+                        <div class="popular-link" onclick="openUrl('https://pages.horizensearch.com', 'Main Search')">
+                            <i class="fas fa-globe"></i> HorizenPages
                         </div>
                         <div class="popular-link" onclick="openUrl('https://ai.horizensearch.com', 'Horizen AI')">
                             <i class="fas fa-brain"></i> Horizen AI
@@ -172,8 +172,8 @@
                         <div class="popular-link" onclick="openUrl('https://gd.horizensearch.com', 'Geometry Dash')">
                             <i class="fas fa-gamepad"></i> Geometry Dash
                         </div>
-                        <div class="popular-link" onclick="openUrl('https://minecraft.horizensearch.com', 'Eagtek MC')">
-                            <i class="fas fa-cube"></i> Eagtek MC
+                        <div class="popular-link" onclick="openUrl('https://quiz.horizensearch.com', 'Eagtek MC')">
+                            <i class="fas fa-cube"></i> Quiz
                         </div>
                     </div>
                 </div>
@@ -185,7 +185,7 @@
                 <h3>Wallpaper Engine</h3>
                 <button class="btn" onclick="toggleWPPicker()">X</button>
             </div>
-            <input type="text" id="wp-search" placeholder="Search Pexels..." style="width:100%; padding:10px; margin-top:10px; background:#111; color:white; border:1px solid #444;">
+            <input type="text" id="wp-search" placeholder="Search HorizenImages..." style="width:100%; padding:10px; margin-top:10px; background:#111; color:white; border:1px solid #444;">
             <div id="wp-grid"></div>
         </div>
 
@@ -210,8 +210,8 @@
 
                 <div id="content-facts" class="content-section">
                     <div id="facts-only-box" class="ai-overview-box">
-                        <div class="ai-overview-header"><i class="fas fa-sparkles"></i> AI Fact Overview</div>
-                        <div class="ai-overview-content" id="facts-content">Generating facts...</div>
+                        <div class="ai-overview-header"><i class="fas fa-sparkles"></i> HorizenAI</div>
+                        <div class="ai-overview-content" id="facts-content">Generating</div>
                     </div>
                 </div>
             </div>
@@ -228,72 +228,143 @@
         let myAddress = "";
 
         // ==========================================
-        // HORIZEN FINGERPRINT BLOCKER SYSTEM
+        // UPGRADED HORIZEN FINGERPRINT SYSTEM
         // ==========================================
         async function generateFingerprint() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            ctx.textBaseline = 'top';
-            ctx.font = '14px Arial';
-            ctx.fillText('HorizonFP', 2, 2);
-            
-            // Combine hardware and browser specs to create a unique machine ID
-            const raw = canvas.toDataURL() + 
-                navigator.hardwareConcurrency + 
-                screen.width + screen.height + 
-                screen.colorDepth + 
-                new Date().getTimezoneOffset() + 
-                navigator.language;
+            let raw = "";
 
-            // Create a quick hash out of the raw data
-            let hash = 0;
-            for (let i = 0; i < raw.length; i++) {
-                const char = raw.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash = hash & hash;
+            // 1. CANVAS FINGERPRINT
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillText('HorizonFP_fingerprint_test', 2, 2);
+                ctx.beginPath();
+                ctx.arc(50, 50, 50, 0, Math.PI * 2, false);
+                ctx.fill();
+                raw += canvas.toDataURL();
+            } catch (e) {}
+
+            // 2. WEBGL GPU & DRIVER FINGERPRINT
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (gl) {
+                    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                    const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+                    const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                    raw += vendor + renderer;
+                }
+            } catch (e) {}
+
+            // 3. AUDIO CONTEXT FINGERPRINT
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const analyser = audioCtx.createAnalyser();
+                const gain = audioCtx.createGain();
+                const scriptProcessor = audioCtx.createScriptProcessor(4096, 1, 1);
+                
+                gain.gain.value = 0; 
+                oscillator.type = 'triangle';
+                oscillator.frequency.setValueAtTime(10000, audioCtx.currentTime);
+                
+                oscillator.connect(analyser);
+                analyser.connect(scriptProcessor);
+                scriptProcessor.connect(gain);
+                gain.connect(audioCtx.destination);
+                oscillator.start(0);
+                
+                raw += audioCtx.sampleRate + audioCtx.destination.maxChannelCount + audioCtx.state;
+                oscillator.stop();
+                audioCtx.close();
+            } catch (e) {}
+
+            // 4. MEDIA DEVICES (Cameras/Mics)
+            try {
+                if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    let deviceCounts = { audioinput: 0, audiooutput: 0, videoinput: 0 };
+                    devices.forEach(d => { if(deviceCounts[d.kind] !== undefined) deviceCounts[d.kind]++; });
+                    raw += JSON.stringify(deviceCounts);
+                }
+            } catch (e) {}
+
+            // 5. HARDWARE, RAM & SCREEN
+            raw += navigator.hardwareConcurrency || 'na';
+            raw += screen.width + 'x' + screen.height;
+            raw += screen.colorDepth;
+            raw += (navigator.deviceMemory || 'na'); // Device RAM in GB
+            raw += (navigator.platform || 'na');
+
+            // 6. TIMEZONE & LOCALE
+            raw += new Date().getTimezoneOffset();
+            raw += navigator.language;
+            raw += Intl.DateTimeFormat().resolvedOptions().timeZone; // e.g. America/New_York
+            raw += (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+            // 7. HIGH ENTROPY CLIENT HINTS (Exact OS build/Arch)
+            try {
+                if (navigator.userAgentData) {
+                    const hints = await navigator.userAgentData.getHighEntropyValues([
+                        "platform", "platformVersion", "architecture", "model", "bitness", "fullVersionList"
+                    ]);
+                    raw += JSON.stringify(hints);
+                } else {
+                    raw += navigator.userAgent;
+                }
+            } catch (e) {
+                raw += navigator.userAgent;
             }
-            
-            // Format it like a clean ID
-            return `hz-pc-${Math.abs(hash).toString(36).toUpperCase()}`;
+
+            // --- DOUBLE FNV-1a HASHING ---
+            let hash1 = 0x811c9dc5; 
+            for (let i = 0; i < raw.length; i++) {
+                hash1 ^= raw.charCodeAt(i);
+                hash1 = Math.imul(hash1, 0x01000193); 
+            }
+
+            let hash2 = 0x811c9dc5;
+            const reversedRaw = raw.split('').reverse().join('');
+            for (let i = 0; i < reversedRaw.length; i++) {
+                hash2 ^= reversedRaw.charCodeAt(i);
+                hash2 = Math.imul(hash2, 0x01000193);
+            }
+
+            const combinedHash = (hash1 >>> 0).toString(16) + (hash2 >>> 0).toString(16);
+            return `hz-pc-${combinedHash.toUpperCase().substring(0, 16)}`;
         }
 
         async function initHorizenBlocker() {
             let computerId = localStorage.getItem('horizen_computer_id');
             
-            // If they don't have an ID saved locally, generate one
             if (!computerId) {
                 computerId = await generateFingerprint();
                 localStorage.setItem('horizen_computer_id', computerId);
             }
 
-            // Show ID in UI (Bottom left corner)
             myAddress = computerId;
             document.getElementById('hz-addr-text').innerText = computerId;
 
-            // 1. Check if they are blocked FIRST
             try {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/users?computer_id=eq.${encodeURIComponent(computerId)}&select=is_blocked`, {
                     headers: { 'apikey': SUPABASE_KEY }
                 });
                 const data = await res.json();
                 
-                // If they exist in the database AND are blocked, kick them out
                 if (data.length > 0 && data[0].is_blocked === true) {
                     window.location.href = 'https://blocked.horizensearch.com';
                     return false; 
                 }
-            } catch (e) {
-                // If database check fails, let them in so the site doesn't break
-            }
+            } catch (e) {}
 
-            // 2. If they passed the block check, make sure they are registered in Supabase
             try {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/users?computer_id=eq.${encodeURIComponent(computerId)}&select=id`, {
                     headers: { 'apikey': SUPABASE_KEY }
                 });
                 const data = await res.json();
 
-                // If they are completely new (not in database), add them
                 if (data.length === 0) {
                     await fetch(`${SUPABASE_URL}/rest/v1/users`, {
                         method: 'POST',
@@ -309,9 +380,7 @@
                         })
                     });
                 }
-            } catch (e) {
-                // Silent fail for registration
-            }
+            } catch (e) {}
 
             return true;
         }
@@ -324,13 +393,11 @@
             });
         }
 
-        // Start OS
         window.onload = async () => {
             updateStatus();
             const savedBG = localStorage.getItem('horizon_bg');
             if(savedBG) setBG(savedBG); 
             
-            // Check block status before loading anything else
             const isAllowed = await initHorizenBlocker();
             
             if (!isAllowed) {
@@ -367,7 +434,6 @@
             document.getElementById('tab-' + id).style.display = 'flex';
         }
 
-        // FORCE OPEN URL IN TAB
         function openUrl(url, tabName) {
             createNewTab(tabName, null, url);
         }
@@ -399,7 +465,6 @@
             pane.className = 'view-pane'; pane.id = 'view-' + safeId;
             const ifr = document.createElement('iframe');
             
-            // Strictly check if it's a URL
             if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
                 ifr.src = url; 
             } else {
