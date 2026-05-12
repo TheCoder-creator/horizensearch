@@ -163,8 +163,8 @@
                 <div class="popular-section">
                     <div class="popular-title">Popular Horizon Websites</div>
                     <div class="popular-grid">
-                        <div class="popular-link" onclick="openUrl('https://pages.horizensearch.com', 'Main Search')">
-                            <i class="fas fa-globe"></i> HorizenPages
+                        <div class="popular-link" onclick="openUrl('https://horizensearch.com', 'Main Search')">
+                            <i class="fas fa-globe"></i> Main Search
                         </div>
                         <div class="popular-link" onclick="openUrl('https://ai.horizensearch.com', 'Horizen AI')">
                             <i class="fas fa-brain"></i> Horizen AI
@@ -172,8 +172,8 @@
                         <div class="popular-link" onclick="openUrl('https://gd.horizensearch.com', 'Geometry Dash')">
                             <i class="fas fa-gamepad"></i> Geometry Dash
                         </div>
-                        <div class="popular-link" onclick="openUrl('https://quiz.horizensearch.com', 'Eagtek MC')">
-                            <i class="fas fa-cube"></i> Quiz
+                        <div class="popular-link" onclick="openUrl('https://minecraft.horizensearch.com', 'Eagtek MC')">
+                            <i class="fas fa-cube"></i> Eagtek MC
                         </div>
                     </div>
                 </div>
@@ -185,7 +185,7 @@
                 <h3>Wallpaper Engine</h3>
                 <button class="btn" onclick="toggleWPPicker()">X</button>
             </div>
-            <input type="text" id="wp-search" placeholder="Search HorizenImages..." style="width:100%; padding:10px; margin-top:10px; background:#111; color:white; border:1px solid #444;">
+            <input type="text" id="wp-search" placeholder="Search Pexels..." style="width:100%; padding:10px; margin-top:10px; background:#111; color:white; border:1px solid #444;">
             <div id="wp-grid"></div>
         </div>
 
@@ -210,8 +210,8 @@
 
                 <div id="content-facts" class="content-section">
                     <div id="facts-only-box" class="ai-overview-box">
-                        <div class="ai-overview-header"><i class="fas fa-sparkles"></i> HorizenAI</div>
-                        <div class="ai-overview-content" id="facts-content">Generating</div>
+                        <div class="ai-overview-header"><i class="fas fa-sparkles"></i> AI Fact Overview</div>
+                        <div class="ai-overview-content" id="facts-content">Generating facts...</div>
                     </div>
                 </div>
             </div>
@@ -228,12 +228,39 @@
         let myAddress = "";
 
         // ==========================================
-        // UPGRADED HORIZEN FINGERPRINT SYSTEM
+        // 1. ADMIN MEMORY WIPE SYSTEM
+        // ==========================================
+        async function checkGlobalWipeCommand() {
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/system_settings?id=eq.1&select=wipe_on`, {
+                    headers: { 'apikey': SUPABASE_KEY }
+                });
+                const data = await res.json();
+
+                // If admin has triggered the wipe
+                if (data.length > 0 && data[0].wipe_on === true) {
+                    // 1. Nuke all local storage
+                    localStorage.clear();
+                    
+                    // 2. Generate a completely fresh fingerprint ID for them
+                    const newId = await generateFingerprint();
+                    localStorage.setItem('horizen_computer_id', newId);
+
+                    // 3. Force reload the page to apply the clean state
+                    window.location.reload();
+                }
+            } catch (e) {
+                // Silent fail - don't break the OS if the DB check fails
+            }
+        }
+
+        // ==========================================
+        // 2. UPGRADED HORIZEN FINGERPRINT SYSTEM
         // ==========================================
         async function generateFingerprint() {
             let raw = "";
 
-            // 1. CANVAS FINGERPRINT
+            // CANVAS
             try {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
@@ -246,7 +273,7 @@
                 raw += canvas.toDataURL();
             } catch (e) {}
 
-            // 2. WEBGL GPU & DRIVER FINGERPRINT
+            // WEBGL GPU & DRIVER
             try {
                 const canvas = document.createElement('canvas');
                 const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -258,7 +285,7 @@
                 }
             } catch (e) {}
 
-            // 3. AUDIO CONTEXT FINGERPRINT
+            // AUDIO CONTEXT
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioCtx.createOscillator();
@@ -281,7 +308,7 @@
                 audioCtx.close();
             } catch (e) {}
 
-            // 4. MEDIA DEVICES (Cameras/Mics)
+            // MEDIA DEVICES (Cameras/Mics)
             try {
                 if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
                     const devices = await navigator.mediaDevices.enumerateDevices();
@@ -291,20 +318,20 @@
                 }
             } catch (e) {}
 
-            // 5. HARDWARE, RAM & SCREEN
+            // HARDWARE, RAM & SCREEN
             raw += navigator.hardwareConcurrency || 'na';
             raw += screen.width + 'x' + screen.height;
             raw += screen.colorDepth;
-            raw += (navigator.deviceMemory || 'na'); // Device RAM in GB
+            raw += (navigator.deviceMemory || 'na'); 
             raw += (navigator.platform || 'na');
 
-            // 6. TIMEZONE & LOCALE
+            // TIMEZONE & LOCALE
             raw += new Date().getTimezoneOffset();
             raw += navigator.language;
-            raw += Intl.DateTimeFormat().resolvedOptions().timeZone; // e.g. America/New_York
+            raw += Intl.DateTimeFormat().resolvedOptions().timeZone; 
             raw += (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
-            // 7. HIGH ENTROPY CLIENT HINTS (Exact OS build/Arch)
+            // HIGH ENTROPY CLIENT HINTS
             try {
                 if (navigator.userAgentData) {
                     const hints = await navigator.userAgentData.getHighEntropyValues([
@@ -318,7 +345,7 @@
                 raw += navigator.userAgent;
             }
 
-            // --- DOUBLE FNV-1a HASHING ---
+            // DOUBLE FNV-1a HASHING
             let hash1 = 0x811c9dc5; 
             for (let i = 0; i < raw.length; i++) {
                 hash1 ^= raw.charCodeAt(i);
@@ -336,6 +363,9 @@
             return `hz-pc-${combinedHash.toUpperCase().substring(0, 16)}`;
         }
 
+        // ==========================================
+        // 3. USER INIT & BLOCK CHECK SYSTEM
+        // ==========================================
         async function initHorizenBlocker() {
             let computerId = localStorage.getItem('horizen_computer_id');
             
@@ -347,6 +377,7 @@
             myAddress = computerId;
             document.getElementById('hz-addr-text').innerText = computerId;
 
+            // Check if blocked
             try {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/users?computer_id=eq.${encodeURIComponent(computerId)}&select=is_blocked`, {
                     headers: { 'apikey': SUPABASE_KEY }
@@ -359,6 +390,7 @@
                 }
             } catch (e) {}
 
+            // Register if new
             try {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/users?computer_id=eq.${encodeURIComponent(computerId)}&select=id`, {
                     headers: { 'apikey': SUPABASE_KEY }
@@ -393,11 +425,18 @@
             });
         }
 
+        // ==========================================
+        // 4. OS BOOT SEQUENCE
+        // ==========================================
         window.onload = async () => {
             updateStatus();
             const savedBG = localStorage.getItem('horizon_bg');
             if(savedBG) setBG(savedBG); 
             
+            // 1. VERY FIRST THING: Check if admin requested a memory wipe
+            await checkGlobalWipeCommand();
+            
+            // 2. Check block status and register user
             const isAllowed = await initHorizenBlocker();
             
             if (!isAllowed) {
@@ -416,6 +455,9 @@
         }
         setInterval(updateStatus, 1000);
 
+        // ==========================================
+        // 5. UI NAVIGATION & TABS
+        // ==========================================
         function handleGlobalContextMenu(e) {
             e.preventDefault();
             const menu = document.getElementById('context-menu');
@@ -492,6 +534,9 @@
             document.getElementById('content-' + filterId).classList.add('active');
         }
 
+        // ==========================================
+        // 6. SEARCH & AI SYSTEM
+        // ==========================================
         async function performSearch(customQuery) {
             const q = customQuery || document.getElementById('search-input').value;
             if(!q) return;
@@ -593,6 +638,9 @@
             }
         });
 
+        // ==========================================
+        // 7. WALLPAPER ENGINE
+        // ==========================================
         function toggleWPPicker() {
             const p = document.getElementById('wp-picker');
             p.style.display = (p.style.display === 'flex') ? 'none' : 'flex';
