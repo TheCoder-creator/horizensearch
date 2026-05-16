@@ -576,6 +576,7 @@
     let myAddress = '';
     let blockChannel = null;
     let appCache = [];
+    let blockPollInterval = null;
 
     async function generateFingerprint() {
       let raw = '';
@@ -650,6 +651,17 @@
       return `hz-pc-${combinedHash.toUpperCase().substring(0, 16)}`;
     }
 
+    async function checkIfBlocked(computerId) {
+      try {
+        const { data } = await sb.from('users').select('is_blocked').eq('computer_id', computerId).maybeSingle();
+        if (data && data.is_blocked === true) {
+          window.location.href = 'https://blocked.horizensearch.com';
+          return true;
+        }
+      } catch (e) {}
+      return false;
+    }
+
     async function initHorizenBlocker() {
       let computerId = localStorage.getItem('horizen_computer_id');
       if (!computerId) {
@@ -659,12 +671,22 @@
       myAddress = computerId;
       document.getElementById('hz-addr-text').innerText = computerId;
 
-      const { data } = await sb.from('users').select('is_blocked').eq('computer_id', computerId).maybeSingle();
-      if (data && data.is_blocked === true) {
-        window.location.href = 'https://blocked.horizensearch.com';
-        return false;
+      // Upsert this device into Supabase so it's visible to admins
+      const { data: upsertData, error: upsertError } = await sb.from('users').upsert(
+        { computer_id: computerId },
+        { onConflict: 'computer_id', ignoreDuplicates: false }
+      );
+      if (upsertError) {
+        console.error('[Horizon] Upsert failed:', upsertError);
+      } else {
+        console.log('[Horizon] Device registered/updated in Supabase:', computerId);
       }
 
+      // Initial block check
+      const blocked = await checkIfBlocked(computerId);
+      if (blocked) return false;
+
+      // Realtime subscription (instant push-based detection)
       if (blockChannel) await sb.removeChannel(blockChannel);
       blockChannel = sb.channel('user-block-watch')
         .on('postgres_changes', {
@@ -678,6 +700,10 @@
           }
         })
         .subscribe();
+
+      // Active poll every 2 seconds as a guaranteed fallback
+      if (blockPollInterval) clearInterval(blockPollInterval);
+      blockPollInterval = setInterval(() => checkIfBlocked(computerId), 2000);
 
       return true;
     }
