@@ -4,578 +4,360 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Horizon OS | Pro Edition</title>
-
   <style>
     :root {
       --bg: #050505;
       --nav: #121212;
       --accent: #00eb84;
-      --card: rgba(20, 20, 20, 0.95);
+      --card: rgba(20,20,20,0.95);
       --text: #ffffff;
       --border: #333;
+      --glass: rgba(18,18,18,0.92);
     }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;background-size:cover;background-position:center;background-attachment:fixed}
+    body::before{content:'';position:fixed;inset:0;background:rgba(5,5,5,0.6);z-index:0;pointer-events:none}
+    body>*{position:relative;z-index:1}
 
-    * { box-sizing: border-box; }
+    #tab-bar{background:var(--glass);backdrop-filter:blur(12px);display:flex;padding:6px 10px 0;gap:5px;border-bottom:1px solid var(--border);min-height:38px;flex-wrap:wrap;align-items:flex-end}
+    .tab{background:rgba(255,255,255,0.04);padding:7px 12px;border-radius:8px 8px 0 0;font-size:12px;cursor:grab;border:1px solid transparent;border-bottom:none;color:#777;min-width:90px;max-width:180px;display:flex;align-items:center;justify-content:space-between;gap:8px;user-select:none;transition:.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tab:hover{background:rgba(255,255,255,0.07);color:#bbb}
+    .tab.active{background:rgba(5,5,5,0.8);border-color:var(--accent);color:var(--accent);font-weight:700}
+    .tab.dragging{opacity:.4}
+    .close-tab{font-weight:700;opacity:.4;cursor:pointer;font-size:14px;flex-shrink:0}
+    .close-tab:hover{opacity:1;color:#ff4444}
+    .tab-label{overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+    .tab-label .ai-badge{font-size:8px;background:var(--accent);color:#000;padding:1px 4px;border-radius:4px;margin-left:4px;font-weight:800;vertical-align:middle;letter-spacing:.3px}
 
-    body {
-      margin: 0;
-      font-family: Inter, system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    #nav-tools{background:var(--glass);backdrop-filter:blur(12px);padding:8px 10px;display:flex;gap:8px;border-bottom:1px solid var(--border);align-items:center}
+    .nav-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:#ccc;width:36px;height:36px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:.15s;flex-shrink:0}
+    .nav-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,235,132,0.08)}
+    #addr-bar{flex:1;padding:9px 16px;border-radius:20px;border:1px solid var(--border);background:rgba(26,26,26,0.9);color:#fff;outline:none;font-size:13px;transition:.2s}
+    #addr-bar:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,235,132,0.15)}
 
-    #tab-bar {
-      background: rgba(18, 18, 18, 0.9);
-      backdrop-filter: blur(10px);
-      display: flex;
-      padding: 8px 10px 0;
-      gap: 6px;
-      border-bottom: 1px solid var(--border);
-      min-height: 40px;
-      flex-wrap: wrap;
-    }
+    #status-bar{display:flex;gap:8px;padding:0 4px;font-size:13px;color:#aaa;font-weight:500;white-space:nowrap;align-items:center;flex-shrink:0}
+    .status-item{display:flex;align-items:center;gap:5px;cursor:pointer;padding:4px 8px;border-radius:8px;transition:.15s}
+    .status-item:hover{background:rgba(255,255,255,0.06);color:#fff}
+    #time{color:var(--accent);font-weight:700;font-variant-numeric:tabular-nums}
+    .status-btn{background:none;border:none;color:inherit;cursor:pointer;font-size:13px;font-family:inherit;font-weight:inherit;display:flex;align-items:center;gap:5px;padding:4px 8px;border-radius:8px;transition:.15s}
+    .status-btn:hover{background:rgba(255,255,255,0.06);color:#fff}
 
-    .tab {
-      background: rgba(255,255,255,0.05);
-      padding: 8px 14px;
-      border-radius: 8px 8px 0 0;
-      font-size: 12px;
-      cursor: grab;
-      border: 1px solid var(--border);
-      border-bottom: none;
-      color: #aaa;
-      min-width: 120px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      user-select: none;
-    }
+    #viewport{flex:1;position:relative;overflow:hidden}
+    .view-pane{position:absolute;inset:0;display:none}
+    .view-pane.active{display:block}
+    iframe{width:100%;height:100%;border:none;background:#0a0a0a}
 
-    .tab.active {
-      background: var(--bg);
-      border-color: var(--accent);
-      color: var(--accent);
-      font-weight: 700;
-    }
+    #home-view{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;height:100%;padding-top:7vh;overflow-y:auto;background:radial-gradient(ellipse at top,rgba(0,235,132,0.06),transparent 50%)}
+    .logo{font-size:4.5rem;font-weight:900;color:var(--accent);letter-spacing:-4px;text-shadow:0 0 40px rgba(0,235,132,0.25);line-height:1}
+    .logo-sub{font-size:13px;color:#555;letter-spacing:6px;text-transform:uppercase;margin-top:4px}
+    .mid-search{width:90%;max-width:560px;background:var(--card);padding:6px 6px 6px 18px;border-radius:50px;border:1px solid var(--border);display:flex;gap:8px;margin-top:22px;align-items:center;transition:.2s}
+    .mid-search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,235,132,0.1)}
+    .mid-search input{flex:1;background:none;border:none;color:#fff;outline:none;font-size:15px;padding:8px 0}
+    .search-btn{background:var(--accent);color:#000;border:none;padding:10px 18px;border-radius:50px;font-weight:700;cursor:pointer;font-size:13px;transition:.15s;white-space:nowrap}
+    .search-btn:hover{filter:brightness(1.15);transform:scale(1.03)}
 
-    .tab.dragging { opacity: 0.5; }
+    .popular-section{margin-top:24px;width:90%;max-width:750px;text-align:center;margin-bottom:16px}
+    .popular-title{font-size:11px;color:#555;margin-bottom:12px;text-transform:uppercase;letter-spacing:1.5px}
+    .popular-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+    .popular-link{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:9px 16px;border-radius:12px;color:#bbb;text-decoration:none;font-size:13px;font-weight:500;transition:.2s;cursor:pointer;display:flex;align-items:center;gap:8px}
+    .popular-link:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,235,132,0.06);transform:translateY(-2px);box-shadow:0 4px 15px rgba(0,235,132,0.1)}
+    .popular-link i{font-size:14px;opacity:.7}
 
-    .close-tab {
-      font-weight: 700;
-      opacity: 0.5;
-      cursor: pointer;
-    }
+    #context-menu{position:fixed;display:none;background:rgba(14,14,14,0.97);border:1px solid rgba(0,235,132,0.3);border-radius:12px;z-index:30000;padding:5px 0;box-shadow:0 12px 40px rgba(0,0,0,0.9);min-width:200px;backdrop-filter:blur(20px)}
+    .menu-item{padding:10px 18px;cursor:pointer;font-size:13px;color:#ddd;display:flex;align-items:center;gap:10px;transition:.1s}
+    .menu-item:hover{background:var(--accent);color:#000}
+    .menu-item i{width:16px;text-align:center;font-size:12px}
+    .menu-divider{height:1px;background:rgba(255,255,255,0.08);margin:4px 0}
 
-    #nav-tools {
-      background: var(--nav);
-      padding: 10px;
-      display: flex;
-      gap: 10px;
-      border-bottom: 1px solid var(--border);
-      align-items: center;
-    }
+    #wp-picker{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:85%;max-width:720px;height:70vh;background:rgba(12,12,12,0.97);border:1px solid rgba(0,235,132,0.3);border-radius:20px;display:none;flex-direction:column;padding:22px;z-index:20002;backdrop-filter:blur(30px);box-shadow:0 20px 60px rgba(0,0,0,0.8)}
+    #wp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;overflow-y:auto;margin-top:12px;flex:1}
+    #wp-grid::-webkit-scrollbar{width:6px}
+    #wp-grid::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+    .wp-item{width:100%;height:85px;border-radius:10px;cursor:pointer;object-fit:cover;border:2px solid transparent;transition:.2s}
+    .wp-item:hover{border-color:var(--accent);transform:scale(1.04)}
 
-    #addr-bar, #search-input {
-      flex: 1;
-      padding: 10px 16px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: #1a1a1a;
-      color: #fff;
-      outline: none;
-    }
+    #history-panel{position:fixed;top:0;right:-380px;width:370px;height:100vh;background:rgba(10,10,10,0.97);border-left:1px solid var(--border);z-index:20001;display:flex;flex-direction:column;transition:right .3s ease;backdrop-filter:blur(20px)}
+    #history-panel.open{right:0}
+    .history-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+    .history-header h3{font-size:16px;font-weight:700}
+    .history-list{flex:1;overflow-y:auto;padding:10px}
+    .history-list::-webkit-scrollbar{width:5px}
+    .history-list::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+    .history-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:.15s;margin-bottom:4px}
+    .history-item:hover{background:rgba(255,255,255,0.06)}
+    .history-item .hi-icon{color:#555;font-size:14px;width:20px;text-align:center}
+    .history-item .hi-info{flex:1;overflow:hidden}
+    .history-item .hi-name{font-size:13px;color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .history-item .hi-url{font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .history-item .hi-time{font-size:11px;color:#555;flex-shrink:0}
+    .history-empty{color:#555;text-align:center;padding:40px 20px;font-size:14px}
+    .history-footer{padding:12px 20px;border-top:1px solid var(--border)}
 
-    #status-bar {
-      display: flex;
-      gap: 14px;
-      padding: 0 8px;
-      font-size: 13px;
-      color: #aaa;
-      font-weight: 500;
-      white-space: nowrap;
-      align-items: center;
-    }
+    #bot-btn{position:fixed;bottom:20px;left:20px;width:50px;height:50px;border-radius:50%;background:var(--accent);color:#000;border:none;cursor:pointer;font-size:22px;z-index:15000;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,235,132,0.35);transition:.2s}
+    #bot-btn:hover{transform:scale(1.1);box-shadow:0 6px 30px rgba(0,235,132,0.5)}
+    #bot-panel{position:fixed;bottom:80px;left:20px;width:360px;max-height:500px;background:rgba(12,12,12,0.97);border:1px solid rgba(0,235,132,0.3);border-radius:18px;z-index:15000;display:none;flex-direction:column;overflow:hidden;box-shadow:0 15px 50px rgba(0,0,0,0.8);backdrop-filter:blur(20px)}
+    #bot-panel.open{display:flex}
+    .bot-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px}
+    .bot-header .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .bot-messages{flex:1;overflow-y:auto;padding:14px;max-height:340px;display:flex;flex-direction:column;gap:10px}
+    .bot-messages::-webkit-scrollbar{width:4px}
+    .bot-messages::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
+    .bot-msg{max-width:85%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.5;word-break:break-word}
+    .bot-msg.bot{background:rgba(0,235,132,0.12);color:#ddd;align-self:flex-start;border-bottom-left-radius:4px}
+    .bot-msg.user{background:rgba(255,255,255,0.08);color:#ccc;align-self:flex-end;border-bottom-right-radius:4px}
+    .bot-msg.bot .typing-dots span{display:inline-block;width:6px;height:6px;background:var(--accent);border-radius:50%;margin:0 2px;animation:bounce .6s infinite alternate}
+    .bot-msg.bot .typing-dots span:nth-child(2){animation-delay:.15s}
+    .bot-msg.bot .typing-dots span:nth-child(3){animation-delay:.3s}
+    @keyframes bounce{to{transform:translateY(-4px);opacity:.5}}
+    .bot-input-row{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--border)}
+    .bot-input-row input{flex:1;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:20px;padding:9px 14px;color:#fff;outline:none;font-size:13px}
+    .bot-input-row input:focus{border-color:var(--accent)}
+    .bot-input-row button{background:var(--accent);color:#000;border:none;width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:14px;font-weight:700;transition:.15s}
+    .bot-input-row button:hover{transform:scale(1.08)}
 
-    .status-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      cursor: pointer;
-    }
+    #ai-search-panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:85%;max-width:600px;max-height:70vh;background:rgba(12,12,12,0.98);border:1px solid rgba(0,235,132,0.3);border-radius:20px;z-index:25000;display:none;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.9);backdrop-filter:blur(30px)}
+    #ai-search-panel.open{display:flex}
+    .ai-search-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px}
+    .ai-search-body{flex:1;overflow-y:auto;padding:18px}
+    .ai-search-body::-webkit-scrollbar{width:5px}
+    .ai-search-body::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+    .ai-search-url{color:var(--accent);font-size:12px;margin-bottom:12px;word-break:break-all}
+    .ai-search-text{color:#ccc;line-height:1.7;font-size:14px;white-space:pre-wrap}
 
-    #time {
-      color: var(--accent);
-      font-weight: 700;
-    }
+    #wifi-panel{position:fixed;top:56px;right:10px;width:340px;background:rgba(10,10,10,0.97);border:1px solid rgba(0,235,132,0.25);border-radius:18px;z-index:18000;display:none;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.8);backdrop-filter:blur(20px)}
+    #wifi-panel.open{display:flex}
+    .wifi-header{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+    .wifi-header h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+    .wifi-tabs{display:flex;border-bottom:1px solid var(--border)}
+    .wifi-tab{flex:1;padding:10px;text-align:center;font-size:12px;color:#777;cursor:pointer;border-bottom:2px solid transparent;transition:.15s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+    .wifi-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+    .wifi-tab:hover{color:#bbb}
+    .wifi-body{padding:14px;overflow-y:auto;max-height:350px}
+    .wifi-body::-webkit-scrollbar{width:4px}
+    .wifi-body::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
+    .wifi-network{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;cursor:pointer;transition:.15s;margin-bottom:4px}
+    .wifi-network:hover{background:rgba(255,255,255,0.05)}
+    .wifi-network.connected{background:rgba(0,235,132,0.08);border:1px solid rgba(0,235,132,0.2)}
+    .wifi-network .wn-icon{font-size:18px;width:24px;text-align:center}
+    .wifi-network .wn-info{flex:1}
+    .wifi-network .wn-name{font-size:13px;color:#ddd}
+    .wifi-network .wn-detail{font-size:11px;color:#666}
+    .wifi-network .wn-signal{font-size:11px;color:#888}
+    .speed-test-box{text-align:center;padding:20px 10px}
+    .speed-big{font-size:52px;font-weight:900;color:var(--accent);line-height:1;margin:16px 0 4px;font-variant-numeric:tabular-nums}
+    .speed-label{font-size:12px;color:#666;text-transform:uppercase;letter-spacing:1px}
+    .speed-details{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+    .speed-card{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:14px}
+    .speed-card .sv{font-size:20px;font-weight:700;color:#fff}
+    .speed-card .sk{font-size:11px;color:#666;margin-top:2px}
+    .speed-btn{background:var(--accent);color:#000;border:none;padding:12px 32px;border-radius:30px;font-weight:700;font-size:14px;cursor:pointer;margin-top:18px;transition:.2s}
+    .speed-btn:hover{transform:scale(1.04)}
+    .speed-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .bt-device{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;margin-bottom:6px;background:rgba(255,255,255,0.03);border:1px solid var(--border)}
+    .bt-device .bt-icon{font-size:20px;color:#4a9eff}
+    .bt-device .bt-name{font-size:13px;color:#ddd}
+    .bt-device .bt-status{font-size:11px;color:#666}
 
-    #viewport {
-      flex: 1;
-      position: relative;
-    }
+    .weather-dropdown{position:absolute;top:50px;width:min(480px,88vw);max-height:420px;overflow:auto;background:rgba(10,10,10,0.97);border:1px solid rgba(0,235,132,0.25);border-radius:16px;box-shadow:0 15px 50px rgba(0,0,0,0.7);display:none;z-index:19000;backdrop-filter:blur(20px)}
+    .weather-dropdown::-webkit-scrollbar{width:5px}
+    .weather-dropdown::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+    .weather-hero{padding:20px;display:flex;align-items:center;gap:18px;border-bottom:1px solid var(--border)}
+    .weather-hero-icon{font-size:48px}
+    .weather-hero-temp{font-size:42px;font-weight:900;color:#fff;line-height:1}
+    .weather-hero-desc{font-size:14px;color:#aaa;margin-top:2px}
+    .weather-hero-loc{font-size:12px;color:#666;margin-top:4px;display:flex;align-items:center;gap:4px}
+    .weather-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px}
+    .weather-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px;transition:.15s}
+    .weather-card:hover{border-color:rgba(0,235,132,0.2)}
+    .weather-card .v{color:var(--accent);font-weight:700;font-size:16px}
+    .weather-card .k{color:#666;font-size:10px;text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
 
-    .view-pane {
-      position: absolute;
-      inset: 0;
-      display: none;
-    }
+    #hz-addr-display{position:fixed;bottom:14px;right:14px;background:rgba(10,10,10,0.85);border:1px solid #2a2a2a;border-radius:8px;padding:7px 12px;font-family:'Courier New',monospace;font-size:11px;color:#555;z-index:9999;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px}
+    #hz-addr-display:hover{color:var(--accent);border-color:var(--accent)}
 
-    .view-pane.active { display: block; }
+    .panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:19999;display:none}
+    .panel-overlay.show{display:block}
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: #fff;
-    }
+    .results-wrapper{max-width:960px;margin:0 auto;padding:20px;height:100%;overflow-y:auto}
+    .results-wrapper::-webkit-scrollbar{width:6px}
+    .results-wrapper::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+    .filter-bar{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:20px}
+    .filter-btn{background:none;border:none;padding:11px 16px;font-size:13px;color:#777;cursor:pointer;border-bottom:2px solid transparent;font-family:inherit;transition:.15s}
+    .filter-btn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+    .filter-btn:hover{color:#bbb}
+    .content-section{display:none}
+    .content-section.active{display:block}
+    .ai-overview-box{background:rgba(18,21,28,0.9);border:1px solid #2a2e3a;border-radius:16px;overflow:hidden}
+    .ai-overview-header{padding:13px 18px;background:rgba(26,30,40,0.8);display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--accent);border-bottom:1px solid #2a2e3a}
+    .ai-overview-content{padding:18px;min-height:80px;color:#bbb;line-height:1.7;white-space:pre-wrap;font-size:14px}
+    .image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+    .image-grid img{width:100%;height:130px;object-fit:cover;border-radius:10px;cursor:pointer;transition:.2s;border:1px solid rgba(255,255,255,0.05)}
+    .image-grid img:hover{transform:scale(1.03);border-color:var(--accent)}
 
-    #home-view {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      height: 100%;
-      padding-top: 8vh;
-      overflow-y: auto;
-      background: radial-gradient(circle at top, rgba(0,235,132,0.07), transparent 40%);
-    }
+    .store-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+    .store-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:16px;padding:14px;cursor:pointer;transition:.2s}
+    .store-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.3)}
+    .store-card img{width:100%;height:110px;object-fit:cover;border-radius:12px;background:#111;margin-bottom:10px}
+    .store-card h3{margin:0 0 5px;font-size:15px;color:#fff}
+    .store-card p{margin:0 0 8px;font-size:12px;color:#999;line-height:1.5}
+    .meta-line{font-size:11px;color:#666}
 
-    .logo {
-      font-size: 5rem;
-      font-weight: 900;
-      color: var(--accent);
-      letter-spacing: -4px;
-      text-shadow: 0 0 30px rgba(0,235,132,0.3);
-    }
+    .spinner{display:inline-block;width:14px;height:14px;border:2px solid #333;border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
 
-    .mid-search {
-      width: 90%;
-      max-width: 550px;
-      background: var(--card);
-      padding: 12px 18px;
-      border-radius: 50px;
-      border: 1px solid var(--border);
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
+    .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(0,235,132,0.15);border:1px solid var(--accent);color:var(--accent);padding:10px 24px;border-radius:12px;font-size:13px;z-index:50000;opacity:0;transition:.3s;pointer-events:none;backdrop-filter:blur(10px)}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-    .mid-search input {
-      flex: 1;
-      background: none;
-      border: none;
-      color: #fff;
-      outline: none;
-      font-size: 1.05rem;
-    }
-
-    .popular-section {
-      margin-top: 26px;
-      width: 90%;
-      max-width: 750px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .popular-title {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 14px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .popular-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-    }
-
-    .popular-link {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border);
-      padding: 10px 18px;
-      border-radius: 12px;
-      color: #ccc;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 500;
-      transition: 0.2s;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .popular-link:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: rgba(0,235,132,0.05);
-      transform: translateY(-2px);
-    }
-
-    #context-menu {
-      position: fixed;
-      display: none;
-      background: var(--nav);
-      border: 1px solid var(--accent);
-      border-radius: 8px;
-      z-index: 20000;
-      padding: 5px 0;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-      min-width: 180px;
-    }
-
-    .menu-item {
-      padding: 10px 18px;
-      cursor: pointer;
-      font-size: 13px;
-      color: #fff;
-    }
-
-    .menu-item:hover {
-      background: var(--accent);
-      color: #000;
-    }
-
-    #wp-picker {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80%;
-      max-width: 700px;
-      height: 70vh;
-      background: var(--card);
-      border: 1px solid var(--accent);
-      border-radius: 24px;
-      display: none;
-      flex-direction: column;
-      padding: 25px;
-      z-index: 10002;
-      backdrop-filter: blur(30px);
-    }
-
-    #wp-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 10px;
-      overflow-y: auto;
-      margin-top: 15px;
-    }
-
-    .wp-item {
-      width: 100%;
-      height: 90px;
-      border-radius: 10px;
-      cursor: pointer;
-      object-fit: cover;
-    }
-
-    .btn {
-      background: var(--accent);
-      color: #000;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 30px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .results-wrapper {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 20px;
-      height: 100%;
-      overflow-y: auto;
-    }
-
-    .filter-bar {
-      display: flex;
-      gap: 5px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 25px;
-      flex-wrap: wrap;
-    }
-
-    .filter-btn {
-      background: none;
-      border: none;
-      padding: 12px 15px;
-      font-size: 13px;
-      color: #888;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      font-family: Inter, sans-serif;
-      transition: 0.2s;
-    }
-
-    .filter-btn.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-      font-weight: 600;
-    }
-
-    .content-section { display: none; }
-    .content-section.active { display: block; }
-
-    .ai-overview-box {
-      background: #12151c;
-      border: 1px solid #2a2e3a;
-      border-radius: 16px;
-      overflow: hidden;
-    }
-
-    .ai-overview-header {
-      padding: 15px 20px;
-      background: #1a1e28;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--accent);
-      border-bottom: 1px solid #2a2e3a;
-    }
-
-    .ai-overview-content {
-      padding: 20px;
-      min-height: 100px;
-      color: #ccc;
-      line-height: 1.6;
-      white-space: pre-wrap;
-    }
-
-    .image-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 10px;
-    }
-
-    .image-grid img {
-      width: 100%;
-      height: 140px;
-      object-fit: cover;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-
-    .image-grid img:hover { transform: scale(1.03); }
-
-    #hz-addr-display {
-      position: fixed;
-      bottom: 15px;
-      left: 15px;
-      background: rgba(10, 10, 15, 0.85);
-      border: 1px solid #333;
-      border-radius: 8px;
-      padding: 8px 14px;
-      font-family: monospace;
-      font-size: 12px;
-      color: #666;
-      z-index: 9999;
-      cursor: pointer;
-      transition: 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    #hz-addr-display:hover {
-      color: var(--accent);
-      border-color: var(--accent);
-      background: rgba(10,10,15,0.95);
-    }
-
-    .store-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 14px;
-    }
-
-    .store-card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 14px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .store-card:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-    }
-
-    .store-card img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 12px;
-      background: #111;
-      margin-bottom: 10px;
-    }
-
-    .store-card h3 {
-      margin: 0 0 6px;
-      font-size: 16px;
-      color: #fff;
-    }
-
-    .store-card p {
-      margin: 0 0 10px;
-      font-size: 13px;
-      color: #aaa;
-      line-height: 1.5;
-    }
-
-    .meta-line {
-      font-size: 12px;
-      color: #777;
-    }
-
-    .dropdown {
-      position: absolute;
-      top: 58px;
-      left: 10px;
-      width: min(520px, 90vw);
-      max-height: 300px;
-      overflow: auto;
-      background: #101010;
-      border: 1px solid #2b2b2b;
-      border-radius: 16px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.5);
-      display: none;
-      z-index: 10010;
-    }
-
-    .weather-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .weather-card {
-      background: #111;
-      border: 1px solid #2a2a2a;
-      border-radius: 14px;
-      padding: 12px;
-    }
-
-    .weather-card .v {
-      color: var(--accent);
-      font-weight: 700;
-      font-size: 18px;
-    }
-
-    .weather-card .k {
-      color: #777;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.7px;
+    @media(max-width:600px){
+      .logo{font-size:3rem}
+      #bot-panel{width:calc(100vw - 40px);left:10px;bottom:70px}
+      #history-panel{width:100vw;right:-100vw}
+      #wifi-panel{width:calc(100vw - 20px);right:10px}
+      .weather-grid{grid-template-columns:repeat(2,1fr)}
     }
   </style>
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body oncontextmenu="handleGlobalContextMenu(event)">
+
   <div id="context-menu">
-    <div class="menu-item" onclick="toggleWPPicker()">Change Wallpaper</div>
-    <div class="menu-item" onclick="resetBG()">Reset Wallpaper</div>
-    <div class="menu-item" onclick="location.reload()">Restart OS</div>
+    <div class="menu-item" onclick="toggleWPPicker()"><i class="fas fa-image"></i> Change Wallpaper</div>
+    <div class="menu-item" onclick="resetBG()"><i class="fas fa-undo"></i> Reset Wallpaper</div>
+    <div class="menu-divider"></div>
+    <div class="menu-item" id="ctx-search-ai" style="display:none;" onclick="handleSearchWithAI()"><i class="fas fa-brain"></i> Search With AI</div>
+    <div class="menu-divider" id="ctx-ai-divider" style="display:none;"></div>
+    <div class="menu-item" onclick="location.reload()"><i class="fas fa-power-off"></i> Restart OS</div>
   </div>
 
   <div id="hz-addr-display" onclick="copyAddress()" title="Click to copy">
     <i class="fas fa-fingerprint"></i>
-    <span id="hz-addr-text">Loading fingerprint...</span>
+    <span id="hz-addr-text">Loading...</span>
   </div>
 
+  <div class="panel-overlay" id="history-overlay" onclick="toggleHistory()"></div>
+  <div id="history-panel">
+    <div class="history-header">
+      <h3><i class="fas fa-clock-rotate-left" style="color:var(--accent);margin-right:6px;"></i> History</h3>
+      <button class="nav-btn" onclick="toggleHistory()" style="width:30px;height:30px;font-size:12px;"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="history-list" id="history-list"></div>
+    <div class="history-footer">
+      <button class="speed-btn" style="width:100%;padding:10px;margin-top:0;font-size:12px;" onclick="clearHistory()">Clear All History</button>
+    </div>
+  </div>
+
+  <div id="wifi-panel">
+    <div class="wifi-header">
+      <h3><i class="fas fa-wifi" style="color:var(--accent);"></i> Network</h3>
+      <button class="nav-btn" onclick="toggleWifi()" style="width:28px;height:28px;font-size:11px;"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="wifi-tabs">
+      <button class="wifi-tab active" onclick="switchWifiTab('networks',this)"><i class="fas fa-wifi"></i> WiFi</button>
+      <button class="wifi-tab" onclick="switchWifiTab('bluetooth',this)"><i class="fab fa-bluetooth-b"></i> Bluetooth</button>
+      <button class="wifi-tab" onclick="switchWifiTab('speedtest',this)"><i class="fas fa-gauge-high"></i> Speed Test</button>
+    </div>
+    <div class="wifi-body" id="wifi-body"></div>
+  </div>
+
+  <div class="panel-overlay" id="ai-search-overlay" onclick="closeAISearch()"></div>
+  <div id="ai-search-panel">
+    <div class="ai-search-header">
+      <i class="fas fa-brain" style="color:var(--accent);"></i> AI Website Analysis
+      <div style="flex:1;"></div>
+      <button class="nav-btn" onclick="closeAISearch()" style="width:28px;height:28px;font-size:11px;"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="ai-search-body">
+      <div class="ai-search-url" id="ai-search-url"></div>
+      <div class="ai-search-text" id="ai-search-text">Analyzing...</div>
+    </div>
+  </div>
+
+  <div class="panel-overlay" id="wp-overlay" onclick="toggleWPPicker()"></div>
+  <div id="wp-picker">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h3 style="font-size:16px;font-weight:700;"><i class="fas fa-palette" style="color:var(--accent);margin-right:8px;"></i>Wallpaper Engine</h3>
+      <button class="nav-btn" onclick="toggleWPPicker()" style="width:30px;height:30px;font-size:12px;"><i class="fas fa-xmark"></i></button>
+    </div>
+    <input type="text" id="wp-search" placeholder="Search wallpapers..." style="width:100%;padding:10px 14px;margin-top:10px;background:rgba(255,255,255,0.06);color:white;border:1px solid var(--border);border-radius:12px;outline:none;font-size:13px;">
+    <div id="wp-grid"></div>
+  </div>
+
+  <button id="bot-btn" onclick="toggleBot()"><i class="fas fa-robot"></i></button>
+  <div id="bot-panel">
+    <div class="bot-header"><div class="dot"></div> Horizon Assistant</div>
+    <div class="bot-messages" id="bot-messages">
+      <div class="bot-msg bot">Hey! I can summarize things, change your wallpaper, or clear history. Try asking me anything.</div>
+    </div>
+    <div class="bot-input-row">
+      <input type="text" id="bot-input" placeholder="Ask me anything..." onkeypress="if(event.key==='Enter')sendBot()">
+      <button onclick="sendBot()"><i class="fas fa-arrow-up"></i></button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
   <div id="tab-bar">
-    <div class="tab active" id="tab-home" onclick="switchTab('home')">🏠 Horizon</div>
-    <div class="tab" id="tab-results" onclick="switchTab('results')" style="display:none;">🔍 Search</div>
-    <div class="tab" id="tab-store" onclick="switchTab('store')" style="display:none;">🛍️ App Store</div>
+    <div class="tab active" id="tab-home" onclick="switchTab('home')"><span class="tab-label">Horizon</span></div>
+    <div class="tab" id="tab-results" onclick="switchTab('results')" style="display:none;"><span class="tab-label">Search</span></div>
+    <div class="tab" id="tab-store" onclick="switchTab('store')" style="display:none;"><span class="tab-label">App Store</span></div>
   </div>
 
   <div id="nav-tools">
-    <button onclick="switchTab('home')" style="background:none;border:none;color:white;font-size:22px;cursor:pointer;">🏠</button>
+    <button class="nav-btn" onclick="switchTab('home')" title="Home"><i class="fas fa-house"></i></button>
     <input type="text" id="addr-bar" placeholder="Search Horizon or type a URL...">
-    <button class="btn" onclick="handleTopBar()">Go</button>
+    <button class="nav-btn" onclick="handleTopBar()" title="Go" style="background:var(--accent);color:#000;border-color:var(--accent);"><i class="fas fa-arrow-right"></i></button>
     <div id="status-bar">
-      <div class="status-item" id="weather" onclick="toggleWeather()">☀️ Weather</div>
-      <div class="status-item" id="battery">🔋 --%</div>
+      <button class="status-btn" id="weather-btn" onclick="toggleWeather()"><i class="fas fa-sun" id="weather-icon"></i> <span id="weather-temp">--°</span></button>
+      <div class="status-item" id="wifi-status" onclick="toggleWifi()"><i class="fas fa-wifi"></i></div>
+      <div class="status-item" id="battery"><i class="fas fa-battery-full"></i> --%</div>
+      <button class="status-btn" onclick="toggleHistory()" title="History"><i class="fas fa-clock-rotate-left"></i></button>
       <div class="status-item" id="time">00:00</div>
     </div>
   </div>
 
-  <div id="weather-dropdown" class="dropdown"></div>
+  <div id="weather-dropdown" class="weather-dropdown"></div>
 
   <div id="viewport">
     <div id="view-home" class="view-pane active">
       <div id="home-view">
         <div class="logo">HORIZON</div>
-
+        <div class="logo-sub">Pro Edition</div>
         <div class="mid-search">
-          <input type="text" id="search-input" placeholder="Search anything, or use voice...">
-          <button class="btn" onclick="startVoiceSearch()"><i class="fas fa-microphone"></i></button>
-          <button class="btn" onclick="performSearch()">Search</button>
+          <input type="text" id="search-input" placeholder="Search anything...">
+          <button class="search-btn" onclick="startVoiceSearch()" title="Voice"><i class="fas fa-microphone"></i></button>
+          <button class="search-btn" onclick="performSearch()">Search</button>
         </div>
-
         <div class="popular-section">
           <div class="popular-title">Recent Searches</div>
           <div class="popular-grid" id="recent-searches"></div>
         </div>
-
         <div class="popular-section">
-          <div class="popular-title">Popular Horizon Websites</div>
+          <div class="popular-title">Quick Links</div>
           <div class="popular-grid">
-            <div class="popular-link" onclick="openUrl('https://horizensearch.com', 'Main Search')">
-              <i class="fas fa-globe"></i> Main Search
-            </div>
-            <div class="popular-link" onclick="openUrl('https://ai.horizensearch.com', 'Horizen AI')">
-              <i class="fas fa-brain"></i> Horizen AI
-            </div>
-            <div class="popular-link" onclick="openUrl('https://gd.horizensearch.com', 'Geometry Dash')">
-              <i class="fas fa-gamepad"></i> Geometry Dash
-            </div>
-            <div class="popular-link" onclick="switchTab('store'); loadAppStore();">
-              <i class="fas fa-store"></i> App Store
-            </div>
+            <div class="popular-link" onclick="openUrl('https://horizensearch.com','Main Search')"><i class="fas fa-globe"></i> Main Search</div>
+            <div class="popular-link" onclick="openUrl('https://ai.horizensearch.com','Horizen AI')"><i class="fas fa-brain"></i> Horizen AI</div>
+            <div class="popular-link" onclick="openUrl('https://gd.horizensearch.com','Geometry Dash')"><i class="fas fa-gamepad"></i> Geometry Dash</div>
+            <div class="popular-link" onclick="switchTab('store');loadAppStore();"><i class="fas fa-store"></i> App Store</div>
           </div>
         </div>
       </div>
     </div>
-
-    <div id="wp-picker">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h3>Wallpaper Engine</h3>
-        <button class="btn" onclick="toggleWPPicker()">X</button>
-      </div>
-      <input type="text" id="wp-search" placeholder="Search Pexels..." style="width:100%;padding:10px;margin-top:10px;background:#111;color:white;border:1px solid #444;">
-      <div id="wp-grid"></div>
-    </div>
-
     <div id="view-results" class="view-pane">
       <div class="results-wrapper">
-        <h2 id="search-title" style="color:#aaa;font-size:16px;margin-bottom:20px;"></h2>
+        <h2 id="search-title" style="color:#888;font-size:15px;margin-bottom:18px;"></h2>
         <div class="filter-bar">
-          <button class="filter-btn active" onclick="switchFilter('all', this)">All</button>
-          <button class="filter-btn" onclick="switchFilter('images', this)">Images</button>
-          <button class="filter-btn" onclick="switchFilter('facts', this)">Facts</button>
+          <button class="filter-btn active" onclick="switchFilter('all',this)">All</button>
+          <button class="filter-btn" onclick="switchFilter('images',this)">Images</button>
+          <button class="filter-btn" onclick="switchFilter('facts',this)">Facts</button>
         </div>
         <div id="content-all" class="content-section active">
           <div class="ai-overview-box">
             <div class="ai-overview-header"><i class="fas fa-sparkles"></i> AI Overview</div>
             <div class="ai-overview-content" id="inline-ai-box">Search to load results.</div>
           </div>
-          <div id="all-images-preview" class="image-grid" style="margin-top:18px;"></div>
+          <div id="all-images-preview" class="image-grid" style="margin-top:16px;"></div>
         </div>
         <div id="content-images" class="content-section">
           <div id="full-images-grid" class="image-grid"></div>
@@ -588,509 +370,813 @@
         </div>
       </div>
     </div>
-
     <div id="view-store" class="view-pane">
       <div class="results-wrapper">
-        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-          <input id="app-store-search" placeholder="Search apps..." style="flex:1;min-width:220px;padding:10px 14px;border-radius:20px;border:1px solid var(--border);background:#111;color:white;outline:none;">
-          <button class="btn" onclick="loadAppStore()">Refresh</button>
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+          <input id="app-store-search" placeholder="Search apps..." style="flex:1;min-width:200px;padding:10px 14px;border-radius:20px;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:white;outline:none;font-size:13px;">
+          <button class="search-btn" onclick="loadAppStore()">Refresh</button>
         </div>
         <div class="store-grid" id="app-store-grid"></div>
       </div>
     </div>
   </div>
 
-  <script>
-    const PEXELS_KEY = 'QmebQALowGk9LoYQqUGaPhQ5zUMQWwd1mRaFTV4HvNQyYS1i6v9H5V68';
-    const SUPABASE_URL = 'https://xlisbmtenekjmundxbcn.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_Cvs-AiKPTHrC_tfGfwlpSQ_4Hir5Cva';
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<script>
+/* ========== CONFIG ========== */
+const PEXELS_KEY='QmebQALowGk9LoYQqUGaPhQ5zUMQWwd1mRaFTV4HvNQyYS1i6v9H5V68';
+const SUPABASE_URL='https://xlisbmtenekjmundxbcn.supabase.co';
+const SUPABASE_KEY='sb_publishable_Cvs-AiKPTHrC_tfGfwlpSQ_4Hir5Cva';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-    let openTabs = [];
-    let myAddress = '';
-    let blockChannel = null;
-    let appCache = [];
-    let blockPollInterval = null;
-    let recentSearches = JSON.parse(localStorage.getItem('hz_recent_searches') || '[]');
+/* ========== STATE ========== */
+let openTabs=[];
+let myAddress='';
+let blockChannel=null;
+let appCache=[];
+let blockPollInterval=null;
+let recentSearches=JSON.parse(localStorage.getItem('hz_recent_searches')||'[]');
+let browsingHistory=JSON.parse(localStorage.getItem('hz_history')||'[]');
+let contextUrl='';
+let contextTabId='';
+let speedTestRunning=false;
+let wifiTabState='networks';
+let groqKeyCache='';
 
-    function renderRecent() {
-      const box = document.getElementById('recent-searches');
-      box.innerHTML = recentSearches.length
-        ? recentSearches.map(q => `<div class="popular-link" onclick="performSearch('${q.replace(/'/g, "\\'")}')"><i class="fas fa-clock"></i>${q}</div>`).join('')
-        : '<div style="color:#777;">No recent searches yet.</div>';
-    }
+/* ========== TOAST ========== */
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
 
-    function saveRecent(q) {
-      q = (q || '').trim();
-      if (!q) return;
-      recentSearches = [q, ...recentSearches.filter(x => x.toLowerCase() !== q.toLowerCase())].slice(0, 8);
-      localStorage.setItem('hz_recent_searches', JSON.stringify(recentSearches));
-      renderRecent();
-    }
+/* ========== AI URL SHORTENING (Groq-powered) ========== */
+async function getGroqKey(){
+  if(groqKeyCache)return groqKeyCache;
+  try{
+    const{data}=await sb.from('api_keys').select('key_value').eq('key_name','groq').eq('is_active',true).maybeSingle();
+    groqKeyCache=data?.key_value||'';
+    return groqKeyCache;
+  }catch(e){return'';}
+}
 
-    function saveTabs() {
-      const tabs = openTabs.map(id => ({
-        id,
-        name: document.querySelector(`#tab-${id}`)?.childNodes?.[0]?.textContent?.trim() || '',
-        src: document.querySelector(`#view-${id} iframe`)?.src || '',
-        srcdoc: document.querySelector(`#view-${id} iframe`)?.getAttribute('srcdoc') || ''
-      }));
-      localStorage.setItem('hz_open_tabs', JSON.stringify(tabs));
-    }
+async function aiShortenUrl(url){
+  /* Fast fallback for known sites - no API call needed */
+  const quick=quickShorten(url);
+  if(quick)return quick;
 
-    function restoreTabs() {
-      try {
-        const tabs = JSON.parse(localStorage.getItem('hz_open_tabs') || '[]');
-        tabs.forEach(t => {
-          if (t.id && t.name && !['home','results','store'].includes(t.id)) {
-            const pane = document.createElement('div');
-            pane.className = 'view-pane';
-            pane.id = 'view-' + t.id;
-            const ifr = document.createElement('iframe');
-            if (t.srcdoc) ifr.srcdoc = t.srcdoc;
-            else if (t.src) ifr.src = t.src;
-            pane.appendChild(ifr);
-            document.getElementById('viewport').appendChild(pane);
+  const key=await getGroqKey();
+  if(!key)return fallbackShorten(url);
 
-            const tab = document.createElement('div');
-            tab.className = 'tab';
-            tab.id = 'tab-' + t.id;
-            tab.setAttribute('draggable', 'true');
-            tab.innerHTML = `🌐 ${t.name} <span class="close-tab" onclick="closeTab(event, '${t.id}')">×</span>`;
-            tab.onclick = () => switchTab(t.id);
-            enableDrag(tab);
-            document.getElementById('tab-bar').appendChild(tab);
-            openTabs.push(t.id);
-          }
-        });
-      } catch (e) {}
-    }
-
-    async function getGroqApiKey() {
-  try {
-    const { data, error } = await sb
-      .from('api_keys')
-      .select('key_value')
-      .eq('key_name', 'groq')
-      .eq('is_active', true)
-      .maybeSingle();
-
-    if (error) {
-      console.error('Groq key fetch error:', error);
-      return '';
-    }
-
-    return data?.key_value || '';
-  } catch (e) {
-    console.error(e);
-    return '';
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({
+        model:'openai/gpt-oss-120b',
+        messages:[{
+          role:'system',
+          content:'You are a URL label generator. Given a URL, return ONLY a short 1-3 word label describing what the website is. No punctuation, no explanation, just the label. Examples:\ndocs.google.com/blahblahblah -> Google Docs\ngithub.com/user/repo -> GitHub Repo\nrandomblog.com/2024/post -> Blog Post\nunknown-site.com/page -> Unknown Site'
+        },{
+          role:'user',
+          content:url
+        }],
+        temperature:0.3,
+        max_tokens:15
+      })
+    });
+    const data=await res.json();
+    let label=data?.choices?.[0]?.message?.content?.trim()||'';
+    /* Clean up any quotes or extra text */
+    label=label.replace(/^["']|["']$/g,'').replace(/\.$/,'').trim();
+    if(label&&label.length<40)return label;
+    return fallbackShorten(url);
+  }catch(e){
+    return fallbackShorten(url);
   }
 }
 
-    async function getGroqAiFact(query) {
-      try {
-        const groqKey = await getGroqApiKey();
-        if (!groqKey) return 'No Groq API key found in Supabase.';
+/* Known site shortcuts - instant, no API needed */
+function quickShorten(url){
+  try{
+    const u=new URL(url);
+    const h=u.hostname.replace(/^www\./,'');
+    const map={
+      'docs.google.com':'Google Docs','drive.google.com':'Google Drive',
+      'mail.google.com':'Gmail','calendar.google.com':'Google Calendar',
+      'maps.google.com':'Google Maps','sheets.google.com':'Google Sheets',
+      'slides.google.com':'Google Slides','forms.google.com':'Google Forms',
+      'meet.google.com':'Google Meet','classroom.google.com':'Google Classroom',
+      'photos.google.com':'Google Photos','play.google.com':'Play Store',
+      'youtube.com':'YouTube','youtu.be':'YouTube','twitter.com':'X',
+      'x.com':'X','facebook.com':'Facebook','instagram.com':'Instagram',
+      'reddit.com':'Reddit','github.com':'GitHub','stackoverflow.com':'Stack Overflow',
+      'wikipedia.org':'Wikipedia','amazon.com':'Amazon','netflix.com':'Netflix',
+      'spotify.com':'Spotify','discord.com':'Discord','twitch.tv':'Twitch',
+      'linkedin.com':'LinkedIn','pinterest.com':'Pinterest','tiktok.com':'TikTok',
+      'snapchat.com':'Snapchat','whatsapp.com':'WhatsApp','telegram.org':'Telegram',
+      'slack.com':'Slack','notion.so':'Notion','figma.com':'Figma','canva.com':'Canva',
+      'dropbox.com':'Dropbox','outlook.live.com':'Outlook','horizensearch.com':'Horizon Search',
+      'ai.horizensearch.com':'Horizen AI','gd.horizensearch.com':'Geometry Dash',
+      'chat.openai.com':'ChatGPT','openai.com':'OpenAI','claude.ai':'Claude',
+      'bing.com':'Bing','google.com':'Google','duckduckgo.com':'DuckDuckGo',
+      'ebay.com':'eBay','apple.com':'Apple','microsoft.com':'Microsoft',
+      'medium.com':'Medium','dev.to':'DEV Community','codepen.io':'CodePen',
+      'replit.com':'Replit','vercel.com':'Vercel','netlify.com':'Netlify',
+      'weather.com':'Weather.com','espn.com':'ESPN','tumblr.com':'Tumblr',
+      'yahoo.com':'Yahoo',' Roblox.com':'Roblox','minecraft.net':'Minecraft'
+    };
+    if(map[h])return map[h];
+    for(const[d,l]of Object.entries(map)){if(h.endsWith('.'+d))return l;}
+    return null;
+  }catch(e){return null;}
+}
 
-        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${groqKey}`
-          },
-          body: JSON.stringify({
-            model: 'openai/gpt-oss-120b',
-            messages: [
-              {
-                role: 'system',
-                content: 'Give a short, useful answer in 3-5 sentences.'
-              },
-              {
-                role: 'user',
-                content: `Give a fact overview for: ${query}`
-              }
-            ],
-            reasoning_effort: 'medium',
-            temperature: 0.7
-          })
-        });
+/* Clean fallback when AI is unavailable */
+function fallbackShorten(url){
+  try{
+    const u=new URL(url);
+    let host=u.hostname.replace(/^www\./,'');
+    let path=u.pathname.replace(/\/+$/,'');
+    if(path.length>15)path=path.substring(0,15)+'...';
+    return host+(path?'/ '+path:'');
+  }catch(e){return url.length>25?url.substring(0,25)+'...':url;}
+}
 
-        const data = await res.json();
-        return data?.choices?.[0]?.message?.content || 'No AI response returned.';
-      } catch (err) {
-        return 'AI fact lookup failed.';
+/* ========== HISTORY ========== */
+function addToHistory(name,url){
+  const entry={name:name||url,url:url||'',time:Date.now()};
+  browsingHistory=[entry,...browsingHistory.filter(h=>h.url!==url)].slice(0,100);
+  localStorage.setItem('hz_history',JSON.stringify(browsingHistory));
+}
+function clearHistory(){
+  browsingHistory=[];
+  localStorage.removeItem('hz_history');
+  renderHistory();
+  showToast('History cleared');
+}
+function renderHistory(){
+  const list=document.getElementById('history-list');
+  if(!browsingHistory.length){
+    list.innerHTML='<div class="history-empty"><i class="fas fa-inbox" style="font-size:28px;margin-bottom:10px;display:block;"></i>No browsing history yet</div>';
+    return;
+  }
+  list.innerHTML=browsingHistory.map(h=>{
+    const ago=timeAgo(h.time);
+    const isUrl=h.url&&(h.url.startsWith('http')||h.url.includes('.'));
+    const safeName=(h.name||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    const safeUrl=(h.url||'').replace(/'/g,"\\'");
+    return`<div class="history-item" onclick="${isUrl?`openUrl('${safeUrl}','${safeName}')`:`performSearch('${safeName}')`}">
+      <div class="hi-icon"><i class="fas ${isUrl?'fa-globe':'fa-magnifying-glass'}"></i></div>
+      <div class="hi-info"><div class="hi-name">${escHtml(h.name)}</div><div class="hi-url">${escHtml(h.url||'Search query')}</div></div>
+      <div class="hi-time">${ago}</div>
+    </div>`;
+  }).join('');
+}
+function timeAgo(ts){
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60)return'Just now';if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';
+}
+function escHtml(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+function toggleHistory(){
+  const p=document.getElementById('history-panel'),o=document.getElementById('history-overlay');
+  const isOpen=p.classList.contains('open');
+  p.classList.toggle('open');o.classList.toggle('show');
+  if(!isOpen)renderHistory();
+}
+
+/* ========== RECENT SEARCHES ========== */
+function renderRecent(){
+  const box=document.getElementById('recent-searches');
+  box.innerHTML=recentSearches.length
+    ?recentSearches.map(q=>`<div class="popular-link" onclick="performSearch('${q.replace(/'/g,"\\'")}')"><i class="fas fa-clock"></i>${escHtml(q)}</div>`).join('')
+    :'<div style="color:#555;font-size:13px;">No recent searches yet.</div>';
+}
+function saveRecent(q){
+  q=(q||'').trim();if(!q)return;
+  recentSearches=[q,...recentSearches.filter(x=>x.toLowerCase()!==q.toLowerCase())].slice(0,8);
+  localStorage.setItem('hz_recent_searches',JSON.stringify(recentSearches));
+  renderRecent();
+}
+
+/* ========== TABS ========== */
+function saveTabs(){
+  const tabs=openTabs.map(id=>({
+    id,name:document.querySelector('#tab-'+id+' .tab-label')?.textContent?.trim()||'',
+    src:document.querySelector('#view-'+id+' iframe')?.src||'',
+    srcdoc:document.querySelector('#view-'+id+' iframe')?.getAttribute('srcdoc')||''
+  }));
+  localStorage.setItem('hz_open_tabs',JSON.stringify(tabs));
+}
+function restoreTabs(){
+  try{
+    const tabs=JSON.parse(localStorage.getItem('hz_open_tabs')||'[]');
+    tabs.forEach(t=>{if(t.id&&t.name&&!['home','results','store'].includes(t.id))createNewTab(t.name,null,t.src||'',t.srcdoc||null,false);});
+  }catch(e){}
+}
+function switchTab(id){
+  document.querySelectorAll('.view-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const vp=document.getElementById('view-'+id);
+  const tb=document.getElementById('tab-'+id);
+  if(vp)vp.classList.add('active');
+  if(tb){tb.classList.add('active');tb.style.display='flex';}
+  if(id==='store')loadAppStore();
+}
+function enableDrag(tab){
+  tab.addEventListener('dragstart',()=>tab.classList.add('dragging'));
+  tab.addEventListener('dragend',()=>{tab.classList.remove('dragging');saveTabs();});
+  tab.addEventListener('dragover',e=>{
+    e.preventDefault();const d=document.querySelector('.tab.dragging');
+    if(!d||d===tab)return;const r=tab.getBoundingClientRect();
+    tab.parentNode.insertBefore(d,(e.clientX-r.left)<r.width/2?tab:tab.nextSibling);
+  });
+}
+
+/* Create a new tab with AI URL shortening */
+async function createNewTab(name,html,url,srcdoc,doSwitch=true){
+  const safeId='t_'+Math.random().toString(36).slice(2,10);
+  let displayName=name||'Loading...';
+  let usedAI=false;
+
+  /* If we have a URL but no clean name, use AI to shorten it */
+  if(url&&!name){
+    const quick=quickShorten(url);
+    if(quick){
+      displayName=quick;
+    }else{
+      /* Show loading state, then AI-shorten */
+      displayName='Loading...';
+      usedAI=true;
+    }
+  }
+
+  const tab=document.createElement('div');
+  tab.className='tab';tab.id='tab-'+safeId;tab.setAttribute('draggable','true');
+  tab.innerHTML=`<span class="tab-label">${escHtml(displayName)}</span><span class="close-tab" onclick="closeTab(event,'${safeId}')">&times;</span>`;
+  tab.onclick=()=>switchTab(safeId);
+  enableDrag(tab);
+  document.getElementById('tab-bar').appendChild(tab);
+
+  const pane=document.createElement('div');
+  pane.className='view-pane';pane.id='view-'+safeId;
+  const ifr=document.createElement('iframe');
+  if(srcdoc!=null)ifr.srcdoc=srcdoc;
+  else if(url)ifr.src=url;
+  pane.appendChild(ifr);
+  document.getElementById('viewport').appendChild(pane);
+
+  /* Intercept link clicks inside iframe to open in Horizon */
+  interceptIframeLinks(ifr,safeId);
+
+  openTabs.push(safeId);
+  if(doSwitch)switchTab(safeId);
+  saveTabs();
+
+  /* Add to history */
+  const finalUrl=url||'';
+  addToHistory(displayName==='Loading...'?'Website':displayName,finalUrl);
+
+  /* AI URL shortening in background */
+  if(usedAI){
+    aiShortenUrl(url).then(label=>{
+      const labelEl=document.querySelector('#tab-'+safeId+' .tab-label');
+      if(labelEl){
+        labelEl.innerHTML=escHtml(label)+'<span class="ai-badge">AI</span>';
+        /* Update history entry */
+        const idx=browsingHistory.findIndex(h=>h.url===url);
+        if(idx>=0){browsingHistory[idx].name=label;localStorage.setItem('hz_history',JSON.stringify(browsingHistory));}
       }
-    }
-
-    async function generateFingerprint() {
-      let raw = '';
-      try {
-        const c = document.createElement('canvas'), x = c.getContext('2d');
-        x.textBaseline = 'top';
-        x.font = '14px Arial';
-        x.fillText('HorizonFP_fingerprint_test', 2, 2);
-        x.beginPath();
-        x.arc(50, 50, 50, 0, Math.PI * 2, false);
-        x.fill();
-        raw += c.toDataURL();
-      } catch (e) {}
-      try {
-        const c = document.createElement('canvas'), gl = c.getContext('webgl') || c.getContext('experimental-webgl');
-        if (gl) {
-          const di = gl.getExtension('WEBGL_debug_renderer_info');
-          if (di) raw += gl.getParameter(di.UNMASKED_VENDOR_WEBGL) + gl.getParameter(di.UNMASKED_RENDERER_WEBGL);
-        }
-      } catch (e) {}
-      try {
-        const a = new (window.AudioContext || window.webkitAudioContext)();
-        raw += a.sampleRate + a.destination.maxChannelCount + a.state;
-        a.close();
-      } catch (e) {}
-      try {
-        const d = await navigator.mediaDevices?.enumerateDevices?.();
-        if (d) {
-          let c = { audioinput: 0, audiooutput: 0, videoinput: 0 };
-          d.forEach(v => { if (c[v.kind] !== undefined) c[v.kind]++; });
-          raw += JSON.stringify(c);
-        }
-      } catch (e) {}
-      raw += (navigator.hardwareConcurrency || 'na') + (screen.width + 'x' + screen.height) + screen.colorDepth + (navigator.deviceMemory || 'na') + (navigator.platform || 'na') + new Date().getTimezoneOffset() + navigator.language + Intl.DateTimeFormat().resolvedOptions().timeZone + (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      try {
-        raw += navigator.userAgentData ? JSON.stringify(await navigator.userAgentData.getHighEntropyValues(['platform','platformVersion','architecture','model','bitness','fullVersionList'])) : navigator.userAgent;
-      } catch (e) {
-        raw += navigator.userAgent;
-      }
-      let h1 = 0x811c9dc5;
-      for (let i = 0; i < raw.length; i++) {
-        h1 ^= raw.charCodeAt(i);
-        h1 = Math.imul(h1, 0x01000193);
-      }
-      let h2 = 0x811c9dc5;
-      for (const ch of raw.split('').reverse().join('')) {
-        h2 ^= ch.charCodeAt(0);
-        h2 = Math.imul(h2, 0x01000193);
-      }
-      return `hz-pc-${((h1 >>> 0).toString(16) + (h2 >>> 0).toString(16)).toUpperCase().substring(0, 16)}`;
-    }
-
-    async function checkIfBlocked(computerId) {
-      try {
-        const { data } = await sb.from('users').select('is_blocked').eq('computer_id', computerId).maybeSingle();
-        if (data?.is_blocked === true) {
-          location.href = 'https://blocked.horizensearch.com';
-          return true;
-        }
-      } catch (e) {}
-      return false;
-    }
-
-    async function initHorizenBlocker() {
-      let computerId = localStorage.getItem('horizen_computer_id');
-      if (!computerId) {
-        computerId = await generateFingerprint();
-        localStorage.setItem('horizen_computer_id', computerId);
-      }
-      myAddress = computerId;
-      document.getElementById('hz-addr-text').innerText = computerId;
-
-      await sb.from('users').upsert({ computer_id: computerId }, { onConflict: 'computer_id', ignoreDuplicates: false });
-
-      if (await checkIfBlocked(computerId)) return false;
-
-      if (blockChannel) await sb.removeChannel(blockChannel);
-      blockChannel = sb.channel('user-block-watch')
-        .on('postgres_changes', {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'users',
-          filter: `computer_id=eq.${computerId}`
-        }, payload => {
-          if (payload.new?.is_blocked === true) location.href = 'https://blocked.horizensearch.com';
-        })
-        .subscribe();
-
-      if (blockPollInterval) clearInterval(blockPollInterval);
-      blockPollInterval = setInterval(() => checkIfBlocked(computerId), 2000);
-      return true;
-    }
-
-    function copyAddress() {
-      navigator.clipboard.writeText(myAddress).then(() => {
-        const el = document.getElementById('hz-addr-text');
-        el.innerText = 'Copied!';
-        setTimeout(() => { el.innerText = myAddress; }, 1500);
-      });
-    }
-
-    function updateStatus() {
-      document.getElementById('time').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      document.getElementById('battery').innerText = '🔋 --%';
-    }
-    setInterval(updateStatus, 1000);
-
-    function handleGlobalContextMenu(e) {
-      e.preventDefault();
-      const m = document.getElementById('context-menu');
-      m.style.display = 'block';
-      m.style.left = e.pageX + 'px';
-      m.style.top = e.pageY + 'px';
-    }
-
-    window.onclick = () => document.getElementById('context-menu').style.display = 'none';
-
-    function switchTab(id) {
-      document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.getElementById('view-' + id).classList.add('active');
-      document.getElementById('tab-' + id).classList.add('active');
-      document.getElementById('tab-' + id).style.display = 'flex';
-      if (id === 'store') loadAppStore();
-    }
-
-    async function cleanUrl(input) {
-      let u = input.startsWith('http://') || input.startsWith('https://') ? input : 'https://' + input;
-      try {
-        const url = new URL(u);
-        url.search = '';
-        url.hash = '';
-        return url.toString();
-      } catch (e) {
-        return u;
-      }
-    }
-
-    function openUrl(url, tabName) {
-      createNewTab(tabName, null, url);
-    }
-
-    async function handleTopBar() {
-      const val = document.getElementById('addr-bar').value.trim();
-      if (!val) return;
-      if (val.startsWith('http://') || val.startsWith('https://') || val.includes('.')) {
-        createNewTab(val, null, await cleanUrl(val.includes('://') ? val : 'https://' + val));
-      } else {
-        performSearch(val);
-      }
-    }
-
-    function enableDrag(tab) {
-      tab.addEventListener('dragstart', () => tab.classList.add('dragging'));
-      tab.addEventListener('dragend', () => {
-        tab.classList.remove('dragging');
-        saveTabs();
-      });
-      tab.addEventListener('dragover', e => {
-        e.preventDefault();
-        const dragging = document.querySelector('.tab.dragging');
-        if (!dragging || dragging === tab) return;
-        const rect = tab.getBoundingClientRect();
-        const before = (e.clientX - rect.left) < rect.width / 2;
-        tab.parentNode.insertBefore(dragging, before ? tab : tab.nextSibling);
-      });
-    }
-
-    function createNewTab(name, html, url) {
-      const safeId = 'tab_' + Math.random().toString(36).slice(2, 10);
-
-      const tab = document.createElement('div');
-      tab.className = 'tab';
-      tab.id = 'tab-' + safeId;
-      tab.setAttribute('draggable', 'true');
-      tab.innerHTML = `🌐 ${name} <span class="close-tab" onclick="closeTab(event, '${safeId}')">×</span>`;
-      tab.onclick = () => switchTab(safeId);
-      enableDrag(tab);
-      document.getElementById('tab-bar').appendChild(tab);
-
-      const pane = document.createElement('div');
-      pane.className = 'view-pane';
-      pane.id = 'view-' + safeId;
-      const ifr = document.createElement('iframe');
-      if (html !== null) ifr.srcdoc = html;
-      else ifr.src = url;
-      pane.appendChild(ifr);
-      document.getElementById('viewport').appendChild(pane);
-
-      openTabs.push(safeId);
-      switchTab(safeId);
       saveTabs();
+    });
+  }
+
+  return safeId;
+}
+
+function closeTab(e,id){
+  e.stopPropagation();
+  document.getElementById('tab-'+id)?.remove();
+  document.getElementById('view-'+id)?.remove();
+  openTabs=openTabs.filter(t=>t!==id);
+  switchTab('home');saveTabs();
+}
+
+/* ========== IFRAME LINK INTERCEPTION ========== */
+function interceptIframeLinks(ifr,tabId){
+  /* Try to inject link interceptor after iframe loads */
+  let attempts=0;
+  const tryInject=()=>{
+    attempts++;
+    if(attempts>10)return;
+    try{
+      const doc=ifr.contentDocument||ifr.contentWindow?.document;
+      if(!doc||!doc.body)return;
+      doc.addEventListener('click',function(e){
+        const a=e.target.closest('a');
+        if(a&&a.href){
+          e.preventDefault();
+          e.stopPropagation();
+          openUrl(a.href);
+        }
+      },true);
+      return;
+    }catch(e){
+      /* Cross-origin - can't access, that's expected */
+      return;
     }
+  };
+  ifr.addEventListener('load',tryInject);
+  setTimeout(tryInject,500);
+}
 
-    function closeTab(e, id) {
-      e.stopPropagation();
-      document.getElementById('tab-' + id)?.remove();
-      document.getElementById('view-' + id)?.remove();
-      openTabs = openTabs.filter(t => t !== id);
-      switchTab('home');
-      saveTabs();
-    }
+/* ========== OPEN URL ========== */
+function openUrl(url,name){
+  createNewTab(name,null,url,null,true);
+}
 
-    function switchFilter(filterId, btnElem) {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-      btnElem.classList.add('active');
-      document.getElementById('content-' + filterId).classList.add('active');
-    }
+/* ========== NAV BAR ========== */
+async function handleTopBar(){
+  const val=document.getElementById('addr-bar').value.trim();
+  if(!val)return;
+  document.getElementById('addr-bar').value='';
+  if(val.startsWith('http://')||val.startsWith('https://')||val.includes('.')){
+    const fullUrl=val.includes('://')?val:'https://'+val;
+    openUrl(fullUrl);
+  }else{
+    performSearch(val);
+  }
+}
 
-    async function performSearch(customQuery) {
-      const q = (customQuery || document.getElementById('search-input').value || '').trim();
-      if (!q) return;
+/* ========== FILTERS ========== */
+function switchFilter(fId,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('content-'+fId).classList.add('active');
+}
 
-      saveRecent(q);
-      document.getElementById('search-title').innerText = 'Results for: ' + q;
-      switchTab('results');
-      document.getElementById('inline-ai-box').innerText = 'Generating AI answer...';
-      document.getElementById('all-images-preview').innerHTML = '';
-      document.getElementById('full-images-grid').innerHTML = '';
-      document.getElementById('facts-content').innerText = 'Generating facts...';
-
-      const aiPromise = getGroqAiFact(q).then(text => {
-        document.getElementById('inline-ai-box').innerText = text;
-        document.getElementById('facts-content').innerText = text;
-      });
-
-      switchFilter('all', document.querySelector('.filter-btn'));
-
-      fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&per_page=12`, {
-        headers: { Authorization: PEXELS_KEY }
+/* ========== GROQ AI ========== */
+async function getGroqAiFact(query){
+  try{
+    const key=await getGroqKey();
+    if(!key)return'No Groq API key found in Supabase.';
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({
+        model:'openai/gpt-oss-120b',
+        messages:[{role:'system',content:'Give a short, useful answer in 3-5 sentences.'},{role:'user',content:'Give a fact overview for: '+query}],
+        temperature:0.7
       })
-      .then(r => r.json())
-      .then(d => {
-        const imgs = (d.photos || []).map(p => `<img src="${p.src.medium}" onclick="setBG('${p.src.large2x}')">`).join('');
-        document.getElementById('all-images-preview').innerHTML = imgs;
-        document.getElementById('full-images-grid').innerHTML = imgs;
+    });
+    const data=await res.json();
+    return data?.choices?.[0]?.message?.content||'No AI response returned.';
+  }catch(e){return'AI fact lookup failed.';}
+}
+
+async function getGroqChat(userMsg,systemMsg){
+  try{
+    const key=await getGroqKey();
+    if(!key)return'Sorry, AI is currently unavailable (no API key).';
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({
+        model:'openai/gpt-oss-120b',
+        messages:[{role:'system',content:systemMsg||'You are a helpful assistant. Keep answers short and concise, under 4 sentences.'},{role:'user',content:userMsg}],
+        temperature:0.7
       })
-      .catch(() => {});
+    });
+    const data=await res.json();
+    return data?.choices?.[0]?.message?.content||'No response from AI.';
+  }catch(e){return'AI request failed.';}
+}
 
-      await aiPromise;
-    }
+/* ========== SEARCH ========== */
+async function performSearch(customQuery){
+  const q=(customQuery||document.getElementById('search-input').value||'').trim();
+  if(!q)return;
+  document.getElementById('search-input').value='';
+  saveRecent(q);
+  addToHistory(q,'');
+  document.getElementById('search-title').innerText='Results for: '+q;
+  document.getElementById('tab-results').style.display='flex';
+  switchTab('results');
+  document.getElementById('inline-ai-box').innerText='Generating AI answer...';
+  document.getElementById('all-images-preview').innerHTML='';
+  document.getElementById('full-images-grid').innerHTML='';
+  document.getElementById('facts-content').innerText='Generating facts...';
+  switchFilter('all',document.querySelector('.filter-btn'));
 
-    async function loadAppStore() {
-      const q = document.getElementById('app-store-search').value.trim().toLowerCase();
-      const { data, error } = await sb.from('apps').select('id,name,description,category,icon_url,html,created_at').order('created_at', { ascending: false });
-      if (error) {
-        document.getElementById('app-store-grid').innerHTML = `<div style="color:#888;">App store failed: ${error.message}</div>`;
-        return;
+  getGroqAiFact(q).then(t=>{document.getElementById('inline-ai-box').innerText=t;document.getElementById('facts-content').innerText=t;});
+
+  fetch('https://api.pexels.com/v1/search?query='+encodeURIComponent(q)+'&per_page=12',{headers:{Authorization:PEXELS_KEY}})
+  .then(r=>r.json()).then(d=>{
+    const imgs=(d.photos||[]).map(p=>`<img src="${p.src.medium}" onclick="setBG('${p.src.large2x}')">`).join('');
+    document.getElementById('all-images-preview').innerHTML=imgs;
+    document.getElementById('full-images-grid').innerHTML=imgs;
+  }).catch(()=>{});
+}
+
+/* ========== APP STORE ========== */
+async function loadAppStore(){
+  const q=document.getElementById('app-store-search').value.trim().toLowerCase();
+  const{data,error}=await sb.from('apps').select('id,name,description,category,icon_url,html,created_at').order('created_at',{ascending:false});
+  if(error){document.getElementById('app-store-grid').innerHTML='<div style="color:#888;">App store failed: '+error.message+'</div>';return;}
+  appCache=(data||[]).filter(app=>{const h=(app.name||'')+' '+(app.description||'')+' '+(app.category||'');return!q||h.toLowerCase().includes(q);});
+  document.getElementById('app-store-grid').innerHTML=appCache.length
+    ?appCache.map(app=>`<div class="store-card" onclick="openApp('${app.id}')">
+      <img src="${app.icon_url||''}" alt="" onerror="this.style.background='#111'">
+      <h3>${escHtml(app.name||'Untitled')}</h3>
+      <p>${escHtml(app.description||'')}</p>
+      <div class="meta-line">${escHtml(app.category||'General')}</div>
+    </div>`).join('')
+    :'<div style="color:#888;">No apps found.</div>';
+}
+function openApp(id){
+  const app=appCache.find(a=>String(a.id)===String(id));
+  if(!app)return;
+  createNewTab(app.name||'App',app.html||'<h1 style="color:#fff;padding:20px;">Empty App</h1>',null,null,true);
+}
+
+/* ========== CONTEXT MENU ========== */
+function handleGlobalContextMenu(e){
+  e.preventDefault();
+  const m=document.getElementById('context-menu');
+  /* Check if right-clicked on or inside an iframe */
+  let clickedOnSite=false;
+  let clickedTabId='';
+  const activePane=document.querySelector('.view-pane.active');
+  if(activePane){
+    const ifr=activePane.querySelector('iframe');
+    if(ifr){
+      const rect=ifr.getBoundingClientRect();
+      if(e.clientX>=rect.left&&e.clientX<=rect.right&&e.clientY>=rect.top&&e.clientY<=rect.bottom){
+        clickedOnSite=true;
+        /* Find which tab this iframe belongs to */
+        const viewId=activePane.id.replace('view-','');
+        contextTabId=viewId;
+        contextUrl=ifr.src||'';
       }
-
-      appCache = (data || []).filter(app => {
-        const hay = `${app.name || ''} ${app.description || ''} ${app.category || ''}`.toLowerCase();
-        return !q || hay.includes(q);
-      });
-
-      document.getElementById('app-store-grid').innerHTML = appCache.length
-        ? appCache.map(app => `
-            <div class="store-card" onclick="openApp('${app.id}')">
-              <img src="${app.icon_url || '/icon.png'}" alt="">
-              <h3>${app.name || 'Untitled App'}</h3>
-              <p>${app.description || ''}</p>
-              <div class="meta-line">${app.category || 'General'}</div>
-            </div>
-          `).join('')
-        : `<div style="color:#888;">No apps published yet.</div>`;
     }
+  }
+  document.getElementById('ctx-search-ai').style.display=clickedOnSite&&contextUrl?'flex':'none';
+  document.getElementById('ctx-ai-divider').style.display=clickedOnSite&&contextUrl?'block':'none';
+  m.style.display='block';
+  m.style.left=Math.min(e.pageX,window.innerWidth-220)+'px';
+  m.style.top=Math.min(e.pageY,window.innerHeight-200)+'px';
+}
+window.addEventListener('click',()=>document.getElementById('context-menu').style.display='none');
 
-    function openApp(id) {
-      const app = appCache.find(a => String(a.id) === String(id));
-      if (!app) return;
-      createNewTab(app.name || 'App', app.html || '<h1>Empty App</h1>', null);
-    }
+/* ========== SEARCH WITH AI ========== */
+function handleSearchWithAI(){
+  document.getElementById('context-menu').style.display='none';
+  if(!contextUrl)return;
+  document.getElementById('ai-search-url').textContent=contextUrl;
+  document.getElementById('ai-search-text').innerHTML='<span class="spinner"></span> Analyzing website with AI...';
+  document.getElementById('ai-search-panel').classList.add('open');
+  document.getElementById('ai-search-overlay').classList.add('show');
+  getGroqChat(
+    'Analyze this website URL and tell me: 1) What is this website? 2) What is its main purpose? 3) Key features or content. Keep it under 5 sentences. URL: '+contextUrl,
+    'You are a website analyzer. Give a concise summary of what the website is about based on its URL. Keep under 5 sentences.'
+  ).then(text=>{document.getElementById('ai-search-text').textContent=text;});
+}
+function closeAISearch(){
+  document.getElementById('ai-search-panel').classList.remove('open');
+  document.getElementById('ai-search-overlay').classList.remove('show');
+}
 
-    function toggleWPPicker() {
-      const p = document.getElementById('wp-picker');
-      p.style.display = (p.style.display === 'flex') ? 'none' : 'flex';
-    }
+/* ========== WALLPAPER ========== */
+function toggleWPPicker(){
+  const p=document.getElementById('wp-picker'),o=document.getElementById('wp-overlay');
+  const isOpen=p.style.display==='flex';
+  p.style.display=isOpen?'none':'flex';
+  o.classList.toggle('show',!isOpen);
+}
+function setBG(url){
+  document.body.style.backgroundImage="url('"+url+"')";
+  localStorage.setItem('horizon_bg',url);
+  showToast('Wallpaper applied');
+}
+function resetBG(){
+  document.body.style.backgroundImage='none';
+  localStorage.removeItem('horizon_bg');
+  showToast('Wallpaper reset');
+}
 
-    function setBG(url) {
-      document.body.style.backgroundImage = `url('${url}')`;
-      localStorage.setItem('horizon_bg', url);
-    }
+/* ========== WEATHER ========== */
+const weatherCodes={
+  0:{icon:'☀️',desc:'Clear sky'},1:{icon:'🌤️',desc:'Mainly clear'},2:{icon:'⛅',desc:'Partly cloudy'},3:{icon:'☁️',desc:'Overcast'},
+  45:{icon:'🌫️',desc:'Foggy'},48:{icon:'🌫️',desc:'Rime fog'},
+  51:{icon:'🌦️',desc:'Light drizzle'},53:{icon:'🌦️',desc:'Drizzle'},55:{icon:'🌦️',desc:'Dense drizzle'},
+  61:{icon:'🌧️',desc:'Slight rain'},63:{icon:'🌧️',desc:'Moderate rain'},65:{icon:'🌧️',desc:'Heavy rain'},
+  71:{icon:'🌨️',desc:'Slight snow'},73:{icon:'🌨️',desc:'Moderate snow'},75:{icon:'❄️',desc:'Heavy snow'},
+  77:{icon:'🌨️',desc:'Snow grains'},80:{icon:'🌦️',desc:'Rain showers'},81:{icon:'🌧️',desc:'Moderate showers'},
+  82:{icon:'⛈️',desc:'Violent showers'},85:{icon:'🌨️',desc:'Snow showers'},86:{icon:'🌨️',desc:'Heavy snow showers'},
+  95:{icon:'⛈️',desc:'Thunderstorm'},96:{icon:'⛈️',desc:'Thunderstorm + hail'},99:{icon:'⛈️',desc:'Severe thunderstorm'}
+};
+function getWeatherInfo(code){
+  return weatherCodes[code]||{icon:'🌡️',desc:'Unknown'};
+}
+function toggleWeather(){
+  const d=document.getElementById('weather-dropdown');
+  const isOpen=d.style.display==='block';
+  d.style.display=isOpen?'none':'block';
+  if(!isOpen)fetchWeather();
+}
+/* Close weather on outside click */
+document.addEventListener('click',e=>{
+  const wd=document.getElementById('weather-dropdown');
+  const wb=document.getElementById('weather-btn');
+  if(wd.style.display==='block'&&!wd.contains(e.target)&&!wb.contains(e.target)){
+    wd.style.display='none';
+  }
+});
+async function fetchWeather(){
+  const lat=37.3382,lon=-121.8863;
+  try{
+    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,pressure_msl,surface_pressure&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&timezone=auto`);
+    const j=await r.json();
+    const c=j.current||{};
+    const d=j.daily||{};
+    const wi=getWeatherInfo(c.weather_code);
+    const temp=Math.round(c.temperature_2m||0);
+    const cloudPct=c.cloud_cover||0;
+    let cloudDesc='Clear';
+    if(cloudPct>80)cloudDesc='Heavy Clouds';
+    else if(cloudPct>50)cloudDesc='Mostly Cloudy';
+    else if(cloudPct>20)cloudDesc='Partly Cloudy';
+    else if(cloudPct>5)cloudDesc='Few Clouds';
 
-    function resetBG() {
-      document.body.style.backgroundImage = 'none';
-      localStorage.removeItem('horizon_bg');
-    }
+    /* Update status bar */
+    document.getElementById('weather-icon').className='fas '+(c.weather_code===0?(c.is_day?'fa-sun':'fa-moon'):'fa-cloud');
+    document.getElementById('weather-temp').textContent=temp+'°'+(c.is_day?'':'');
 
-    function toggleWeather() {
-      const d = document.getElementById('weather-dropdown');
-      d.style.display = d.style.display === 'block' ? 'none' : 'block';
-      if (d.style.display === 'block') fetchWeather();
-    }
-
-    async function fetchWeather() {
-      const lat = 37.3382, lon = -121.8863;
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,pressure_msl,surface_pressure&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&timezone=auto`;
-      const r = await fetch(url);
-      const j = await r.json();
-      const c = j.current || {};
-      const d = j.daily || {};
-      document.getElementById('weather-dropdown').innerHTML = `
-        <div style="padding:12px;">
-          <div style="font-size:14px;color:#aaa;margin-bottom:8px;">San Jose Weather</div>
-          <div class="weather-grid">
-            <div class="weather-card"><div class="k">Temp</div><div class="v">${c.temperature_2m ?? '--'}°</div></div>
-            <div class="weather-card"><div class="k">Feels Like</div><div class="v">${c.apparent_temperature ?? '--'}°</div></div>
-            <div class="weather-card"><div class="k">Humidity</div><div class="v">${c.relative_humidity_2m ?? '--'}%</div></div>
-            <div class="weather-card"><div class="k">Wind</div><div class="v">${c.wind_speed_10m ?? '--'} km/h</div></div>
-            <div class="weather-card"><div class="k">Gusts</div><div class="v">${c.wind_gusts_10m ?? '--'} km/h</div></div>
-            <div class="weather-card"><div class="k">Pressure</div><div class="v">${c.pressure_msl ?? '--'} hPa</div></div>
-            <div class="weather-card"><div class="k">Rain</div><div class="v">${c.rain ?? '--'} mm</div></div>
-            <div class="weather-card"><div class="k">Clouds</div><div class="v">${c.cloud_cover ?? '--'}%</div></div>
-            <div class="weather-card"><div class="k">Today High</div><div class="v">${d.temperature_2m_max?.[0] ?? '--'}°</div></div>
-            <div class="weather-card"><div class="k">Today Low</div><div class="v">${d.temperature_2m_min?.[0] ?? '--'}°</div></div>
-            <div class="weather-card"><div class="k">Daily Rain</div><div class="v">${d.precipitation_sum?.[0] ?? '--'} mm</div></div>
-            <div class="weather-card"><div class="k">Wind Max</div><div class="v">${d.wind_speed_10m_max?.[0] ?? '--'} km/h</div></div>
-          </div>
+    document.getElementById('weather-dropdown').innerHTML=`
+      <div class="weather-hero">
+        <div class="weather-hero-icon">${wi.icon}</div>
+        <div>
+          <div class="weather-hero-temp">${temp}°C</div>
+          <div class="weather-hero-desc">${wi.desc} &middot; ${cloudDesc}</div>
+          <div class="weather-hero-loc"><i class="fas fa-location-dot"></i> San Jose, CA</div>
         </div>
-      `;
-    }
+      </div>
+      <div class="weather-grid">
+        <div class="weather-card"><div class="v">${c.apparent_temperature??'--'}°</div><div class="k">Feels Like</div></div>
+        <div class="weather-card"><div class="v">${c.relative_humidity_2m??'--'}%</div><div class="k">Humidity</div></div>
+        <div class="weather-card"><div class="v">${c.wind_speed_10m??'--'} km/h</div><div class="k">Wind Speed</div></div>
+        <div class="weather-card"><div class="v">${c.wind_gusts_10m??'--'} km/h</div><div class="k">Wind Gusts</div></div>
+        <div class="weather-card"><div class="v">${c.pressure_msl??'--'} hPa</div><div class="k">Pressure</div></div>
+        <div class="weather-card"><div class="v">${c.rain??'0'} mm</div><div class="k">Rainfall</div></div>
+        <div class="weather-card"><div class="v">${cloudPct}%</div><div class="k">Cloud Cover</div></div>
+        <div class="weather-card"><div class="v">${d.temperature_2m_max?.[0]??'--'}°</div><div class="k">Today High</div></div>
+        <div class="weather-card"><div class="v">${d.temperature_2m_min?.[0]??'--'}°</div><div class="k">Today Low</div></div>
+      </div>`;
+  }catch(e){
+    document.getElementById('weather-dropdown').innerHTML='<div style="padding:30px;text-align:center;color:#888;">Weather data unavailable</div>';
+  }
+}
 
-    function startVoiceSearch() {
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR) {
-        alert('Voice search is not supported in this browser.');
-        return;
+/* ========== WIFI / BLUETOOTH / SPEED TEST ========== */
+function toggleWifi(){
+  const p=document.getElementById('wifi-panel');
+  const isOpen=p.classList.contains('open');
+  p.classList.toggle('open');
+  if(!isOpen)renderWifiContent();
+}
+function switchWifiTab(tab,btn){
+  wifiTabState=tab;
+  document.querySelectorAll('.wifi-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderWifiContent();
+}
+function renderWifiContent(){
+  const body=document.getElementById('wifi-body');
+  if(wifiTabState==='networks'){
+    const networks=[
+      {name:'Horizon-5G',signal:4,freq:'5 GHz',connected:true},
+      {name:'Neighbor_WiFi',signal:3,freq:'2.4 GHz',connected:false},
+      {name:'CoffeeShop_Free',signal:2,freq:'2.4 GHz',connected:false},
+      {name:'Netgear-2.4G',signal:2,freq:'2.4 GHz',connected:false},
+      {name:'TP-Link_5G_EXT',signal:1,freq:'5 GHz',connected:false},
+      {name:'xfinitywifi',signal:1,freq:'2.4 GHz',connected:false},
+    ];
+    body.innerHTML=networks.map(n=>{
+      const bars='<i class="fas fa-wifi" style="opacity:'+(n.signal*0.25)+';"></i>';
+      return`<div class="wifi-network${n.connected?' connected':''}" onclick="connectWifi('${n.name}')">
+        <div class="wn-icon">${n.connected?'<i class="fas fa-wifi" style="color:var(--accent);"></i>':'<i class="fas fa-wifi"></i>'}</div>
+        <div class="wn-info"><div class="wn-name">${n.name}</div><div class="wn-detail">${n.freq}${n.connected?' &middot; Connected':''}</div></div>
+        <div class="wn-signal">${'<i class="fas fa-signal"></i>'.repeat(n.signal)}</div>
+      </div>`;
+    }).join('');
+  }else if(wifiTabState==='bluetooth'){
+    const devices=[
+      {name:'AirPods Pro',type:'headphones',status:'Connected',icon:'fa-headphones'},
+      {name:'Horizon Speaker',type:'speaker',status:'Paired',icon:'fa-volume-high'},
+      {name:'MX Master 3',type:'mouse',status:'Connected',icon:'fa-computer-mouse'},
+      {name:'Galaxy Watch',type:'watch',status:'Available',icon:'fa-clock'},
+      {name:'Pixel Buds',type:'headphones',status:'Available',icon:'fa-headphones'},
+    ];
+    body.innerHTML=devices.map(d=>`
+      <div class="bt-device">
+        <div class="bt-icon"><i class="fas ${d.icon}"></i></div>
+        <div style="flex:1;"><div class="bt-name">${d.name}</div><div class="bt-status">${d.status}</div></div>
+        <button class="nav-btn" style="width:30px;height:30px;font-size:11px;" onclick="showToast('${d.status==='Connected'?'Disconnecting...':'Connecting...'} ${d.name}')">
+          <i class="fas ${d.status==='Connected'?'fa-link-slash':'fa-link'}"></i>
+        </button>
+      </div>`).join('');
+  }else if(wifiTabState==='speedtest'){
+    body.innerHTML=`
+      <div class="speed-test-box">
+        <div class="speed-label">Download Speed</div>
+        <div class="speed-big" id="speed-value">--</div>
+        <div class="speed-label">Mbps</div>
+        <div class="speed-details">
+          <div class="speed-card"><div class="sv" id="speed-upload">--</div><div class="sk">Upload Mbps</div></div>
+          <div class="speed-card"><div class="sv" id="speed-ping">--</div><div class="sk">Ping ms</div></div>
+        </div>
+        <button class="speed-btn" id="speed-test-btn" onclick="runSpeedTest()">Start Test</button>
+      </div>`;
+  }
+}
+function connectWifi(name){
+  showToast('Connecting to '+name+'...');
+  setTimeout(()=>showToast('Connected to '+name),1500);
+}
+async function runSpeedTest(){
+  if(speedTestRunning)return;
+  speedTestRunning=true;
+  const btn=document.getElementById('speed-test-btn');
+  const valEl=document.getElementById('speed-value');
+  const upEl=document.getElementById('speed-upload');
+  const pingEl=document.getElementById('speed-ping');
+  btn.disabled=true;btn.textContent='Testing...';
+  valEl.textContent='0';upEl.textContent='--';pingEl.textContent='...';
+
+  /* Simulated speed test (real speed test requires a dedicated endpoint) */
+  const target=Math.floor(Math.random()*300)+50;
+  for(let i=0;i<=target;i+=Math.floor(Math.random()*20)+5){
+    valEl.textContent=Math.min(i,target);
+    await new Promise(r=>setTimeout(r,80));
+  }
+  valEl.textContent=target;
+  upEl.textContent=Math.floor(target*0.4)+Math.floor(Math.random()*30);
+  pingEl.textContent=Math.floor(Math.random()*30)+5;
+  btn.disabled=false;btn.textContent='Start Test';
+  speedTestRunning=false;
+}
+
+/* ========== BOT ========== */
+function toggleBot(){
+  document.getElementById('bot-panel').classList.toggle('open');
+}
+function addBotMsg(text,isUser){
+  const box=document.getElementById('bot-messages');
+  const div=document.createElement('div');
+  div.className='bot-msg '+(isUser?'user':'bot');
+  div.textContent=text;
+  box.appendChild(div);
+  box.scrollTop=box.scrollHeight;
+}
+function addBotTyping(){
+  const box=document.getElementById('bot-messages');
+  const div=document.createElement('div');
+  div.className='bot-msg bot';div.id='bot-typing';
+  div.innerHTML='<div class="typing-dots"><span></span><span></span><span></span></div>';
+  box.appendChild(div);box.scrollTop=box.scrollHeight;
+}
+function removeBotTyping(){document.getElementById('bot-typing')?.remove();}
+
+async function sendBot(){
+  const input=document.getElementById('bot-input');
+  const msg=input.value.trim();input.value='';
+  if(!msg)return;
+  addBotMsg(msg,true);
+  addBotTyping();
+
+  const lower=msg.toLowerCase();
+
+  /* Check for special commands */
+  if(lower.startsWith('change wallpaper to ')){
+    const query=msg.replace(/^change wallpaper to /i,'').trim();
+    removeBotTyping();
+    addBotMsg('Searching for "'+query+'" wallpaper...',false);
+    try{
+      const r=await fetch('https://api.pexels.com/v1/search?query='+encodeURIComponent(query)+'&per_page=6',{headers:{Authorization:PEXELS_KEY}});
+      const d=await r.json();
+      if(d.photos?.length){
+        const url=d.photos[0].src.large2x;
+        setBG(url);
+        addBotMsg('Wallpaper changed to "'+query+'"! You can also right-click for more options.',false);
+      }else{
+        addBotMsg('No wallpapers found for "'+query+'". Try a different search term.',false);
       }
-      const rec = new SR();
-      rec.lang = 'en-US';
-      rec.interimResults = false;
-      rec.maxAlternatives = 1;
-      rec.onresult = e => {
-        const text = e.results[0][0].transcript;
-        document.getElementById('search-input').value = text;
-        performSearch(text);
-      };
-      rec.start();
-    }
+    }catch(e){addBotMsg('Failed to fetch wallpaper. Check your connection.',false);}
+    return;
+  }
 
-    document.getElementById('wp-search').onkeypress = e => {
-      if (e.key === 'Enter') {
-        fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(e.target.value)}&per_page=20`, {
-          headers: { Authorization: PEXELS_KEY }
-        })
-        .then(r => r.json())
-        .then(d => {
-          document.getElementById('wp-grid').innerHTML = (d.photos || []).map(p =>
-            `<img src="${p.src.medium}" class="wp-item" onclick="setBG('${p.src.large2x}')">`
-          ).join('');
-        })
-        .catch(() => {});
-      }
-    };
+  if(lower==='delete history'||lower==='clear history'){
+    removeBotTyping();
+    clearHistory();
+    addBotMsg('Browsing history has been cleared!',false);
+    return;
+  }
 
-    document.getElementById('addr-bar').onkeypress = e => { if (e.key === 'Enter') handleTopBar(); };
-    document.getElementById('search-input').onkeypress = e => { if (e.key === 'Enter') performSearch(); };
-    document.getElementById('app-store-search').addEventListener('input', loadAppStore);
+  /* Default: AI-powered response */
+  const response=await getGroqChat(msg,'You are the Horizon OS assistant. Keep answers short and helpful, under 4 sentences. If asked about the OS, say Horizon is a browser-based operating system.');
+  removeBotTyping();
+  addBotMsg(response,false);
+}
 
-    window.onload = async () => {
-      const savedBG = localStorage.getItem('horizon_bg');
-      if (savedBG) setBG(savedBG);
-      updateStatus();
-      renderRecent();
-      restoreTabs();
-      const ok = await initHorizenBlocker();
-      if (!ok) document.body.style.display = 'none';
-      loadAppStore();
-    };
-  </script>
+/* ========== VOICE ========== */
+function startVoiceSearch(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('Voice search not supported');return;}
+  const rec=new SR();rec.lang='en-US';rec.interimResults=false;rec.maxAlternatives=1;
+  rec.onresult=e=>{const t=e.results[0][0].transcript;document.getElementById('search-input').value=t;performSearch(t);};
+  rec.onerror=()=>showToast('Voice recognition failed');
+  rec.start();
+  showToast('Listening...');
+}
+
+/* ========== FINGERPRINT & BLOCKER ========== */
+async function generateFingerprint(){
+  let raw='';
+  try{const c=document.createElement('canvas'),x=c.getContext('2d');x.textBaseline='top';x.font='14px Arial';x.fillText('HorizonFP',2,2);raw+=c.toDataURL();}catch(e){}
+  try{const c=document.createElement('canvas'),gl=c.getContext('webgl');if(gl){const di=gl.getExtension('WEBGL_debug_renderer_info');if(di)raw+=gl.getParameter(di.UNMASKED_VENDOR_WEBGL)+gl.getParameter(di.UNMASKED_RENDERER_WEBGL);}}catch(e){}
+  try{const a=new(window.AudioContext||window.webkitAudioContext)();raw+=a.sampleRate;a.close();}catch(e){}
+  raw+=(navigator.hardwareConcurrency||'')+(screen.width+'x'+screen.height)+screen.colorDepth+(navigator.deviceMemory||'')+navigator.platform+new Date().getTimezoneOffset()+navigator.language;
+  raw+=navigator.userAgent;
+  let h1=0x811c9dc5;for(let i=0;i<raw.length;i++){h1^=raw.charCodeAt(i);h1=Math.imul(h1,0x01000193);}
+  return'hz-pc-'+((h1>>>0).toString(16)).toUpperCase().substring(0,12);
+}
+async function checkIfBlocked(id){
+  try{const{data}=await sb.from('users').select('is_blocked').eq('computer_id',id).maybeSingle();if(data?.is_blocked)location.href='https://blocked.horizensearch.com';return data?.is_blocked;}catch(e){}return false;
+}
+async function initHorizenBlocker(){
+  let id=localStorage.getItem('horizen_computer_id');
+  if(!id){id=await generateFingerprint();localStorage.setItem('horizen_computer_id',id);}
+  myAddress=id;document.getElementById('hz-addr-text').innerText=id;
+  await sb.from('users').upsert({computer_id:id},{onConflict:'computer_id'});
+  if(await checkIfBlocked(id))return false;
+  try{
+    blockChannel=sb.channel('user-block-watch').on('postgres_changes',{event:'UPDATE',schema:'public',table:'users',filter:'computer_id=eq.'+id},p=>{if(p.new?.is_blocked)location.href='https://blocked.horizensearch.com';}).subscribe();
+  }catch(e){}
+  blockPollInterval=setInterval(()=>checkIfBlocked(id),2000);
+  return true;
+}
+function copyAddress(){
+  navigator.clipboard.writeText(myAddress).then(()=>{
+    const el=document.getElementById('hz-addr-text');el.innerText='Copied!';
+    setTimeout(()=>{el.innerText=myAddress;},1500);
+  });
+}
+
+/* ========== STATUS BAR ========== */
+function updateStatus(){
+  document.getElementById('time').innerText=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  if(navigator.getBattery){
+    navigator.getBattery().then(b=>{
+      const lvl=Math.round(b.level*100);
+      const icon=lvl>75?'fa-battery-full':lvl>50?'fa-battery-three-quarters':lvl>25?'fa-battery-half':lvl>10?'fa-battery-quarter':'fa-battery-empty';
+      document.getElementById('battery').innerHTML='<i class="fas '+icon+'"></i> '+lvl+'%';
+    });
+  }
+}
+setInterval(updateStatus,1000);
+
+/* ========== WALLPAPER SEARCH ========== */
+document.getElementById('wp-search').addEventListener('keypress',e=>{
+  if(e.key==='Enter'){
+    const q=e.target.value.trim();if(!q)return;
+    document.getElementById('wp-grid').innerHTML='<div style="text-align:center;padding:30px;color:#888;"><span class="spinner"></span> Searching...</div>';
+    fetch('https://api.pexels.com/v1/search?query='+encodeURIComponent(q)+'&per_page=20',{headers:{Authorization:PEXELS_KEY}})
+    .then(r=>r.json()).then(d=>{
+      document.getElementById('wp-grid').innerHTML=(d.photos||[]).map(p=>`<img src="${p.src.medium}" class="wp-item" onclick="setBG('${p.src.large2x}')">`).join('')||'<div style="text-align:center;padding:30px;color:#888;">No results found</div>';
+    }).catch(()=>{document.getElementById('wp-grid').innerHTML='<div style="text-align:center;padding:30px;color:#888;">Search failed</div>';});
+  }
+});
+
+/* ========== EVENT LISTENERS ========== */
+document.getElementById('addr-bar').addEventListener('keypress',e=>{if(e.key==='Enter')handleTopBar();});
+document.getElementById('search-input').addEventListener('keypress',e=>{if(e.key==='Enter')performSearch();});
+document.getElementById('app-store-search').addEventListener('input',loadAppStore);
+
+/* ========== INIT ========== */
+window.onload=async()=>{
+  const savedBG=localStorage.getItem('horizon_bg');
+  if(savedBG)setBG(savedBG);
+  updateStatus();
+  renderRecent();
+  restoreTabs();
+  const ok=await initHorizenBlocker();
+  if(!ok)document.body.style.display='none';
+  loadAppStore();
+  /* Preload weather for status bar */
+  fetchWeather();
+};
+</script>
 </body>
 </html>
