@@ -1,11 +1,235 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Horizon OS</title></head>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horizon OS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#050505;font-family:system-ui,sans-serif;color:#fff}
+#screen{display:none;position:fixed;inset:0;z-index:10}
+#screen.active{display:flex}
+
+/* Update Prompt */
+#prompt-screen{flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(0,235,132,0.04),transparent 60%),#050505;gap:28px;text-align:center;padding:20px}
+.prompt-icon{width:80px;height:80px;border-radius:50%;background:rgba(0,235,132,0.1);border:2px solid rgba(0,235,132,0.3);display:flex;align-items:center;justify-content:center;font-size:32px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.prompt-title{font-size:28px;font-weight:800;letter-spacing:-0.5px}
+.prompt-sub{font-size:14px;color:#888;max-width:380px;line-height:1.6}
+.prompt-btns{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;justify-content:center}
+.prompt-btn{padding:14px 32px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:0.2s;font-family:inherit}
+.prompt-btn:hover{transform:scale(1.04)}
+.prompt-btn.primary{background:#00eb84;color:#000}
+.prompt-btn.primary:hover{filter:brightness(1.15)}
+.prompt-btn.secondary{background:rgba(255,255,255,0.06);color:#aaa;border:1px solid #333}
+.prompt-btn.secondary:hover{background:rgba(255,255,255,0.1);color:#fff}
+.prompt-ver{font-size:11px;color:#444;margin-top:4px;font-family:monospace}
+
+/* Update Loading */
+#update-screen{flex-direction:column;align-items:center;justify-content:center;background:#050505;gap:0}
+.update-logo{font-size:3rem;font-weight:900;color:#00eb84;letter-spacing:-2px;margin-bottom:40px;text-shadow:0 0 30px rgba(0,235,132,0.2)}
+.update-box{width:min(400px,85vw);text-align:center}
+.update-status{font-size:14px;color:#888;margin-bottom:20px;min-height:20px}
+.progress-track{width:100%;height:6px;background:#1a1a1a;border-radius:99px;overflow:hidden}
+.progress-fill{width:0%;height:100%;background:linear-gradient(90deg,#00eb84,#00d68f);border-radius:99px;transition:width 0.3s linear}
+.update-percent{font-size:48px;font-weight:900;color:#fff;margin-top:24px;font-variant-numeric:tabular-nums}
+.update-sub{font-size:12px;color:#555;margin-top:8px}
+.update-dots span{display:inline-block;width:4px;height:4px;background:#333;border-radius:50%;margin:0 3px;animation:dotPulse 1.5s infinite}
+.update-dots span:nth-child(2){animation-delay:.2s}
+.update-dots span:nth-child(3){animation-delay:.4s}
+@keyframes dotPulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.5)}}
+
+/* Error */
+#error-screen{flex-direction:column;align-items:center;justify-content:center;background:#050505;gap:16px;text-align:center;padding:20px}
+.error-icon{font-size:40px;color:#ff4d6a}
+.error-msg{font-size:14px;color:#888;max-width:360px;line-height:1.6}
+.error-btn{padding:12px 28px;background:#00eb84;color:#000;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px;margin-top:8px;font-family:inherit}
+.error-btn:hover{filter:brightness(1.15)}
+</style>
+</head>
 <body>
+
+<div id="screen" class="active" style="display:flex;align-items:center;justify-content:center;position:fixed;inset:0;z-index:10;background:#050505">
+  <div style="width:40px;height:40px;border:3px solid #1a1a1a;border-top-color:#00eb84;border-radius:50%;animation:spin .7s linear infinite"></div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+<div id="prompt-screen" class="screen">
+  <div class="prompt-icon"><i class="fas fa-arrow-up-from-bracket"></i></div>
+  <div class="prompt-title">Update Found</div>
+  <div class="prompt-sub">A new version of Horizon OS is available. Would you like to update now or wait until later?</div>
+  <div class="prompt-btns">
+    <button class="prompt-btn primary" onclick="startUpdate()">Update Now</button>
+    <button class="prompt-btn secondary" onclick="deferUpdate()">Wait Until Later</button>
+  </div>
+  <div class="prompt-ver" id="prompt-ver"></div>
+</div>
+
+<div id="update-screen" class="screen">
+  <div class="update-logo">HORIZON</div>
+  <div class="update-box">
+    <div class="update-status" id="update-status">Preparing update...</div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="update-percent" id="update-percent">0%</div>
+    <div class="update-sub">Do not close this tab<div class="update-dots" style="margin-top:8px"><span></span><span></span><span></span></div></div>
+  </div>
+</div>
+
+<div id="error-screen" class="screen">
+  <div class="error-icon"><i class="fas fa-triangle-exclamation"></i></div>
+  <div class="error-msg" id="error-msg">Failed to load Horizon OS.</div>
+  <button class="error-btn" onclick="location.reload()">Try Again</button>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 <script>
-fetch('https://xlisbmtenekjmundxbcn.supabase.co/rest/v1/search?id=eq.1&select=code',{headers:{apikey:'sb_publishable_Cvs-AiKPTHrC_tfGfwlpSQ_4Hir5Cva'}})
-.then(r=>r.json())
-.then(d=>{document.open();document.write(d[0].code);document.close();});
+(function(){
+  var URL='https://xlisbmtenekjmundxbcn.supabase.co';
+  var KEY='sb_publishable_Cvs-AiKPTHrC_tfGfwlpSQ_4Hir5Cva';
+
+  var newCode='';
+  var newHash='';
+  var oldCode='';
+  var oldHash='';
+
+  /* Simple hash */
+  function hash(str){
+    var h=0x811c9dc5;
+    for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,0x01000193);}
+    return(h>>>0).toString(16);
+  }
+
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');s.style.display='none';});
+    var el=document.getElementById(id);
+    if(el){el.style.display='flex';el.classList.add('active');}
+  }
+
+  function shortHash(h){return h.substring(0,8).toUpperCase();}
+
+  /* Main flow */
+  async function init(){
+    try{
+      /* Fetch latest code */
+      var res=await fetch(URL+'/rest/v1/search?id=eq.1&select=code',{headers:{apikey:KEY}});
+      if(!res.ok)throw new Error('Server returned '+res.status);
+      var data=await res.json();
+      if(!data||!data.length||!data[0].code)throw new Error('No code found in database');
+      newCode=data[0].code;
+      newHash=hash(newCode);
+
+      /* Load cached version */
+      oldCode=localStorage.getItem('hz_cached_code')||'';
+      oldHash=localStorage.getItem('hz_cached_hash')||'';
+
+      /* No cache or same version → run directly */
+      if(!oldCode||oldHash===newHash){
+        saveAndRun(newCode,newHash);
+        return;
+      }
+
+      /* Check if user already deferred this specific update */
+      var deferredHash=localStorage.getItem('hz_deferred_hash')||'';
+      if(deferredHash===newHash){
+        /* They waited last time → auto-update now */
+        saveAndRun(newCode,newHash);
+        return;
+      }
+
+      /* Different version found → show prompt */
+      document.getElementById('prompt-ver').textContent='v'+shortHash(oldHash)+' → v'+shortHash(newHash);
+      showScreen('prompt-screen');
+
+    }catch(e){
+      /* If we have cached code, use it as fallback */
+      oldCode=localStorage.getItem('hz_cached_code')||'';
+      if(oldCode){
+        runCode(oldCode);
+        return;
+      }
+      document.getElementById('error-msg').textContent='Failed to load Horizon OS.\n\n'+e.message;
+      showScreen('error-screen');
+    }
+  }
+
+  /* User clicked "Update Now" */
+  window.startUpdate=function(){
+    showScreen('update-screen');
+    var fill=document.getElementById('progress-fill');
+    var pct=document.getElementById('update-percent');
+    var status=document.getElementById('update-status');
+    var elapsed=0;
+    var total=60;
+    var phases=[
+      {at:0,text:'Preparing update...'},
+      {at:15,text:'Downloading components...'},
+      {at:35,text:'Applying changes...'},
+      {at:55,text:'Finalizing...'},
+      {at:80,text:'Almost done...'},
+      {at:95,text:'Completing update...'}
+    ];
+
+    var interval=setInterval(function(){
+      elapsed+=0.3;
+      var percent=Math.min(Math.round((elapsed/total)*100),100);
+      fill.style.width=percent+'%';
+      pct.textContent=percent+'%';
+
+      for(var i=phases.length-1;i>=0;i--){
+        if(percent>=phases[i].at){status.textContent=phases[i].text;break;}
+      }
+
+      if(elapsed>=total){
+        clearInterval(interval);
+        fill.style.width='100%';
+        pct.textContent='100%';
+        status.textContent='Update complete!';
+        setTimeout(function(){
+          saveAndRun(newCode,newHash);
+        },600);
+      }
+    },300);
+  };
+
+  /* User clicked "Wait Until Later" */
+  window.deferUpdate=function(){
+    /* Save the new hash as deferred so next visit auto-updates */
+    localStorage.setItem('hz_deferred_hash',newHash);
+    /* Run the old cached code */
+    if(oldCode){
+      runCode(oldCode);
+    }else{
+      /* No cache somehow, just run new */
+      saveAndRun(newCode,newHash);
+    }
+  };
+
+  function saveAndRun(code,h){
+    localStorage.setItem('hz_cached_code',code);
+    localStorage.setItem('hz_cached_hash',h);
+    /* Clear any old deferred flag since we're now on this version */
+    localStorage.removeItem('hz_deferred_hash');
+    runCode(code);
+  }
+
+  function runCode(code){
+    /* Hide all screens */
+    document.querySelectorAll('.screen').forEach(function(s){s.remove();});
+    /* Remove the inline spinner style */
+    var inlineStyle=document.querySelector('style');
+    if(inlineStyle&&inlineStyle.textContent.indexOf('@keyframes spin')!==-1&&inlineStyle!==document.querySelector('style[style]')){
+      /* keep it, it's fine */
+    }
+    document.body.style.background='';
+    document.body.style.overflow='';
+    document.open();
+    document.write(code);
+    document.close();
+  }
+
+  init();
+})();
 </script>
 </body>
 </html>
