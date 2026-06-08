@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HorizenFamily</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#0a0a0f;--bg2:#111118;--bg3:#18181f;--bg4:#222230;--border:#2a2a3a;--accent:#00eb84;--accent2:#a3f7d4;--red:#f43f5e;--yellow:#fbbf24;--blue:#38bdf8;--purple:#a78bfa;--text:#e8e8f0;--text2:#9090a8;--text3:#5a5a72;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+h1,h2,h3,h4{font-family:'Syne',sans-serif}
+.hidden{display:none!important}
+
+/* AUTH */
+#auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 30% 20%,rgba(0,235,132,0.08) 0%,var(--bg) 60%)}
+.auth-card{background:var(--bg2);border:1px solid var(--border);border-radius:24px;padding:44px;width:420px;box-shadow:0 40px 80px rgba(0,0,0,.5)}
+.auth-logo{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.auth-logo-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--accent),#00a86b);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.auth-logo h1{font-size:24px;font-weight:800}
+.auth-logo span{color:var(--accent)}
+.auth-sub{font-size:13px;color:var(--text3);margin-bottom:28px}
+.auth-tabs{display:flex;gap:4px;background:var(--bg3);border-radius:10px;padding:4px;margin-bottom:24px}
+.auth-tab{flex:1;padding:9px;border:none;background:transparent;color:var(--text2);border-radius:7px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;transition:.15s}
+.auth-tab.active{background:var(--accent);color:#000}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:11px;color:var(--text2);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase;font-weight:600}
+.fg input{width:100%;padding:12px 15px;background:var(--bg3);border:1px solid var(--border);border-radius:11px;color:var(--text);outline:none;font-size:14px;font-family:'DM Sans',sans-serif;transition:.2s}
+.fg input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,235,132,0.12)}
+.btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),#00c46a);border:none;border-radius:11px;color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:.2s}
+.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.auth-error{background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.3);border-radius:9px;padding:10px 14px;color:var(--red);font-size:13px;margin-bottom:14px;display:none}
+
+/* APP LAYOUT */
+#app{display:none;min-height:100vh;flex-direction:column}
+#app.show{display:flex}
+
+/* TOP NAV */
+.top-nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:16px;height:58px;position:sticky;top:0;z-index:100}
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:16px}
+.nav-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),#00a86b);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.nav-logo span{color:var(--accent)}
+.nav-tabs{display:flex;gap:2px;flex:1;justify-content:center}
+.nav-tab{padding:8px 18px;border:none;background:transparent;color:var(--text2);border-radius:9px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:600;font-size:13px;transition:.15s;display:flex;align-items:center;gap:6px}
+.nav-tab:hover{background:var(--bg3);color:var(--text)}
+.nav-tab.active{background:rgba(0,235,132,0.12);color:var(--accent)}
+.nav-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+.nav-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#00a86b);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:#000;cursor:pointer}
+.nav-role-badge{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.role-parent{background:rgba(0,235,132,0.15);color:var(--accent)}
+.role-child{background:rgba(56,189,248,0.15);color:var(--blue)}
+
+/* PAGES */
+.page{display:none;padding:28px 24px;max-width:1100px;margin:0 auto;width:100%}
+.page.active{display:block}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:20px}
+.card-title{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title .ct-icon{font-size:16px}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+
+/* STAT CARDS */
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:18px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;right:0;width:60px;height:60px;border-radius:0 16px 0 60px;opacity:.08}
+.stat-card.green::before{background:var(--accent)}
+.stat-card.blue::before{background:var(--blue)}
+.stat-card.red::before{background:var(--red)}
+.stat-card.yellow::before{background:var(--yellow)}
+.stat-icon{font-size:22px;margin-bottom:10px}
+.stat-value{font-size:28px;font-weight:800;font-family:'Syne',sans-serif;line-height:1}
+.stat-label{font-size:12px;color:var(--text3);margin-top:4px}
+.stat-trend{font-size:11px;margin-top:6px;font-weight:600}
+.stat-trend.up{color:var(--accent)}
+.stat-trend.down{color:var(--red)}
+
+/* MEMBER CARD */
+.member-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:18px;cursor:pointer;transition:.2s;position:relative}
+.member-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.member-card.selected{border-color:var(--accent);background:rgba(0,235,132,0.04)}
+.member-av{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#00a86b);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:#000;margin-bottom:12px;position:relative}
+.member-av.child-av{background:linear-gradient(135deg,var(--blue),#6366f1)}
+.member-av.child-av{color:#fff}
+.online-dot{position:absolute;bottom:2px;right:2px;width:12px;height:12px;border-radius:50%;border:2px solid var(--bg2)}
+.online-dot.on{background:var(--accent)}
+.online-dot.off{background:var(--text3)}
+.member-name{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:3px}
+.member-role{font-size:11px;color:var(--text3);margin-bottom:8px}
+.member-stats{display:flex;gap:8px;flex-wrap:wrap}
+.member-stat{font-size:11px;background:var(--bg3);border-radius:6px;padding:3px 8px;color:var(--text2)}
+.member-actions{display:flex;gap:6px;margin-top:12px}
+.mbtn{flex:1;padding:7px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;transition:.15s}
+.mbtn:hover{border-color:var(--accent);color:var(--accent)}
+.mbtn.danger:hover{border-color:var(--red);color:var(--red)}
+.mbtn.primary{background:var(--accent);color:#000;border-color:var(--accent)}
+.mbtn.primary:hover{filter:brightness(1.1)}
+
+/* CONTROLS */
+.control-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
+.control-row:last-child{border-bottom:none}
+.control-info{flex:1}
+.control-label{font-size:14px;font-weight:600;margin-bottom:2px}
+.control-sub{font-size:12px;color:var(--text3)}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:var(--bg4);border-radius:24px;transition:.3s;border:1px solid var(--border)}
+.toggle-slider::before{content:'';position:absolute;height:18px;width:18px;left:2px;bottom:2px;background:#fff;border-radius:50%;transition:.3s}
+.toggle input:checked+.toggle-slider{background:var(--accent);border-color:var(--accent)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(20px)}
+.range-wrap{display:flex;align-items:center;gap:10px;margin-top:8px}
+.range-wrap input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--bg4);outline:none}
+.range-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer}
+.range-val{font-size:12px;color:var(--accent);font-weight:700;min-width:55px;text-align:right}
+
+/* BLOCKED URLS */
+.url-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.25);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--red);margin:3px}
+.url-tag button{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;line-height:1;padding:0 2px;opacity:.7}
+.url-tag button:hover{opacity:1}
+.url-add-row{display:flex;gap:8px;margin-top:10px}
+.url-add-row input{flex:1;padding:9px 13px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);outline:none;font-size:13px}
+.url-add-row input:focus{border-color:var(--accent)}
+.url-add-row button{padding:9px 16px;background:var(--accent);border:none;border-radius:10px;color:#000;font-weight:700;cursor:pointer;font-size:13px}
+
+/* LOCATION MAP */
+.location-box{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.location-box .loc-icon{font-size:36px}
+.location-coords{font-size:12px;color:var(--text3);font-family:monospace}
+.location-time{font-size:11px;color:var(--text3)}
+.map-link{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:rgba(0,235,132,0.1);border:1px solid rgba(0,235,132,0.25);border-radius:8px;color:var(--accent);text-decoration:none;font-size:12px;font-weight:700;margin-top:6px;cursor:pointer}
+
+/* ACTIVITY */
+.activity-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.activity-item:last-child{border-bottom:none}
+.act-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.act-icon.search{background:rgba(0,235,132,0.12)}
+.act-icon.app{background:rgba(56,189,248,0.12)}
+.act-icon.time{background:rgba(251,191,36,0.12)}
+.act-info{flex:1;min-width:0}
+.act-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.act-time{font-size:11px;color:var(--text3);flex-shrink:0}
+
+/* SCREEN TIME CHART */
+.time-bar-wrap{display:flex;flex-direction:column;gap:8px}
+.time-bar-row{display:flex;align-items:center;gap:10px}
+.time-bar-day{font-size:11px;color:var(--text3);width:28px;flex-shrink:0;text-align:right}
+.time-bar-track{flex:1;background:var(--bg4);border-radius:4px;height:10px;overflow:hidden}
+.time-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),#00c46a);border-radius:4px;transition:.4s}
+.time-bar-val{font-size:11px;color:var(--text2);width:40px;text-align:right;flex-shrink:0}
+
+/* CONNECT MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal-ov.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;width:420px;box-shadow:0 40px 80px rgba(0,0,0,.5)}
+.modal h2{font-size:18px;margin-bottom:6px;font-family:'Syne',sans-serif;font-weight:800;display:flex;align-items:center;gap:8px}
+.modal-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
+.modal-actions{display:flex;gap:10px;margin-top:20px}
+.btn-sec{flex:1;padding:11px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:.15s}
+.btn-sec:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger{background:rgba(244,63,94,.1);border-color:rgba(244,63,94,.3);color:var(--red)}
+.btn-danger:hover{background:rgba(244,63,94,.2);border-color:var(--red)}
+.search-results{max-height:180px;overflow-y:auto;margin-top:8px}
+.search-res-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:.15s;justify-content:space-between}
+.search-res-item:hover{background:var(--bg3)}
+.sri-left{display:flex;align-items:center;gap:10px}
+.sri-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#6366f1);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff}
+.sri-name{font-size:13px;font-weight:600}
+.sri-user{font-size:11px;color:var(--text3)}
+.btn-sm{padding:5px 12px;border-radius:7px;border:none;font-family:'Syne',sans-serif;font-weight:700;font-size:11px;cursor:pointer;transition:.15s}
+.btn-sm.primary{background:var(--accent);color:#000}
+.btn-sm.sent{background:var(--bg4);color:var(--text3);cursor:default}
+
+/* INVITE BANNER */
+.invite-banner{background:rgba(0,235,132,0.08);border:1px solid rgba(0,235,132,0.25);border-radius:14px;padding:16px 18px;margin-bottom:20px;display:flex;align-items:center;gap:14px}
+.invite-banner-icon{font-size:28px;flex-shrink:0}
+.invite-banner-info{flex:1}
+.invite-banner-title{font-size:14px;font-weight:700;margin-bottom:3px}
+.invite-banner-sub{font-size:12px;color:var(--text3)}
+.invite-banner-actions{display:flex;gap:8px}
+.ibtn{padding:8px 16px;border-radius:9px;border:none;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer}
+.ibtn.acc{background:var(--accent);color:#000}
+.ibtn.dec{background:rgba(244,63,94,.15);border:1px solid rgba(244,63,94,.3);color:var(--red)}
+
+/* EMPTY */
+.empty-box{text-align:center;padding:40px 20px;color:var(--text3)}
+.empty-box .ei{font-size:44px;margin-bottom:12px;display:block}
+.empty-box h3{font-family:'Syne',sans-serif;color:var(--text2);font-size:16px;margin-bottom:6px}
+.empty-box p{font-size:13px;line-height:1.6}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:13px;color:var(--text);opacity:0;transition:opacity .3s;z-index:4000;pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.toast.show{opacity:1}
+
+/* NOTIFICATION DOT */
+.notif-dot{width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block;margin-left:4px;vertical-align:middle}
+
+/* CHILD VIEW NOTICE */
+.child-notice{background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.2);border-radius:12px;padding:12px 16px;font-size:13px;color:var(--blue);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .auth-card{width:95%;padding:28px 20px}
+  .nav-tabs{gap:0}
+  .nav-tab{padding:8px 10px;font-size:12px}
+  .page{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">👨‍👧</div>
+      <h1>Horizen<span>Family</span></h1>
+    </div>
+    <div class="auth-sub">Parental controls & family safety for Horizon OS</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login',this)">Sign In</button>
+      <button class="auth-tab" onclick="switchAuthTab('signup',this)">Create Account</button>
+    </div>
+    <div id="auth-error" class="auth-error"></div>
+    <div id="login-form">
+      <div class="fg"><label>Username or Email</label><input type="text" id="login-id" placeholder="yourname or you@email.com"></div>
+      <div class="fg"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn-primary" onclick="doLogin()">Sign In →</button>
+    </div>
+    <div id="signup-form" style="display:none">
+      <div class="fg"><label>Username</label><input type="text" id="signup-username" placeholder="yourname"></div>
+      <div class="fg"><label>Email</label><input type="email" id="signup-email" placeholder="you@email.com"></div>
+      <div class="fg"><label>Password</label><input type="password" id="signup-pass" placeholder="••••••••"></div>
+      <div class="fg"><label>Display Name</label><input type="text" id="signup-display" placeholder="Your Name"></div>
+      <button class="btn-primary" onclick="doSignup()">Create Account →</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <nav class="top-nav">
+    <div class="nav-logo"><div class="nav-logo-icon">👨‍👧</div><h1>Horizen<span>Family</span></h1></div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tab-btn-overview" onclick="showPage('overview')">📊 Overview</button>
+      <button class="nav-tab" id="tab-btn-members" onclick="showPage('members')">👥 Family <span id="members-dot" class="notif-dot" style="display:none"></span></button>
+      <button class="nav-tab" id="tab-btn-controls" onclick="showPage('controls')" id="controls-tab">🛡️ Controls</button>
+      <button class="nav-tab" id="tab-btn-activity" onclick="showPage('activity')">📋 Activity</button>
+      <button class="nav-tab" id="tab-btn-location" onclick="showPage('location')">📍 Location</button>
+    </div>
+    <div class="nav-right">
+      <span class="nav-role-badge" id="nav-role-badge">...</span>
+      <div class="nav-avatar" id="nav-avatar" onclick="showLogoutMenu()">?</div>
+    </div>
+  </nav>
+
+  <!-- OVERVIEW PAGE -->
+  <div class="page active" id="page-overview">
+    <div id="pending-invites-area"></div>
+
+    <!-- Parent overview -->
+    <div id="parent-overview">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <h2 style="font-size:22px;font-weight:800">Family Overview</h2>
+          <div style="font-size:13px;color:var(--text3);margin-top:4px" id="family-name-label">Loading family...</div>
+        </div>
+        <button class="mbtn primary" onclick="openConnectModal()" style="flex:none;padding:10px 20px;font-size:13px">＋ Connect Child</button>
+      </div>
+      <div class="grid-4" style="margin-bottom:24px">
+        <div class="stat-card green"><div class="stat-icon">👥</div><div class="stat-value" id="stat-members">0</div><div class="stat-label">Family Members</div></div>
+        <div class="stat-card blue"><div class="stat-icon">⏱️</div><div class="stat-value" id="stat-screentime">0m</div><div class="stat-label">Avg Screen Time Today</div></div>
+        <div class="stat-card yellow"><div class="stat-icon">🔍</div><div class="stat-value" id="stat-searches">0</div><div class="stat-label">Searches Today</div></div>
+        <div class="stat-card red"><div class="stat-icon">🚫</div><div class="stat-value" id="stat-blocked">0</div><div class="stat-label">Blocked Sites</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">👶</span> Children</div>
+          <div id="overview-children-list"><div style="color:var(--text3);font-size:13px;text-align:center;padding:20px">No children connected yet.<br>Click "Connect Child" to add one.</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">📊</span> Screen Time This Week</div>
+          <div class="time-bar-wrap" id="overview-time-chart"><div style="color:var(--text3);font-size:13px;text-align:center;padding:20px">No data yet</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Child overview -->
+    <div id="child-overview" style="display:none">
+      <div class="child-notice">👶 You are viewing HorizenFamily as a child. You can see your family and settings but cannot change them.</div>
+      <div style="margin-bottom:20px">
+        <h2 style="font-size:22px;font-weight:800">My Family</h2>
+        <div style="font-size:13px;color:var(--text3);margin-top:4px" id="child-family-name">Loading...</div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">👨‍👩‍👧</span> Family Members</div>
+          <div id="child-members-list"><div style="color:var(--text3);font-size:13px;padding:10px">Loading...</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">🛡️</span> My Restrictions</div>
+          <div id="child-restrictions-view"><div style="color:var(--text3);font-size:13px;padding:10px">Loading...</div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title"><span class="ct-icon">⏱️</span> My Screen Time Today</div>
+        <div id="child-screentime-view" style="color:var(--text3);font-size:13px;padding:10px">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEMBERS PAGE -->
+  <div class="page" id="page-members">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <h2 style="font-size:22px;font-weight:800">Family Members</h2>
+      <button class="mbtn primary" onclick="openConnectModal()" id="connect-btn-members" style="flex:none;padding:10px 20px;font-size:13px">＋ Connect Child</button>
+    </div>
+    <div id="pending-invites-members"></div>
+    <div id="members-grid" class="grid-3"><div style="color:var(--text3);font-size:13px;padding:20px;text-align:center">Loading...</div></div>
+  </div>
+
+  <!-- CONTROLS PAGE -->
+  <div class="page" id="page-controls">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+      <div>
+        <h2 style="font-size:22px;font-weight:800">Parental Controls</h2>
+        <div style="font-size:13px;color:var(--text3);margin-top:4px">Managing: <span id="controls-child-name" style="color:var(--accent);font-weight:700">Select a child</span></div>
+      </div>
+      <div id="child-selector-wrap" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    </div>
+    <div id="controls-child-notice" style="display:none">
+      <div class="child-notice">👶 These are your current restrictions set by your parent. You cannot change them.</div>
+    </div>
+    <div id="controls-content" style="display:none">
+      <div class="grid-2" style="margin-bottom:16px">
+        <!-- SAFETY -->
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">🛡️</span> Safety</div>
+          <div class="control-row">
+            <div class="control-info"><div class="control-label">Safe Search</div><div class="control-sub">Filter adult content from searches</div></div>
+            <label class="toggle"><input type="checkbox" id="ctrl-safe-search" onchange="saveControls()"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="control-row">
+            <div class="control-info"><div class="control-label">🔒 Lock Browser</div><div class="control-sub">Prevent all browsing until unlocked</div></div>
+            <label class="toggle"><input type="checkbox" id="ctrl-locked" onchange="saveControls()"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="control-row">
+            <div class="control-info"><div class="control-label">📍 Location Tracking</div><div class="control-sub">See child's real-time location</div></div>
+            <label class="toggle"><input type="checkbox" id="ctrl-location" onchange="saveControls()"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <!-- SCREEN TIME -->
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">⏱️</span> Screen Time Limit</div>
+          <div class="control-row">
+            <div class="control-info">
+              <div class="control-label">Daily Limit</div>
+              <div class="control-sub">Set maximum minutes per day (0 = no limit)</div>
+              <div class="range-wrap">
+                <input type="range" id="ctrl-screentime" min="0" max="480" step="15" value="0" oninput="updateScreenTimeLabel(this.value)" onchange="saveControls()">
+                <span class="range-val" id="screentime-label">No limit</span>
+              </div>
+            </div>
+          </div>
+          <div class="control-row">
+            <div class="control-info"><div class="control-label">Unlock Code</div><div class="control-sub">Code child can use to unlock browser</div></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <input type="text" id="ctrl-unlock-code" placeholder="Set unlock code..." style="flex:1;padding:9px 13px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);outline:none;font-size:13px">
+            <button onclick="saveControls()" style="padding:9px 16px;background:var(--accent);border:none;border-radius:10px;color:#000;font-weight:700;cursor:pointer;font-size:13px">Save</button>
+          </div>
+        </div>
+      </div>
+      <!-- BLOCKED SITES -->
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">🚫</span> Blocked Sites</div>
+        <div id="blocked-urls-list"></div>
+        <div class="url-add-row" id="blocked-add-row">
+          <input type="text" id="new-blocked-url" placeholder="e.g. youtube.com or social media" onkeypress="if(event.key==='Enter')addBlockedUrl()">
+          <button onclick="addBlockedUrl()">Block</button>
+        </div>
+      </div>
+    </div>
+    <div id="controls-placeholder" style="text-align:center;padding:60px 20px;color:var(--text3)">
+      <div style="font-size:44px;margin-bottom:12px">🛡️</div>
+      <h3 style="font-family:'Syne',sans-serif;color:var(--text2);font-size:16px;margin-bottom:6px">Select a Child</h3>
+      <p style="font-size:13px">Choose a child from the buttons above to manage their controls</p>
+    </div>
+  </div>
+
+  <!-- ACTIVITY PAGE -->
+  <div class="page" id="page-activity">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+      <h2 style="font-size:22px;font-weight:800">Activity</h2>
+      <div id="activity-child-selector" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">🔍</span> Recent Searches</div>
+        <div id="activity-searches"><div style="color:var(--text3);font-size:13px;padding:10px;text-align:center">Select a child above</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">📱</span> Apps Opened</div>
+        <div id="activity-apps"><div style="color:var(--text3);font-size:13px;padding:10px;text-align:center">Select a child above</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-title"><span class="ct-icon">📊</span> Screen Time — Last 7 Days</div>
+      <div class="time-bar-wrap" id="activity-time-chart"><div style="color:var(--text3);font-size:13px;padding:10px;text-align:center">Select a child above</div></div>
+    </div>
+  </div>
+
+  <!-- LOCATION PAGE -->
+  <div class="page" id="page-location">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+      <h2 style="font-size:22px;font-weight:800">Location</h2>
+      <div id="location-child-selector" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">📍</span> Last Known Location</div>
+        <div class="location-box" id="location-box">
+          <div class="loc-icon">📍</div>
+          <div style="font-size:13px;color:var(--text2)">Select a child to view location</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">🗺️</span> Location History</div>
+        <div id="location-history"><div style="color:var(--text3);font-size:13px;padding:10px;text-align:center">Select a child above</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONNECT CHILD MODAL -->
+<div class="modal-ov" id="connect-modal">
+  <div class="modal">
+    <h2>👶 Connect a Child</h2>
+    <div class="modal-sub">Search for your child's Horizen account by username and send them a connection request.</div>
+    <div class="fg">
+      <label>Search by Username</label>
+      <input type="text" id="connect-search-input" placeholder="Type username..." oninput="searchChildAccounts()">
+    </div>
+    <div class="search-results" id="connect-search-results"></div>
+    <div class="modal-actions">
+      <button class="btn-sec" onclick="closeConnectModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL='https://xlisbmtenekjmundxbcn.supabase.co';
+const SUPABASE_KEY='sb_publishable_Cvs-AiKPTHrC_tfGfwlpSQ_4Hir5Cva';
+const {createClient}=supabase;
+const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let me=null, myRole=null, myFamily=null, myFamilyId=null, children=[], selectedChildId=null, selectedChildRestrictions=null, restrictionsSub=null;
+
+/* ===== UTILS ===== */
+function escH(t){const d=document.createElement('div');d.textContent=String(t??'');return d.innerHTML}
+function showToast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2800)}
+function timeAgo(ts){if(!ts)return'Never';const s=Math.floor((Date.now()-new Date(ts).getTime())/1000);if(s<60)return'Just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+function fmtMins(m){if(!m||m===0)return'0m';if(m<60)return m+'m';return Math.floor(m/60)+'h '+(m%60)+'m';}
+
+/* ===== AUTH ===== */
+function switchAuthTab(tab,btn){document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');document.getElementById('login-form').style.display=tab==='login'?'block':'none';document.getElementById('signup-form').style.display=tab==='signup'?'block':'none';document.getElementById('auth-error').style.display='none';}
+function showAuthErr(m){const e=document.getElementById('auth-error');e.textContent=m;e.style.display='block'}
+async function sha256(message){const msgBuffer=new TextEncoder().encode(message);const hashBuffer=await crypto.subtle.digest('SHA-256',msgBuffer);return Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,'0')).join('');}
+
+async function doLogin(){
+  const id=document.getElementById('login-id').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  if(!id||!pass)return showAuthErr('Fill in all fields');
+  const hash=await sha256(pass);
+  const isEmail=id.includes('@');
+  let query=sb.from('horizen_accounts').select('*').eq('password_hash',hash);
+  if(isEmail)query=query.eq('email',id);else query=query.eq('username',id);
+  const{data,error}=await query.maybeSingle();
+  if(error||!data)return showAuthErr('Invalid username/email or password');
+  me=data;
+  localStorage.setItem('hf_account',JSON.stringify(data));
+  onAuth();
+}
+
+async function doSignup(){
+  const username=document.getElementById('signup-username').value.trim();
+  const email=document.getElementById('signup-email').value.trim();
+  const pass=document.getElementById('signup-pass').value;
+  const display=document.getElementById('signup-display').value.trim()||username;
+  if(!username||!email||!pass)return showAuthErr('Fill in all fields');
+  if(pass.length<6)return showAuthErr('Password must be at least 6 characters');
+  const hash=await sha256(pass);
+  const{data,error}=await sb.from('horizen_accounts').insert({username,email,password_hash:hash,display_name:display}).select().single();
+  if(error)return showAuthErr(error.message.includes('duplicate')?'Username or email already taken':error.message);
+  me=data;
+  localStorage.setItem('hf_account',JSON.stringify(data));
+  onAuth();
+}
+
+async function onAuth(){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').classList.add('show');
+  document.getElementById('nav-avatar').textContent=(me.display_name||me.username||'?')[0].toUpperCase();
+  // Determine role
+  await determineRole();
+  // Start location tracking if child
+  if(myRole==='child')startLocationTracking();
+}
+
+async function determineRole(){
+  // Check if member of any family
+  const{data:member}=await sb.from('family_members').select('*,family:horizen_family(*)').eq('account_id',me.id).maybeSingle();
+  if(member){
+    myRole=member.role;
+    myFamily=member.family;
+    myFamilyId=member.family_id;
+    document.getElementById('nav-role-badge').textContent=myRole==='parent'?'Parent':'Child';
+    document.getElementById('nav-role-badge').className='nav-role-badge '+(myRole==='parent'?'role-parent':'role-child');
+    // Hide connect button for children
+    if(myRole==='child'){
+      document.getElementById('connect-btn-members')?.remove();
+      document.getElementById('tab-btn-controls').textContent='🛡️ My Restrictions';
+    }
+    await loadFamilyData();
+  }else{
+    // No family — check pending invites
+    myRole='parent'; // Default to parent until connected as child
+    document.getElementById('nav-role-badge').textContent='Parent';
+    document.getElementById('nav-role-badge').className='nav-role-badge role-parent';
+    await checkPendingInvites();
+    showPage('overview');
+  }
+}
+
+async function loadFamilyData(){
+  if(!myFamilyId)return;
+  document.getElementById('family-name-label').textContent=myFamily?.family_name||'My Family';
+  document.getElementById('child-family-name').textContent=myFamily?.family_name||'My Family';
+  // Get all members
+  const{data:members}=await sb.from('family_members').select('*,account:horizen_accounts(*)').eq('family_id',myFamilyId);
+  const allMembers=members||[];
+  children=allMembers.filter(m=>m.role==='child').map(m=>m.account);
+  if(myRole==='parent'){
+    document.getElementById('parent-overview').style.display='block';
+    document.getElementById('child-overview').style.display='none';
+    renderOverviewStats();
+    renderOverviewChildren();
+    renderMembersGrid(allMembers);
+    buildChildSelectors();
+    await loadOverviewTimeChart();
+    // Create family if not exists
+    if(!myFamily){await ensureFamily();}
+  }else{
+    document.getElementById('parent-overview').style.display='none';
+    document.getElementById('child-overview').style.display='block';
+    renderChildMembersView(allMembers);
+    renderChildRestrictionsView();
+    await checkPendingInvites();
+  }
+  subscribeToRestrictions();
+}
+
+async function ensureFamily(){
+  // Parent has no family yet — create one
+  const{data:existing}=await sb.from('family_members').select('family_id').eq('account_id',me.id).maybeSingle();
+  if(existing){myFamilyId=existing.family_id;return;}
+  const{data:fam}=await sb.from('horizen_family').insert({family_name:(me.display_name||me.username)+"'s Family",parent_account_id:me.id}).select().single();
+  if(fam){
+    myFamily=fam;myFamilyId=fam.id;
+    await sb.from('family_members').insert({family_id:fam.id,account_id:me.id,role:'parent'});
+    document.getElementById('family-name-label').textContent=fam.family_name;
+  }
+}
+
+/* ===== OVERVIEW ===== */
+async function renderOverviewStats(){
+  document.getElementById('stat-members').textContent=children.length;
+  let totalSearches=0,totalBlockedCount=0,totalTime=0;
+  const today=new Date().toISOString().split('T')[0];
+  for(const child of children){
+    const{count:sc}=await sb.from('account_search_history').select('*',{count:'exact',head:true}).eq('account_id',child.id).gte('searched_at',today+'T00:00:00');
+    totalSearches+=(sc||0);
+    const{data:restr}=await sb.from('family_restrictions').select('blocked_urls').eq('child_account_id',child.id).maybeSingle();
+    totalBlockedCount+=(restr?.blocked_urls?.length||0);
+    const{data:st}=await sb.from('screen_time_logs').select('minutes_used').eq('account_id',child.id).eq('date',today).maybeSingle();
+    totalTime+=(st?.minutes_used||0);
+  }
+  document.getElementById('stat-searches').textContent=totalSearches;
+  document.getElementById('stat-blocked').textContent=totalBlockedCount;
+  document.getElementById('stat-screentime').textContent=children.length?fmtMins(Math.round(totalTime/children.length)):'0m';
+}
+
+function renderOverviewChildren(){
+  const el=document.getElementById('overview-children-list');
+  if(!children.length){el.innerHTML='<div style="color:var(--text3);font-size:13px;text-align:center;padding:16px">No children connected yet</div>';return;}
+  el.innerHTML=children.map(c=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div class="sri-av" style="background:linear-gradient(135deg,var(--blue),#6366f1);width:36px;height:36px;font-size:14px">${(c.display_name||c.username||'?')[0].toUpperCase()}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700">${escH(c.display_name||c.username)}</div>
+        <div style="font-size:11px;color:var(--text3)">@${escH(c.username)}</div>
+      </div>
+      <button class="btn-sm primary" onclick="showPage('controls');selectChild('${c.id}')">Manage</button>
+    </div>`).join('');
+}
+
+async function loadOverviewTimeChart(){
+  const el=document.getElementById('overview-time-chart');
+  if(!children.length){el.innerHTML='<div style="color:var(--text3);font-size:13px;text-align:center;padding:10px">No children yet</div>';return;}
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today=new Date();
+  let rows='';
+  let maxMins=60;
+  const weekData=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    const dateStr=d.toISOString().split('T')[0];
+    let total=0;
+    for(const child of children){
+      const{data:st}=await sb.from('screen_time_logs').select('minutes_used').eq('account_id',child.id).eq('date',dateStr).maybeSingle();
+      total+=st?.minutes_used||0;
+    }
+    const avg=children.length?Math.round(total/children.length):0;
+    if(avg>maxMins)maxMins=avg;
+    weekData.push({day:days[d.getDay()],mins:avg});
+  }
+  rows=weekData.map(w=>`<div class="time-bar-row"><div class="time-bar-day">${w.day}</div><div class="time-bar-track"><div class="time-bar-fill" style="width:${Math.min(100,Math.round((w.mins/maxMins)*100))}%"></div></div><div class="time-bar-val">${fmtMins(w.mins)}</div></div>`).join('');
+  el.innerHTML=rows||'<div style="color:var(--text3);font-size:13px;text-align:center;padding:10px">No data</div>';
+}
+
+/* ===== MEMBERS ===== */
+function renderMembersGrid(allMembers){
+  const el=document.getElementById('members-grid');
+  if(!allMembers.length){el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:20px;text-align:center">No members yet</div>';return;}
+  el.innerHTML=allMembers.map(m=>{
+    const acc=m.account;
+    const isParent=m.role==='parent';
+    return`<div class="member-card">
+      <div class="member-av ${isParent?'':'child-av'}">${(acc.display_name||acc.username||'?')[0].toUpperCase()}<div class="online-dot ${acc.status==='online'?'on':'off'}"></div></div>
+      <div class="member-name">${escH(acc.display_name||acc.username)}</div>
+      <div class="member-role">@${escH(acc.username)} · ${isParent?'Parent 👑':'Child 👶'}</div>
+      ${!isParent&&myRole==='parent'?`<div class="member-actions">
+        <button class="mbtn" onclick="showPage('controls');selectChild('${acc.id}')">🛡️ Controls</button>
+        <button class="mbtn" onclick="showPage('activity');selectActivityChild('${acc.id}')">📋 Activity</button>
+        <button class="mbtn danger" onclick="removeChild('${acc.id}','${escH(acc.display_name||acc.username)}')">Remove</button>
+      </div>`:''}
+    </div>`;
+  }).join('');
+}
+
+async function removeChild(childId,name){
+  if(!confirm(`Remove ${name} from the family?`))return;
+  await sb.from('family_members').delete().eq('account_id',childId).eq('family_id',myFamilyId);
+  await sb.from('family_restrictions').delete().eq('child_account_id',childId).eq('family_id',myFamilyId);
+  showToast(name+' removed from family');
+  await loadFamilyData();
+}
+
+/* ===== CHILD VIEW ===== */
+function renderChildMembersView(allMembers){
+  const el=document.getElementById('child-members-list');
+  el.innerHTML=allMembers.map(m=>{
+    const acc=m.account;
+    const isMe=acc.id===me.id;
+    return`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+      <div class="sri-av" style="${m.role==='parent'?'background:linear-gradient(135deg,var(--accent),#00a86b);color:#000':'background:linear-gradient(135deg,var(--blue),#6366f1)'}">${(acc.display_name||acc.username||'?')[0].toUpperCase()}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700">${escH(acc.display_name||acc.username)}${isMe?' (You)':''}</div>
+        <div style="font-size:11px;color:var(--text3)">${m.role==='parent'?'👑 Parent':'👶 Child'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function renderChildRestrictionsView(){
+  const el=document.getElementById('child-restrictions-view');
+  const{data:r}=await sb.from('family_restrictions').select('*').eq('child_account_id',me.id).maybeSingle();
+  if(!r){el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:10px">No restrictions set</div>';return;}
+  el.innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--text2)">Safe Search</span><span style="font-weight:700;color:${r.safe_search?'var(--accent)':'var(--text3)'}">${r.safe_search?'ON':'OFF'}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--text2)">Browser Locked</span><span style="font-weight:700;color:${r.locked?'var(--red)':'var(--accent)'}">${r.locked?'YES':'NO'}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--text2)">Screen Time Limit</span><span style="font-weight:700;color:var(--accent)">${r.screen_time_limit_minutes?fmtMins(r.screen_time_limit_minutes):'No limit'}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--text2)">Location Tracking</span><span style="font-weight:700;color:${r.location_tracking?'var(--accent)':'var(--text3)'}">${r.location_tracking?'ON':'OFF'}</span></div>
+      <div style="padding:8px 0"><span style="font-size:13px;color:var(--text2)">Blocked Sites: </span><span style="font-weight:700;color:var(--red)">${(r.blocked_urls||[]).length} sites</span></div>
+    </div>`;
+  // Also show in controls page for child
+  document.getElementById('controls-child-notice').style.display='block';
+  document.getElementById('controls-content').style.display='block';
+  document.getElementById('controls-placeholder').style.display='none';
+  document.getElementById('controls-child-name').textContent='Your restrictions (read-only)';
+  loadControlsForChild(r);
+}
+
+function loadControlsForChild(r){
+  document.getElementById('ctrl-safe-search').checked=r.safe_search||false;
+  document.getElementById('ctrl-locked').checked=r.locked||false;
+  document.getElementById('ctrl-location').checked=r.location_tracking||false;
+  document.getElementById('ctrl-screentime').value=r.screen_time_limit_minutes||0;
+  updateScreenTimeLabel(r.screen_time_limit_minutes||0);
+  document.getElementById('ctrl-unlock-code').value='';
+  // Disable all controls for child
+  ['ctrl-safe-search','ctrl-locked','ctrl-location','ctrl-screentime','ctrl-unlock-code'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=true;});
+  document.getElementById('blocked-add-row').style.display='none';
+  renderBlockedUrls(r.blocked_urls||[],true);
+}
+
+/* ===== CHILD SELECTORS (for controls/activity/location) ===== */
+function buildChildSelectors(){
+  ['child-selector-wrap','activity-child-selector','location-child-selector'].forEach(wrapId=>{
+    const wrap=document.getElementById(wrapId);
+    if(!wrap)return;
+    wrap.innerHTML=children.map(c=>`<button class="mbtn" id="${wrapId}-${c.id}" onclick="onChildSelectorClick('${c.id}','${wrapId}')">${(c.display_name||c.username||'?')[0].toUpperCase()} ${escH(c.display_name||c.username)}</button>`).join('')||'<span style="color:var(--text3);font-size:13px">No children connected</span>';
+  });
+}
+
+function onChildSelectorClick(childId,wrapId){
+  document.querySelectorAll(`#${wrapId} .mbtn`).forEach(b=>b.classList.remove('primary'));
+  document.getElementById(`${wrapId}-${childId}`)?.classList.add('primary');
+  if(wrapId==='child-selector-wrap')selectChild(childId);
+  else if(wrapId==='activity-child-selector')selectActivityChild(childId);
+  else if(wrapId==='location-child-selector')selectLocationChild(childId);
+}
+
+/* ===== CONTROLS ===== */
+async function selectChild(childId){
+  selectedChildId=childId;
+  const child=children.find(c=>c.id===childId);
+  if(!child)return;
+  document.getElementById('controls-child-name').textContent=child.display_name||child.username;
+  document.getElementById('controls-content').style.display='block';
+  document.getElementById('controls-placeholder').style.display='none';
+  document.getElementById('controls-child-notice').style.display='none';
+  // Enable all controls
+  ['ctrl-safe-search','ctrl-locked','ctrl-location','ctrl-screentime','ctrl-unlock-code'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});
+  document.getElementById('blocked-add-row').style.display='flex';
+  // Load restrictions
+  const{data:r}=await sb.from('family_restrictions').select('*').eq('child_account_id',childId).maybeSingle();
+  selectedChildRestrictions=r;
+  document.getElementById('ctrl-safe-search').checked=r?.safe_search||false;
+  document.getElementById('ctrl-locked').checked=r?.locked||false;
+  document.getElementById('ctrl-location').checked=r?.location_tracking||false;
+  document.getElementById('ctrl-screentime').value=r?.screen_time_limit_minutes||0;
+  updateScreenTimeLabel(r?.screen_time_limit_minutes||0);
+  document.getElementById('ctrl-unlock-code').value=r?.unlock_code||'';
+  renderBlockedUrls(r?.blocked_urls||[],false);
+  // Highlight selector
+  document.querySelectorAll('#child-selector-wrap .mbtn').forEach(b=>b.classList.remove('primary'));
+  document.getElementById(`child-selector-wrap-${childId}`)?.classList.add('primary');
+}
+
+function updateScreenTimeLabel(val){
+  const v=parseInt(val);
+  document.getElementById('screentime-label').textContent=v===0?'No limit':fmtMins(v);
+}
+
+async function saveControls(){
+  if(!selectedChildId||myRole!=='parent')return;
+  const safeSearch=document.getElementById('ctrl-safe-search').checked;
+  const locked=document.getElementById('ctrl-locked').checked;
+  const locationTracking=document.getElementById('ctrl-location').checked;
+  const screenTimeLimit=parseInt(document.getElementById('ctrl-screentime').value)||0;
+  const unlockCode=document.getElementById('ctrl-unlock-code').value.trim();
+  const blockedUrls=getBlockedUrlsList();
+  const payload={family_id:myFamilyId,child_account_id:selectedChildId,safe_search:safeSearch,locked,location_tracking:locationTracking,screen_time_limit_minutes:screenTimeLimit,blocked_urls:blockedUrls,updated_at:new Date().toISOString()};
+  if(unlockCode)payload.unlock_code=unlockCode;
+  const{error}=await sb.from('family_restrictions').upsert(payload,{onConflict:'family_id,child_account_id'});
+  if(error){showToast('Failed to save: '+error.message);return;}
+  selectedChildRestrictions={...selectedChildRestrictions,...payload};
+  showToast('✅ Controls saved!');
+  renderOverviewStats();
+}
+
+/* ===== BLOCKED URLS ===== */
+let blockedUrls=[];
+function renderBlockedUrls(urls,readOnly){
+  blockedUrls=[...urls];
+  const el=document.getElementById('blocked-urls-list');
+  if(!urls.length){el.innerHTML='<div style="color:var(--text3);font-size:12px;padding:6px 0">No sites blocked yet</div>';return;}
+  el.innerHTML='<div style="padding:4px 0;flex-wrap:wrap;display:flex">'+urls.map((u,i)=>`<span class="url-tag">${escH(u)}${!readOnly?`<button onclick="removeBlockedUrl(${i})">×</button>`:''}</span>`).join('')+'</div>';
+}
+function getBlockedUrlsList(){return blockedUrls;}
+function addBlockedUrl(){
+  const inp=document.getElementById('new-blocked-url');
+  const url=inp.value.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/\/.*$/,'');
+  if(!url)return;
+  if(blockedUrls.includes(url)){showToast('Already blocked');return;}
+  blockedUrls.push(url);
+  inp.value='';
+  renderBlockedUrls(blockedUrls,false);
+  saveControls();
+}
+function removeBlockedUrl(index){blockedUrls.splice(index,1);renderBlockedUrls(blockedUrls,false);saveControls();}
+
+/* ===== ACTIVITY ===== */
+async function selectActivityChild(childId){
+  const child=children.find(c=>c.id===childId);
+  if(!child)return;
+  document.querySelectorAll('#activity-child-selector .mbtn').forEach(b=>b.classList.remove('primary'));
+  document.getElementById(`activity-child-selector-${childId}`)?.classList.add('primary');
+  // Searches
+  const today=new Date().toISOString().split('T')[0];
+  const{data:searches}=await sb.from('account_search_history').select('*').eq('account_id',childId).order('searched_at',{ascending:false}).limit(20);
+  const searchEl=document.getElementById('activity-searches');
+  searchEl.innerHTML=(searches&&searches.length)?searches.map(s=>`<div class="activity-item"><div class="act-icon search">🔍</div><div class="act-info"><div class="act-title">${escH(s.query)}</div><div class="act-sub">Search</div></div><div class="act-time">${timeAgo(s.searched_at)}</div></div>`).join(''):'<div style="color:var(--text3);font-size:13px;padding:10px;text-align:center">No searches yet</div>';
+  // Apps
+  const{data:apps}=await sb.from('account_app_history').select('*').eq('account_id',childId).order('opened_at',{ascending:false}).limit(20);
+  const appsEl=document.getElementById('activity-apps');
+  appsEl.innerHTML=(apps&&apps.length)?apps.map(a=>`<div class="activity-item"><div class="act-icon app">📱</div><div class="act-info"><div class="act-title">${escH(a.app_name)}</div><div class="act-sub">${escH(a.app_url||'')}</div></div><div class="act-time">${timeAgo(a.opened_at)}</div></div>`).join(''):'<div style="color:var(--text3);font-size:13px;padding:10px;text-align:center">No apps opened yet</div>';
+  // Screen time chart
+  await loadActivityTimeChart(childId);
+}
+
+async function loadActivityTimeChart(childId){
+  const el=document.getElementById('activity-time-chart');
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today=new Date();
+  let maxMins=60;
+  const weekData=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    const dateStr=d.toISOString().split('T')[0];
+    const{data:st}=await sb.from('screen_time_logs').select('minutes_used').eq('account_id',childId).eq('date',dateStr).maybeSingle();
+    const mins=st?.minutes_used||0;
+    if(mins>maxMins)maxMins=mins;
+    weekData.push({day:days[d.getDay()],mins});
+  }
+  el.innerHTML=weekData.map(w=>`<div class="time-bar-row"><div class="time-bar-day">${w.day}</div><div class="time-bar-track"><div class="time-bar-fill" style="width:${Math.min(100,Math.round((w.mins/maxMins)*100))}%"></div></div><div class="time-bar-val">${fmtMins(w.mins)}</div></div>`).join('');
+}
+
+/* ===== LOCATION ===== */
+async function selectLocationChild(childId){
+  const child=children.find(c=>c.id===childId);
+  if(!child)return;
+  document.querySelectorAll('#location-child-selector .mbtn').forEach(b=>b.classList.remove('primary'));
+  document.getElementById(`location-child-selector-${childId}`)?.classList.add('primary');
+  const{data:loc}=await sb.from('child_locations').select('*').eq('account_id',childId).order('recorded_at',{ascending:false}).limit(10);
+  const latest=loc?.[0];
+  const locBox=document.getElementById('location-box');
+  if(latest){
+    locBox.innerHTML=`<div class="loc-icon">📍</div><div style="font-size:14px;font-weight:700;color:var(--text)">${escH(child.display_name||child.username)}</div><div class="location-coords">Lat: ${latest.latitude?.toFixed(5)}, Lng: ${latest.longitude?.toFixed(5)}</div>${latest.accuracy?`<div style="font-size:11px;color:var(--text3)">Accuracy: ±${Math.round(latest.accuracy)}m</div>`:''}<div class="location-time">Last updated: ${timeAgo(latest.recorded_at)}</div><a class="map-link" href="https://www.google.com/maps?q=${latest.latitude},${latest.longitude}" target="_blank">🗺️ Open in Maps</a>`;
+  }else{
+    locBox.innerHTML=`<div class="loc-icon">📍</div><div style="font-size:13px;color:var(--text2)">No location data yet</div><div style="font-size:12px;color:var(--text3);margin-top:4px">Location tracking may not be enabled for this child</div>`;
+  }
+  // History
+  const histEl=document.getElementById('location-history');
+  histEl.innerHTML=(loc&&loc.length>1)?loc.slice(1).map(l=>`<div class="activity-item"><div class="act-icon" style="background:rgba(0,235,132,0.12)">📍</div><div class="act-info"><div class="act-title">${l.latitude?.toFixed(4)}, ${l.longitude?.toFixed(4)}</div><div class="act-sub">±${l.accuracy?Math.round(l.accuracy):'-'}m accuracy</div></div><div class="act-time">${timeAgo(l.recorded_at)}</div></div>`).join(''):'<div style="color:var(--text3);font-size:13px;padding:10px;text-align:center">No history</div>';
+}
+
+function startLocationTracking(){
+  // Track child's location every 5 minutes if permitted
+  async function doTrack(){
+    const{data:r}=await sb.from('family_restrictions').select('location_tracking').eq('child_account_id',me.id).maybeSingle();
+    if(!r?.location_tracking)return;
+    if(!navigator.geolocation)return;
+    navigator.geolocation.getCurrentPosition(async pos=>{
+      await sb.from('child_locations').insert({account_id:me.id,latitude:pos.coords.latitude,longitude:pos.coords.longitude,accuracy:pos.coords.accuracy});
+    },()=>{},{enableHighAccuracy:true,timeout:10000});
+  }
+  doTrack();
+  setInterval(doTrack,5*60*1000);
+}
+
+/* ===== CONNECT (PARENT → CHILD INVITE) ===== */
+function openConnectModal(){
+  if(myRole!=='parent'){showToast('Only parents can connect children');return;}
+  // Ensure family exists first
+  if(!myFamilyId){ensureFamily().then(()=>openConnectModal());return;}
+  document.getElementById('connect-modal').classList.add('show');
+  document.getElementById('connect-search-input').value='';
+  document.getElementById('connect-search-results').innerHTML='';
+}
+function closeConnectModal(){document.getElementById('connect-modal').classList.remove('show');}
+
+async function searchChildAccounts(){
+  const q=document.getElementById('connect-search-input').value.trim();
+  const res=document.getElementById('connect-search-results');
+  if(q.length<2){res.innerHTML='';return;}
+  const{data}=await sb.from('horizen_accounts').select('*').ilike('username',`%${q}%`).neq('id',me.id).limit(8);
+  // Check existing
+  const{data:ex}=await sb.from('family_members').select('account_id').eq('family_id',myFamilyId);
+  const existingIds=(ex||[]).map(e=>e.account_id);
+  const{data:pendingInv}=await sb.from('family_invites').select('to_account_id').eq('family_id',myFamilyId).eq('status','pending');
+  const pendingIds=(pendingInv||[]).map(e=>e.to_account_id);
+  res.innerHTML='';
+  (data||[]).forEach(user=>{
+    const isMember=existingIds.includes(user.id);
+    const isPending=pendingIds.includes(user.id);
+    let btn=`<button class="btn-sm primary" onclick="sendConnectInvite('${user.id}',this)">Connect</button>`;
+    if(isMember)btn=`<span class="btn-sm sent">In Family ✓</span>`;
+    else if(isPending)btn=`<span class="btn-sm sent">Invited…</span>`;
+    const d=document.createElement('div');d.className='search-res-item';
+    d.innerHTML=`<div class="sri-left"><div class="sri-av">${(user.display_name||user.username||'?')[0].toUpperCase()}</div><div><div class="sri-name">${escH(user.display_name||user.username)}</div><div class="sri-user">@${escH(user.username)}</div></div></div>${btn}`;
+    res.appendChild(d);
+  });
+  if(!(data||[]).length)res.innerHTML='<div style="color:var(--text3);font-size:13px;padding:10px">No users found</div>';
+}
+
+async function sendConnectInvite(toId,btn){
+  btn.textContent='Sending...';btn.disabled=true;
+  const{error}=await sb.from('family_invites').insert({family_id:myFamilyId,from_account_id:me.id,to_account_id:toId,status:'pending'});
+  if(error){showToast('Error: '+error.message);btn.disabled=false;btn.textContent='Connect';return;}
+  // Also send family notification
+  await sb.from('family_notifications').insert({to_account_id:toId,from_account_id:me.id,type:'invite',data:{family_id:myFamilyId,family_name:myFamily?.family_name||'My Family',from_name:me.display_name||me.username}});
+  btn.textContent='Invited ✓';btn.className='btn-sm sent';
+  showToast('Invite sent!');
+}
+
+/* ===== PENDING INVITES (CHILD SIDE) ===== */
+async function checkPendingInvites(){
+  const{data:invites}=await sb.from('family_invites').select('*,from_account:horizen_accounts!family_invites_from_account_id_fkey(display_name,username),family:horizen_family(family_name)').eq('to_account_id',me.id).eq('status','pending');
+  if(!invites||!invites.length){
+    document.getElementById('pending-invites-area').innerHTML='';
+    document.getElementById('pending-invites-members').innerHTML='';
+    document.getElementById('members-dot').style.display='none';
+    return;
+  }
+  document.getElementById('members-dot').style.display='inline-block';
+  const html=invites.map(inv=>`
+    <div class="invite-banner">
+      <div class="invite-banner-icon">👨‍👧</div>
+      <div class="invite-banner-info">
+        <div class="invite-banner-title">${escH(inv.from_account?.display_name||inv.from_account?.username||'Someone')} wants to add you to their family</div>
+        <div class="invite-banner-sub">Family: "${escH(inv.family?.family_name||'My Family')}"</div>
+      </div>
+      <div class="invite-banner-actions">
+        <button class="ibtn dec" onclick="respondInvite('${inv.id}','${inv.family_id}','declined')">Decline</button>
+        <button class="ibtn acc" onclick="respondInvite('${inv.id}','${inv.family_id}','accepted')">Accept ✓</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('pending-invites-area').innerHTML=html;
+  document.getElementById('pending-invites-members').innerHTML=html;
+}
+
+async function respondInvite(inviteId,familyId,status){
+  await sb.from('family_invites').update({status}).eq('id',inviteId);
+  if(status==='accepted'){
+    await sb.from('family_members').insert({family_id:familyId,account_id:me.id,role:'child'});
+    showToast('🎉 You joined the family!');
+    // Reload
+    await determineRole();
+  }else{
+    showToast('Invite declined');
+    await checkPendingInvites();
+  }
+}
+
+/* ===== REAL-TIME SUBSCRIPTIONS ===== */
+function subscribeToRestrictions(){
+  if(restrictionsSub)restrictionsSub.unsubscribe();
+  if(myRole==='child'&&me){
+    restrictionsSub=sb.channel(`hf-restr:${me.id}`).on('postgres_changes',{event:'*',schema:'public',table:'family_restrictions',filter:'child_account_id=eq.'+me.id},p=>{renderChildRestrictionsView();showToast('Your restrictions were updated');}).subscribe();
+    // Subscribe to invites
+    sb.channel(`hf-invites:${me.id}`).on('postgres_changes',{event:'INSERT',schema:'public',table:'family_invites',filter:'to_account_id=eq.'+me.id},()=>checkPendingInvites()).subscribe();
+  }
+}
+
+/* ===== PAGES ===== */
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name)?.classList.add('active');
+  document.getElementById('tab-btn-'+name)?.classList.add('active');
+}
+
+/* ===== LOGOUT ===== */
+function showLogoutMenu(){
+  if(confirm('Sign out of HorizenFamily?')){
+    localStorage.removeItem('hf_account');
+    location.reload();
+  }
+}
+
+/* ===== INIT ===== */
+window.onload=async()=>{
+  const saved=localStorage.getItem('hf_account');
+  if(saved){
+    try{
+      const acc=JSON.parse(saved);
+      // Re-verify with DB
+      const{data}=await sb.from('horizen_accounts').select('*').eq('id',acc.id).maybeSingle();
+      if(data){me=data;localStorage.setItem('hf_account',JSON.stringify(data));onAuth();return;}
+    }catch(e){}
+  }
+};
+
+document.getElementById('connect-modal').addEventListener('click',function(e){if(e.target===this)closeConnectModal();});
+</script>
+</body>
+</html>
