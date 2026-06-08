@@ -18,6 +18,7 @@
     .close-tab{font-weight:700;opacity:.4;cursor:pointer;font-size:14px;flex-shrink:0}
     .close-tab:hover{opacity:1;color:#ff4444}
     .tab-label{overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+    .tab-label .ai-badge{font-size:8px;background:var(--accent);color:#000;padding:1px 4px;border-radius:4px;margin-left:4px;font-weight:800;vertical-align:middle}
     #add-win-btn{background:rgba(255,255,255,0.06);border:1px dashed var(--border);color:#555;padding:7px 12px;border-radius:8px 8px 0 0;font-size:12px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:4px}
     #add-win-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,235,132,0.08)}
     #nav-tools{background:var(--glass);backdrop-filter:blur(12px);padding:8px 10px;display:flex;gap:8px;border-bottom:1px solid var(--border);align-items:center}
@@ -40,6 +41,8 @@
     .view-pane{position:absolute;inset:0;display:none}
     .view-pane.active{display:block}
     iframe{width:100%;height:100%;border:none;background:#0a0a0a}
+    .data-uri-viewer{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#0a0a0a;overflow:hidden;padding:20px}
+    .data-uri-viewer img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
     #home-view{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;height:100%;padding-top:7vh;overflow-y:auto;background:radial-gradient(ellipse at top,rgba(0,235,132,0.06),transparent 50%)}
     .logo{font-size:4.5rem;font-weight:900;color:var(--accent);letter-spacing:-4px;text-shadow:0 0 40px rgba(0,235,132,0.25);line-height:1}
     .logo-sub{font-size:13px;color:#555;letter-spacing:6px;text-transform:uppercase;margin-top:4px}
@@ -269,6 +272,7 @@
     .wifi-network.connected{background:rgba(0,235,132,0.08);border:1px solid rgba(0,235,132,0.2)}
     .wifi-network .wn-name{font-size:13px;color:#ddd}
     .wifi-network .wn-detail{font-size:11px;color:#666}
+    .bt-device{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;margin-bottom:6px;background:rgba(255,255,255,0.03);border:1px solid var(--border)}
 
     /* Weather */
     .weather-dropdown{position:absolute;top:50px;width:min(480px,88vw);max-height:420px;overflow:auto;background:rgba(10,10,10,0.97);border:1px solid rgba(0,235,132,0.25);border-radius:16px;box-shadow:0 15px 50px rgba(0,0,0,0.7);display:none;z-index:19000;backdrop-filter:blur(20px)}
@@ -279,6 +283,10 @@
     .weather-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px}
     .weather-card .v{color:var(--accent);font-weight:700;font-size:16px}
     .weather-card .k{color:#666;font-size:10px;text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
+
+    /* Horizen Messages iframe tab */
+    .hm-iframe-container{position:relative;width:100%;height:100%}
+    .hm-iframe-container iframe{width:100%;height:100%;border:none}
 
     /* Family locked overlay */
     #family-lock-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:none;flex-direction:column;align-items:center;justify-content:center;backdrop-filter:blur(20px)}
@@ -297,10 +305,6 @@
     .stw-title{font-size:13px;font-weight:700;color:#ff9500;margin-bottom:4px}
     .stw-msg{font-size:12px;color:#aaa}
 
-    /* Sign-Ins Panel */
-    #signins-panel{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:40000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
-    #signins-panel.open{display:flex}
-
     @media(max-width:600px){
       .logo{font-size:3rem}
       #bot-panel{width:calc(100vw - 40px);left:10px;bottom:70px}
@@ -313,7 +317,7 @@
 </head>
 <body oncontextmenu="handleGlobalContextMenu(event)">
 
-  <!-- LOCKED OVERLAY -->
+  <!-- LOCKED OVERLAY (HorizenFamily) -->
   <div id="family-lock-overlay">
     <div class="lock-icon">🔒</div>
     <div class="lock-title">Browser Locked</div>
@@ -365,6 +369,8 @@
     <div class="menu-item" onclick="toggleWPPicker()"><i class="fas fa-image"></i> Change Wallpaper</div>
     <div class="menu-item" onclick="resetBG()"><i class="fas fa-undo"></i> Reset Wallpaper</div>
     <div class="menu-divider"></div>
+    <div class="menu-item" id="ctx-search-ai" style="display:none;" onclick="handleSearchWithAI()"><i class="fas fa-brain"></i> Search With AI</div>
+    <div class="menu-divider" id="ctx-ai-divider" style="display:none;"></div>
     <div class="menu-item" onclick="openDevTools()"><i class="fas fa-code"></i> Developer Tools</div>
     <div class="menu-divider"></div>
     <div class="menu-item" onclick="location.reload()"><i class="fas fa-power-off"></i> Restart OS</div>
@@ -509,7 +515,7 @@
     </div>
     <div class="ha-footer">
       <button class="speed-btn" style="flex:1;padding:10px;margin:0;font-size:12px;background:rgba(0,235,132,0.12);color:var(--accent);border:1px solid rgba(0,235,132,0.3);" onclick="doHorizenLogout()"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
-      <button class="speed-btn" style="flex:1;padding:10px;margin:0;font-size:12px;" onclick="openHorizenFamily()"><i class="fas fa-users"></i> Family</button>
+      <button class="speed-btn" style="flex:1;padding:10px;margin:0;font-size:12px;" onclick="openHorizenFamily()"><i class="fas fa-family"></i> HorizenFamily</button>
     </div>
   </div>
 
@@ -593,10 +599,9 @@
         <i class="fas fa-sun" id="weather-icon"></i> <span id="weather-temp">--°</span>
         <div class="weather-dropdown" id="weather-dropdown"></div>
       </button>
-      <!-- CHAT BUTTON ADDED NEXT TO WIFI -->
-      <button class="status-btn" id="chat-status-btn" onclick="openMessagesTab()" title="HorizenMessages"><i class="fas fa-comment-dots"></i></button>
       <div class="status-item" onclick="toggleWifi()"><i class="fas fa-wifi" id="wifi-icon"></i></div>
       <div class="status-item" id="battery"><i class="fas fa-battery-full"></i> --%</div>
+      <button class="status-btn" id="messages-status-btn" onclick="openMessagesTab()" title="HorizenMessages" style="display:none;"><i class="fas fa-comment-dots"></i> <span class="msg-badge" id="msg-unread-badge" style="display:none;">0</span></button>
       <button class="status-btn" id="role-mode-btn" onclick="openCodesModal()" title="Role Codes" style="display:none;"><i class="fas fa-shield-halved"></i> <span id="role-mode-label">Mode</span></button>
       <button class="status-btn" onclick="toggleHistory()" title="History"><i class="fas fa-clock-rotate-left"></i></button>
       <div class="status-item" id="time">00:00</div>
@@ -671,25 +676,27 @@ const PEXELS_KEY='QmebQALowGk9LoYQqUGaPhQ5zUMQWwd1mRaFTV4HvNQyYS1i6v9H5V68';
 const SUPABASE_URL='https://xlisbmtenekjmundxbcn.supabase.co';
 const SUPABASE_KEY='sb_publishable_Cvs-AiKPTHrC_tfGfwlpSQ_4Hir5Cva';
 const HM_URL='https://messages.horizensearch.com';
-const FAMILY_URL='https://family.horizensearch.com';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 /* ===== STATE ===== */
 let openTabs=[],myAddress='',blockChannel=null,appCache=[],blockPollInterval=null;
 let browsingHistory=JSON.parse(localStorage.getItem('hz_history')||'[]');
-let speedTestRunning=false,wifiTabState='networks';
+let contextUrl='',contextTabId='',speedTestRunning=false,wifiTabState='networks';
 let groqKeyCache='',msgNotifTimer=null;
 let aiSearchCache=JSON.parse(localStorage.getItem('hz_ai_cache')||'{}');
 let currentAdmin=null;
+// Horizen Account
 let horizenAccount=JSON.parse(localStorage.getItem('hz_account')||'null');
 let horizenAuthTab='login';
+// Screen time
 let screenTimeStart=Date.now();
 let screenTimeInterval=null;
 let screenTimeLimitMinutes=0;
 let todayScreenMinutes=0;
+// Family
 let familyRestrictions=null;
 let familyLocked=false;
-let hmTabId=null;
+let hmTabId=null; // id of the messages tab
 
 /* ===== TOAST ===== */
 function showToast(msg,title,icon){
@@ -753,8 +760,8 @@ async function doHorizenLogin(){
     if(error||!data){errEl.textContent='Invalid username/email or password';errEl.style.display='block';btn.disabled=false;btn.textContent='Sign In';return;}
     horizenAccount=data;
     localStorage.setItem('hz_account',JSON.stringify(data));
-    // FIX: Using then() instead of .catch() on Supabase promise
-    sb.from('horizen_sessions').upsert({account_id:data.id,fingerprint:myAddress,last_active:new Date().toISOString()},{onConflict:'account_id,fingerprint'}).then(({error})=>{if(error)devLog('Session save failed: '+error.message,'warn');});
+    // Save session linked to fingerprint
+    await sb.from('horizen_sessions').upsert({account_id:data.id,fingerprint:myAddress,last_active:new Date().toISOString()},{onConflict:'account_id,fingerprint'}).catch(()=>{});
     closeHorizenSignIn();
     onHorizenAccountLoaded();
     showToast('Welcome back, '+data.display_name+'!','Horizen','✅');
@@ -777,7 +784,7 @@ async function doHorizenSignup(){
     if(error){errEl.textContent=error.message.includes('duplicate')?'Username or email already taken':error.message;errEl.style.display='block';btn.disabled=false;btn.textContent='Create Account';return;}
     horizenAccount=data;
     localStorage.setItem('hz_account',JSON.stringify(data));
-    sb.from('horizen_sessions').insert({account_id:data.id,fingerprint:myAddress}).then(({error})=>{if(error)devLog('Session save failed: '+error.message,'warn');});
+    await sb.from('horizen_sessions').insert({account_id:data.id,fingerprint:myAddress}).catch(()=>{});
     closeHorizenSignIn();
     onHorizenAccountLoaded();
     showToast('Account created! Welcome, '+display+'!','Horizen','🎉');
@@ -787,17 +794,22 @@ async function doHorizenSignup(){
 function doHorizenLogout(){
   horizenAccount=null;
   localStorage.removeItem('hz_account');
-  localStorage.removeItem('hm_auto_login');
   closeHorizenAccountPanel();
   document.getElementById('fp-horizen-tag').style.display='none';
-  showToast('Signed out of Horizen account','Horizon','👋');
+  document.getElementById('messages-status-btn').style.display='none';
+  showToast('Signed out of Horizen account','Horizen','👋');
 }
 function onHorizenAccountLoaded(){
   if(!horizenAccount)return;
   document.getElementById('fp-horizen-tag').style.display='inline-flex';
+  document.getElementById('messages-status-btn').style.display='flex';
+  // Apply saved wallpaper
   if(horizenAccount.wallpaper_url&&!localStorage.getItem('horizon_bg')){setBG(horizenAccount.wallpaper_url);}
+  // Load family restrictions
   loadFamilyRestrictions();
+  // Start screen time tracking
   startScreenTimeTracking();
+  // Auto-login to HorizenMessages via localStorage
   autoLoginMessages();
   showToast('Signed in as '+horizenAccount.display_name,'Horizen','✅');
 }
@@ -823,6 +835,7 @@ async function loadAccountStats(){
     document.getElementById('ha-searches').textContent=(searches||[]).length;
     document.getElementById('ha-apps').textContent=(apps||[]).length;
     if(searches&&searches.length){document.getElementById('ha-recent-searches').innerHTML=(searches||[]).map(s=>`<div style="padding:5px 0;font-size:12px;color:#bbb;border-bottom:1px solid rgba(255,255,255,0.04)">${escHtml(s.query)}</div>`).join('');}
+    // Family info
     const{data:member}=await sb.from('family_members').select('*,family:horizen_family(*)').eq('account_id',horizenAccount.id).maybeSingle();
     if(member){document.getElementById('ha-family-info').innerHTML=`<div style="font-size:13px;color:var(--accent);font-weight:700">${escHtml(member.family?.family_name||'My Family')}</div><div style="font-size:12px;color:#888;margin-top:4px">Role: ${member.role}</div>`;}
   }catch(e){}
@@ -834,6 +847,7 @@ function openSignInsPanel(){
   const body=document.getElementById('signins-body');
   body.innerHTML='<div style="padding:20px;text-align:center;color:#888"><span class="spinner"></span></div>';
   document.getElementById('signins-panel').classList.add('open');
+  // Show current accounts
   const rows=[];
   if(horizenAccount){
     rows.push(`<div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(0,235,132,0.06);border:1px solid rgba(0,235,132,0.2);border-radius:12px;margin-bottom:8px">
@@ -855,6 +869,7 @@ function closeSignInsPanel(){document.getElementById('signins-panel').classList.
 /* ===== AUTO-LOGIN HORIZEN MESSAGES ===== */
 function autoLoginMessages(){
   if(!horizenAccount)return;
+  // Store credentials for HorizenMessages iframe to pick up
   const hmCreds={email:horizenAccount.email,autoLogin:true,accountId:horizenAccount.id};
   localStorage.setItem('hm_auto_login',JSON.stringify(hmCreds));
 }
@@ -863,15 +878,11 @@ function autoLoginMessages(){
 function openMessagesTab(){
   dismissMsgNotif();dismissCallNotif();
   if(hmTabId&&document.getElementById('tab-'+hmTabId)){switchTab(hmTabId);return;}
+  // Create messages tab with iframe
   const id='t_'+Math.random().toString(36).slice(2,10);
   hmTabId=id;
-  
-  // FIX: Truncate tab name after the dot
-  let tabName = 'messages.horizensearch'.split('.')[0];
-  tabName = tabName.charAt(0).toUpperCase() + tabName.slice(1);
-  
   const tab=document.createElement('div');tab.className='tab';tab.id='tab-'+id;tab.setAttribute('draggable','true');
-  tab.innerHTML=`<span class="tab-label">${escHtml(tabName)}</span><span class="close-tab" onclick="closeMessagesTab(event,'${id}')">&times;</span>`;
+  tab.innerHTML=`<span class="tab-label"><i class="fas fa-comment-dots" style="color:var(--accent);margin-right:4px;font-size:10px;"></i> Messages</span><span class="close-tab" onclick="closeMessagesTab(event,'${id}')">&times;</span>`;
   tab.onclick=()=>switchTab(id);enableDrag(tab);
   document.getElementById('tab-bar').insertBefore(tab,document.getElementById('add-win-btn'));
   const pane=document.createElement('div');pane.className='view-pane';pane.id='view-'+id;
@@ -882,34 +893,41 @@ function openMessagesTab(){
   document.getElementById('viewport').appendChild(pane);
   openTabs.push(id);
   switchTab(id);
+  // Try to send auto-login data to iframe after load
   ifr.addEventListener('load',()=>{
     try{
       ifr.contentWindow.postMessage({type:'horizen_autologin',data:JSON.parse(localStorage.getItem('hm_auto_login')||'null')},'*');
     }catch(e){}
+    // Try to fetch title from iframe
     try{
-      const title=ifr.contentDocument?.title||'';
-      if(title.trim()){
-        const truncTitle = title.split('.')[0];
-        const lbl=document.querySelector('#tab-'+id+' .tab-label');
-        if(lbl)lbl.textContent=truncTitle;
-      }
+      const title=ifr.contentDocument?.title||'Messages';
+      document.querySelector('#tab-'+id+' .tab-label').innerHTML=`<i class="fas fa-comment-dots" style="color:var(--accent);margin-right:4px;font-size:10px;"></i> ${escHtml(title)}`;
     }catch(e){}
   });
-  addToHistory(tabName,HM_URL);
+  addToHistory('HorizenMessages',HM_URL);
 }
 function closeMessagesTab(e,id){e.stopPropagation();hmTabId=null;document.getElementById('tab-'+id)?.remove();document.getElementById('view-'+id)?.remove();openTabs=openTabs.filter(t=>t!==id);switchTab('home');saveTabs();}
 
 /* ===== MESSAGE NOTIFICATIONS FROM IFRAME ===== */
 window.addEventListener('message',e=>{
   if(!e.data||typeof e.data!=='object')return;
+  // New message notification
   if(e.data.type==='hm_new_message'){
     const{senderName,text,callType}=e.data;
-    if(callType){showCallNotif(senderName,callType);}else{showMsgNotif(senderName,text);}
+    if(callType){
+      showCallNotif(senderName,callType);
+    }else{
+      showMsgNotif(senderName,text);
+    }
+    // Update badge
+    const badge=document.getElementById('msg-unread-badge');
+    badge.style.display='inline-flex';
+    badge.textContent=(parseInt(badge.textContent||'0')+1);
   }
+  // Title update
   if(e.data.type==='hm_title'&&e.data.title&&hmTabId){
-    const truncTitle = e.data.title.split('.')[0];
     const lbl=document.querySelector('#tab-'+hmTabId+' .tab-label');
-    if(lbl)lbl.textContent=truncTitle;
+    if(lbl)lbl.innerHTML=`<i class="fas fa-comment-dots" style="color:var(--accent);margin-right:4px;font-size:10px;"></i> ${escHtml(e.data.title)}`;
   }
 });
 
@@ -929,22 +947,25 @@ function showCallNotif(name,type){
 }
 function dismissCallNotif(){document.getElementById('call-notif').classList.remove('show');}
 
-/* ===== SCREEN TIME ===== */
+/* ===== SCREEN TIME TRACKING ===== */
 function startScreenTimeTracking(){
   if(screenTimeInterval)clearInterval(screenTimeInterval);
   screenTimeLimitMinutes=familyRestrictions?.screen_time_limit_minutes||horizenAccount?.screen_time_limit_minutes||0;
+  // Load today's usage
   loadTodayScreenTime();
   screenTimeInterval=setInterval(async()=>{
     todayScreenMinutes++;
     document.getElementById('ha-screentime').textContent=todayScreenMinutes+' min';
+    // Save to DB every 5 min
     if(todayScreenMinutes%5===0)saveScreenTime();
+    // Check limit
     if(screenTimeLimitMinutes>0){
       const remaining=screenTimeLimitMinutes-todayScreenMinutes;
       if(remaining===10)showScreenTimeWarning('You have 10 minutes of screen time remaining today.');
       if(remaining===5)showScreenTimeWarning('You have 5 minutes of screen time remaining today.');
       if(remaining<=0){showScreenTimeWarning('Screen time limit reached. Please take a break!');lockBrowser();}
     }
-  },60000);
+  },60000); // every minute
 }
 async function loadTodayScreenTime(){
   if(!horizenAccount)return;
@@ -974,22 +995,28 @@ async function loadFamilyRestrictions(){
     familyRestrictions=restrictions;
     if(restrictions){
       if(restrictions.locked)lockBrowser();
+      if(restrictions.safe_search)applySafeSearch();
       screenTimeLimitMinutes=restrictions.screen_time_limit_minutes||0;
     }
+    // Subscribe to restriction changes
     sb.channel(`restrictions:${horizenAccount.id}`).on('postgres_changes',{event:'UPDATE',schema:'public',table:'family_restrictions',filter:'child_account_id=eq.'+horizenAccount.id},p=>{
       familyRestrictions=p.new;
       if(p.new.locked)lockBrowser();else unlockBrowserSilent();
+      if(p.new.safe_search)applySafeSearch();
       screenTimeLimitMinutes=p.new.screen_time_limit_minutes||0;
       showToast('Parental controls updated','HorizenFamily','👨‍👧');
     }).subscribe();
+    // Check family invites
     checkFamilyInvites();
   }catch(e){}
 }
 function lockBrowser(){familyLocked=true;document.getElementById('family-lock-overlay').classList.add('show');}
 function unlockBrowserSilent(){familyLocked=false;document.getElementById('family-lock-overlay').classList.remove('show');}
+function applySafeSearch(){/* Safe search flag - used when performing searches */}
 async function tryUnlockBrowser(){
   const code=document.getElementById('lock-code-input').value.trim();
   if(!code){showToast('Enter unlock code','Lock','⚠️');return;}
+  // Check against family restrictions unlock code
   try{
     const{data}=await sb.from('family_restrictions').select('unlock_code').eq('child_account_id',horizenAccount?.id).maybeSingle();
     if(data?.unlock_code&&data.unlock_code===code){unlockBrowserSilent();showToast('Browser unlocked','Lock','🔓');}
@@ -1002,29 +1029,27 @@ async function checkFamilyInvites(){
     const{data:invites}=await sb.from('family_invites').select('*,from_account:horizen_accounts!family_invites_from_account_id_fkey(display_name,username),family:horizen_family(family_name)').eq('to_account_id',horizenAccount.id).eq('status','pending');
     if(invites&&invites.length>0){
       const inv=invites[0];
-      showFamilyInviteToast(inv.id,inv.from_account?.display_name||'Someone',inv.family?.family_name||'a family');
+      const parentName=inv.from_account?.display_name||inv.from_account?.username||'Someone';
+      const familyName=inv.family?.family_name||'a family';
+      showFamilyInviteToast(inv.id,parentName,familyName);
     }
   }catch(e){}
+  // Subscribe to new invites
   sb.channel(`invites:${horizenAccount.id}`).on('postgres_changes',{event:'INSERT',schema:'public',table:'family_invites',filter:'to_account_id=eq.'+horizenAccount.id},async p=>{
     const inv=p.new;
     const{data:from}=await sb.from('horizen_accounts').select('display_name,username').eq('id',inv.from_account_id).maybeSingle();
     const{data:fam}=await sb.from('horizen_family').select('family_name').eq('id',inv.family_id).maybeSingle();
-    showFamilyInviteToast(inv.id,from?.display_name||'Someone',fam?.family_name||'a family');
+    showFamilyInviteToast(inv.id,from?.display_name||from?.username||'Someone',fam?.family_name||'a family');
   }).subscribe();
 }
 function showFamilyInviteToast(inviteId,parentName,familyName){
   showToast(`${parentName} wants to add you to "${familyName}". Check HorizenFamily to accept.`,'HorizenFamily Invite','👨‍👧');
 }
 
-/* ===== HORIZEN FAMILY OPENER (IFRAME) ===== */
+/* ===== HORIZEN FAMILY OPENER ===== */
 function openHorizenFamily(){
   if(!horizenAccount){showToast('Sign in to your Horizen account first','HorizenFamily','⚠️');openHorizenSignIn();return;}
-  
-  // Truncate name after dot
-  let tabName = 'family.horizensearch'.split('.')[0];
-  tabName = tabName.charAt(0).toUpperCase() + tabName.slice(1);
-  
-  createNewTab(tabName, null, FAMILY_URL, null, true);
+  createNewTab('HorizenFamily',null,'horizenfamily.html',null,true);
 }
 
 /* ===== HISTORY ===== */
@@ -1035,34 +1060,28 @@ function toggleHistory(){const p=document.getElementById('history-panel'),o=docu
 
 /* ===== TABS & WINDOWS ===== */
 function saveTabs(){const tabs=openTabs.map(id=>({id,name:document.querySelector('#tab-'+id+' .tab-label')?.textContent?.trim()||'',src:document.querySelector('#view-'+id+' iframe')?.src||''}));localStorage.setItem('hz_open_tabs',JSON.stringify(tabs));}
-function restoreTabs(){try{JSON.parse(localStorage.getItem('hz_open_tabs')||'[]').forEach(t=>{if(t.id&&t.name&&!['home','results','store'].includes(t.id)&&t.src!==HM_URL&&t.src!==FAMILY_URL)createNewTab(t.name,null,t.src||'',null,false);});}catch(e){}}
+function restoreTabs(){try{JSON.parse(localStorage.getItem('hz_open_tabs')||'[]').forEach(t=>{if(t.id&&t.name&&!['home','results','store'].includes(t.id)&&t.src!==HM_URL)createNewTab(t.name,null,t.src||'',null,false);});}catch(e){}}
 function switchTab(id){document.querySelectorAll('.view-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));const vp=document.getElementById('view-'+id),tb=document.getElementById('tab-'+id);if(vp)vp.classList.add('active');if(tb){tb.classList.add('active');tb.style.display='flex';}if(id==='store')loadAppStore();}
 function enableDrag(tab){tab.addEventListener('dragstart',()=>tab.classList.add('dragging'));tab.addEventListener('dragend',()=>{tab.classList.remove('dragging');saveTabs();});tab.addEventListener('dragover',e=>{e.preventDefault();const d=document.querySelector('.tab.dragging');if(!d||d===tab)return;const r=tab.getBoundingClientRect();tab.parentNode.insertBefore(d,(e.clientX-r.left)<r.width/2?tab:tab.nextSibling);});}
 
-const quickMap={'docs.google.com':'Google Docs','drive.google.com':'Google Drive','mail.google.com':'Gmail','youtube.com':'YouTube','twitter.com':'X','x.com':'X','facebook.com':'Facebook','instagram.com':'Instagram','reddit.com':'Reddit','github.com':'GitHub','wikipedia.org':'Wikipedia','amazon.com':'Amazon','netflix.com':'Netflix','spotify.com':'Spotify','discord.com':'Discord','twitch.tv':'Twitch','linkedin.com':'LinkedIn','tiktok.com':'TikTok','horizensearch.com':'Horizon Search','ai.horizensearch.com':'Horizen AI','gd.horizensearch.com':'Geometry Dash','messages.horizensearch.com':'HorizenMessages','family.horizensearch.com':'HorizenFamily','chat.openai.com':'ChatGPT','claude.ai':'Claude','google.com':'Google'};
+const quickMap={'docs.google.com':'Google Docs','drive.google.com':'Google Drive','mail.google.com':'Gmail','youtube.com':'YouTube','twitter.com':'X','x.com':'X','facebook.com':'Facebook','instagram.com':'Instagram','reddit.com':'Reddit','github.com':'GitHub','wikipedia.org':'Wikipedia','amazon.com':'Amazon','netflix.com':'Netflix','spotify.com':'Spotify','discord.com':'Discord','twitch.tv':'Twitch','linkedin.com':'LinkedIn','tiktok.com':'TikTok','horizensearch.com':'Horizon Search','ai.horizensearch.com':'Horizen AI','gd.horizensearch.com':'Geometry Dash','messages.horizensearch.com':'HorizenMessages','chat.openai.com':'ChatGPT','claude.ai':'Claude','google.com':'Google'};
 function quickShorten(url){try{const u=new URL(url),h=u.hostname.replace(/^www\./,'');if(quickMap[h])return quickMap[h];for(const[d,l]of Object.entries(quickMap)){if(h.endsWith('.'+d))return l;}return null;}catch(e){return null;}}
 function fallbackShorten(url){try{return new URL(url).hostname.replace(/^www\./, '');}catch(e){return url.length>25?url.substring(0,25)+'...':url;}}
 
-function parseTabName(url, name){
-  if(name) return name;
-  let short = quickShorten(url);
-  if(short) return short;
-  // Fallback: Truncate after the first dot
-  try {
-    let host = new URL(url).hostname.replace(/^www\./, '');
-    return host.split('.')[0];
-  } catch(e) { return 'New Tab'; }
+async function fetchIframeTitle(url){
+  // Try to get actual page title via a proxy or just use quickShorten
+  return quickShorten(url)||fallbackShorten(url);
 }
 
 async function createNewTab(name,html,url,srcdoc,doSwitch=true){
   if(familyLocked){showToast('Browser is locked by your parent','HorizenFamily','🔒');return;}
+  // Check blocked URLs
   if(url&&familyRestrictions?.blocked_urls?.length){
     const blocked=familyRestrictions.blocked_urls.some(b=>url.includes(b));
     if(blocked){showToast('This site is blocked by your parent','HorizenFamily','🚫');return;}
   }
   const safeId='t_'+Math.random().toString(36).slice(2,10);
-  let displayName = parseTabName(url, name);
-  
+  let displayName=name||quickShorten(url)||'Loading...';
   const tab=document.createElement('div');tab.className='tab';tab.id='tab-'+safeId;tab.setAttribute('draggable','true');
   tab.innerHTML=`<span class="tab-label">${escHtml(displayName)}</span><span class="close-tab" onclick="closeTab(event,'${safeId}')">&times;</span>`;
   tab.onclick=()=>switchTab(safeId);enableDrag(tab);
@@ -1076,15 +1095,17 @@ async function createNewTab(name,html,url,srcdoc,doSwitch=true){
   if(doSwitch)switchTab(safeId);
   saveTabs();
   addToHistory(displayName,url||'');
-  if(horizenAccount&&url){sb.from('account_app_history').insert({account_id:horizenAccount.id,app_name:displayName,app_url:url}).then(()=>{}).catch(()=>{});}
-  
+  // Track app usage
+  if(horizenAccount&&url){
+    sb.from('account_app_history').insert({account_id:horizenAccount.id,app_name:displayName,app_url:url}).catch(()=>{});
+  }
+  // Try to get actual title from iframe
   ifr.addEventListener('load',()=>{
     try{
       const title=ifr.contentDocument?.title;
       if(title&&title.trim()){
-        const truncTitle = title.split('.')[0];
         const lbl=document.querySelector('#tab-'+safeId+' .tab-label');
-        if(lbl)lbl.textContent=truncTitle.substring(0,30);
+        if(lbl)lbl.textContent=title.trim().substring(0,30);
       }
     }catch(e){}
   });
@@ -1102,11 +1123,14 @@ function switchFilter(fId,btn){document.querySelectorAll('.filter-btn').forEach(
 async function performSearch(customQuery){
   const q=(customQuery||document.getElementById('search-input').value||'').trim();
   if(!q)return;
+  // Safe search filter
+  if(familyRestrictions?.safe_search){/* Could filter results */}
   document.getElementById('search-input').value='';
   document.getElementById('home-suggestions').style.display='none';
   addToHistory(q,'');
   saveSuggestion(q);
-  if(horizenAccount){sb.from('account_search_history').insert({account_id:horizenAccount.id,query:q}).then(()=>{}).catch(()=>{});}
+  // Save to account
+  if(horizenAccount){sb.from('account_search_history').insert({account_id:horizenAccount.id,query:q}).catch(()=>{});}
   document.getElementById('search-title').innerText='Results for: '+q;
   document.getElementById('tab-results').style.display='flex';
   switchTab('results');
@@ -1128,15 +1152,16 @@ async function loadAppStore(){
   appCache=(data||[]).filter(app=>{const h=(app.name||'')+' '+(app.description||'')+' '+(app.category||'');return!q||h.toLowerCase().includes(q);});
   document.getElementById('app-store-grid').innerHTML=appCache.length?appCache.map(app=>`<div class="store-card" onclick="openApp('${app.id}')"><img src="${escHtml(app.icon_url||'')}" alt="" onerror="this.style.display='none'"><h3>${escHtml(app.name||'Untitled')}</h3><p>${escHtml(app.description||'')}</p><div class="meta-line">${escHtml(app.category||'General')}</div></div>`).join(''):'<div style="color:#888;padding:20px;">No apps found.</div>';
 }
-function openApp(id){const app=appCache.find(a=>String(a.id)===String(id));if(!app)return;createNewTab(app.name||'App',null,null,app.html||'<h1 style="color:#fff;padding:20px;">Empty App</h1>',true);if(horizenAccount){sb.from('account_app_history').insert({account_id:horizenAccount.id,app_name:app.name||'App'}).then(()=>{}).catch(()=>{});}}
+function openApp(id){const app=appCache.find(a=>String(a.id)===String(id));if(!app)return;createNewTab(app.name||'App',null,null,app.html||'<h1 style="color:#fff;padding:20px;">Empty App</h1>',true);if(horizenAccount){sb.from('account_app_history').insert({account_id:horizenAccount.id,app_name:app.name||'App'}).catch(()=>{});}}
 
 /* ===== CONTEXT MENU ===== */
-function handleGlobalContextMenu(e){e.preventDefault();const m=document.getElementById('context-menu');m.style.display='block';m.style.left=Math.min(e.pageX,window.innerWidth-220)+'px';m.style.top=Math.min(e.pageY,window.innerHeight-200)+'px';}
+function handleGlobalContextMenu(e){e.preventDefault();const m=document.getElementById('context-menu');let clickedOnSite=false;const activePane=document.querySelector('.view-pane.active');if(activePane){const ifr=activePane.querySelector('iframe');if(ifr){const r=ifr.getBoundingClientRect();if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){clickedOnSite=true;contextUrl=ifr.src||'';}}}document.getElementById('ctx-search-ai').style.display=clickedOnSite&&contextUrl?'flex':'none';document.getElementById('ctx-ai-divider').style.display=clickedOnSite&&contextUrl?'block':'none';m.style.display='block';m.style.left=Math.min(e.pageX,window.innerWidth-220)+'px';m.style.top=Math.min(e.pageY,window.innerHeight-200)+'px';}
 window.addEventListener('click',()=>document.getElementById('context-menu').style.display='none');
+function handleSearchWithAI(){document.getElementById('context-menu').style.display='none';}
 
 /* ===== WALLPAPER ===== */
 function toggleWPPicker(){const p=document.getElementById('wp-picker'),o=document.getElementById('wp-overlay');const isOpen=p.style.display==='flex';p.style.display=isOpen?'none':'flex';o.classList.toggle('show',!isOpen);}
-function setBG(url){document.body.style.backgroundImage="url('"+url+"')";localStorage.setItem('horizon_bg',url);if(horizenAccount){sb.from('horizen_accounts').update({wallpaper_url:url}).eq('id',horizenAccount.id).then(()=>{}).catch(()=>{});horizenAccount.wallpaper_url=url;localStorage.setItem('hz_account',JSON.stringify(horizenAccount));}showToast('Wallpaper applied','Wallpaper','🖼️');}
+function setBG(url){document.body.style.backgroundImage="url('"+url+"')";localStorage.setItem('horizon_bg',url);if(horizenAccount){sb.from('horizen_accounts').update({wallpaper_url:url}).eq('id',horizenAccount.id).catch(()=>{});horizenAccount.wallpaper_url=url;localStorage.setItem('hz_account',JSON.stringify(horizenAccount));}showToast('Wallpaper applied','Wallpaper','🖼️');}
 function resetBG(){document.body.style.backgroundImage='none';localStorage.removeItem('horizon_bg');showToast('Wallpaper reset','Wallpaper','🖼️');}
 document.getElementById('wp-search').addEventListener('keypress',e=>{if(e.key==='Enter'){const q=e.target.value.trim();if(!q)return;document.getElementById('wp-grid').innerHTML='<div style="text-align:center;padding:30px;"><span class="spinner"></span></div>';fetch('https://api.pexels.com/v1/search?query='+encodeURIComponent(q)+'&per_page=20',{headers:{Authorization:PEXELS_KEY}}).then(r=>r.json()).then(d=>{document.getElementById('wp-grid').innerHTML=(d.photos||[]).map(p=>`<img src="${p.src.medium}" class="wp-item" onclick="setBG('${p.src.large2x}')">`).join('')||'<div style="text-align:center;padding:30px;color:#888;">No results</div>';}).catch(()=>{});}});
 
@@ -1183,13 +1208,12 @@ function removeBotTyping(){document.getElementById('bot-typing')?.remove();}
 async function sendBot(){
   const input=document.getElementById('bot-input');const msg=input.value.trim();input.value='';if(!msg)return;
   addBotMsg(msg,true);addBotTyping();const lower=msg.toLowerCase();
-  if(lower.startsWith('open ')){removeBotTyping();const q=msg.substring(5).trim();if(q==='messages'||q==='horizenmessages'||q==='chat'){openMessagesTab();addBotMsg('Opened HorizenMessages.',false);return;}if(q==='family'||q==='horizenfamily'){openHorizenFamily();addBotMsg('Opened HorizenFamily.',false);return;}if(q.includes('.')||q.startsWith('http')){openUrl(q.includes('://')?q:'https://'+q);addBotMsg('Opened '+q,false);return;}performSearch(q);addBotMsg('Searched for "'+q+'".',false);return;}
+  if(lower.startsWith('open ')){removeBotTyping();const q=msg.substring(5).trim();if(q==='messages'||q==='horizenmessages'){openMessagesTab();addBotMsg('Opened HorizenMessages.',false);return;}if(q.includes('.')||q.startsWith('http')){openUrl(q.includes('://')?q:'https://'+q);addBotMsg('Opened '+q,false);return;}performSearch(q);addBotMsg('Searched for "'+q+'".',false);return;}
   if(lower.startsWith('search ')){removeBotTyping();const q=msg.substring(7).trim();performSearch(q);addBotMsg('Searched for "'+q+'".',false);return;}
-  if(lower==='open messages'||lower==='messages'||lower==='open chat'||lower==='chat'){removeBotTyping();openMessagesTab();addBotMsg('Opened HorizenMessages!',false);return;}
-  if(lower==='open family'||lower==='family'){removeBotTyping();openHorizenFamily();addBotMsg('Opened HorizenFamily!',false);return;}
+  if(lower==='open messages'||lower==='messages'){removeBotTyping();openMessagesTab();addBotMsg('Opened HorizenMessages!',false);return;}
   if(lower.startsWith('change wallpaper to ')){const query=msg.replace(/^change wallpaper to /i,'').trim();removeBotTyping();addBotMsg('Searching "'+query+'"...',false);try{const r=await fetch('https://api.pexels.com/v1/search?query='+encodeURIComponent(query)+'&per_page=6',{headers:{Authorization:PEXELS_KEY}});const d=await r.json();if(d.photos?.length){setBG(d.photos[0].src.large2x);addBotMsg('Wallpaper changed!',false);}else addBotMsg('No wallpapers found.',false);}catch(e){addBotMsg('Failed.',false);}return;}
   if(lower==='clear history'){removeBotTyping();clearHistory();addBotMsg('History cleared!',false);return;}
-  const sysMsg=`You are the Horizon OS Assistant. You can help with OS commands like: "open [url]", "search [query]", "open messages", "open family", "change wallpaper to [topic]", "clear history". Keep answers short.`;
+  const sysMsg=`You are the Horizon OS Assistant. You can help with OS commands like: "open [url]", "search [query]", "open messages", "change wallpaper to [topic]", "clear history". Keep answers short.`;
   const response=await getGroqChat(msg,sysMsg);removeBotTyping();addBotMsg(response,false);
 }
 
@@ -1204,7 +1228,7 @@ async function initHorizenBlocker(){
   if(!id){id=await generateFingerprint();localStorage.setItem('horizen_computer_id',id);}
   myAddress=id;
   document.getElementById('hz-addr-text').innerText=id;
-  sb.from('users').upsert({computer_id:id},{onConflict:'computer_id'}).then(()=>{}).catch(e=>devLog('User upsert failed: '+e.message,'error'));
+  try{await sb.from('users').upsert({computer_id:id},{onConflict:'computer_id'});}catch(e){}
   if(await checkIfBlocked(id))return false;
   try{blockChannel=sb.channel('user-block-watch').on('postgres_changes',{event:'UPDATE',schema:'public',table:'users',filter:'computer_id=eq.'+id},p=>{if(p.new?.is_blocked)location.href='https://blocked.horizensearch.com';}).subscribe();}catch(e){}
   blockPollInterval=setInterval(()=>checkIfBlocked(id),2000);
@@ -1256,7 +1280,9 @@ window.onload=async()=>{
   devLog('Horizon OS Pro Edition Initialized','info');
   const ok=await initHorizenBlocker();
   if(!ok){document.body.style.display='none';return;}
+  // Auto-login Horizen account from localStorage
   if(horizenAccount){
+    // Re-fetch fresh account data
     try{
       const{data}=await sb.from('horizen_accounts').select('*').eq('id',horizenAccount.id).maybeSingle();
       if(data){horizenAccount=data;localStorage.setItem('hz_account',JSON.stringify(data));}
