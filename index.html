@@ -632,7 +632,7 @@
             <div class="popular-link" onclick="openUrl('https://gd.horizensearch.com','Geometry Dash')"><i class="fas fa-gamepad"></i> Geometry Dash</div>
             <div class="popular-link" onclick="openMessagesTab()"><i class="fas fa-comment-dots"></i> Messages</div>
             <div class="popular-link" onclick="switchTab('store');loadAppStore();"><i class="fas fa-store"></i> App Store</div>
-            <div class="popular-link" onclick="openHorizenFamily()"><i class="fas fa-users"></i> HorizenFamily</div>
+            <div class="popular-link" onclick="openUrl('https://family.horizensearch.com','HorizenFamily')"><i class="fas fa-users"></i>Family</div>
           </div>
         </div>
       </div>
@@ -1071,7 +1071,7 @@ function showFamilyInviteToast(inviteId,parentName,familyName){
 /* ===== HORIZEN FAMILY OPENER ===== */
 function openHorizenFamily(){
   if(!horizenAccount){showToast('Sign in to your Horizen account first','HorizenFamily','⚠️');openHorizenSignIn();return;}
-  createNewTab('HorizenFamily',null,'family.horizensearch.com',null,true);
+  openURL('HorizenFamily',null,'family.horizensearch.com',null,true);
 }
 
 /* ===== HISTORY ===== */
