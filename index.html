@@ -125,8 +125,6 @@
     .toast-body{}
     .toast-title{font-weight:700;font-size:12px;color:var(--accent);margin-bottom:2px}
     .toast-msg{font-size:12px;color:#aaa;line-height:1.4}
-
-    /* Dev Tools */
     #dev-tools-modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:45000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
     #dev-tools-modal.open{display:flex}
     .dev-tools-box{width:90%;max-width:800px;max-height:80vh;background:#0d0d0d;border:1px solid #333;border-radius:16px;display:flex;flex-direction:column;overflow:hidden}
@@ -141,8 +139,6 @@
     .dev-tools-input-row{display:flex;gap:0;border-top:1px solid #333}
     .dev-tools-input-row span{padding:10px 12px;background:#141414;color:#888;font-family:'Courier New',monospace;font-size:12px;display:flex;align-items:center;border-right:1px solid #333}
     .dev-tools-input-row input{flex:1;background:#0a0a0a;border:none;color:#fff;padding:10px 12px;font-family:'Courier New',monospace;font-size:12px;outline:none}
-
-    /* New Window Modal */
     #new-win-modal{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:40000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
     #new-win-modal.open{display:flex}
     .new-win-box{background:rgba(12,12,12,0.98);border:1px solid rgba(0,235,132,0.3);border-radius:20px;padding:26px;width:90%;max-width:380px}
@@ -150,8 +146,6 @@
     .new-win-box input{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:#fff;outline:none;font-size:14px;transition:.2s;font-family:inherit;margin-bottom:14px}
     .new-win-box input:focus{border-color:var(--accent)}
     .new-win-actions{display:flex;gap:10px;justify-content:flex-end}
-
-    /* ===== MODAL BASE ===== */
     .modal-base{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:40000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
     .modal-base.open{display:flex}
     .modal-card{background:rgba(12,12,12,0.98);border:1px solid rgba(0,235,132,0.3);border-radius:20px;padding:28px;width:90%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.9)}
@@ -172,8 +166,6 @@
     .auth-tabs-row{display:flex;gap:4px;background:rgba(255,255,255,0.04);border-radius:10px;padding:4px;margin-bottom:20px}
     .auth-tab-btn{flex:1;padding:8px;border:none;background:transparent;color:#777;border-radius:7px;cursor:pointer;font-size:12px;font-weight:700;transition:.15s}
     .auth-tab-btn.active{background:var(--accent);color:#000}
-
-    /* FP Popup */
     #hz-addr-display{position:fixed;bottom:14px;right:14px;background:rgba(10,10,10,0.85);border:1px solid #2a2a2a;border-radius:8px;padding:7px 12px;font-family:'Courier New',monospace;font-size:11px;color:#555;z-index:9999;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px}
     #hz-addr-display:hover{color:var(--accent);border-color:var(--accent)}
     #fp-popup{position:fixed;bottom:50px;right:14px;width:240px;background:rgba(10,10,10,0.97);border:1px solid rgba(0,235,132,0.25);border-radius:14px;z-index:20000;display:none;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.8);backdrop-filter:blur(20px)}
@@ -185,8 +177,6 @@
     .fp-popup-item .fp-tag{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:800;margin-left:auto}
     .fp-tag-admin{background:rgba(255,77,106,0.2);color:#ff4d6a}
     .fp-tag-horizen{background:rgba(0,235,132,0.2);color:var(--accent)}
-
-    /* Admin modals */
     #admin-login-modal{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:40000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
     #admin-login-modal.open{display:flex}
     #admin-codes-modal{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:40000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
@@ -204,8 +194,6 @@
     .role-dev{background:rgba(0,235,132,0.15);color:var(--accent)}
     .role-co-owner{background:rgba(255,149,0,0.15);color:#ff9500}
     .role-owner{background:rgba(255,77,106,0.15);color:#ff4d6a}
-
-    /* Horizen Account Panel */
     #horizen-account-panel{position:fixed;top:0;right:-420px;width:400px;height:100vh;background:rgba(10,10,10,0.97);border-left:1px solid var(--border);z-index:22000;display:flex;flex-direction:column;transition:right .3s ease;backdrop-filter:blur(20px)}
     #horizen-account-panel.open{right:0}
     .ha-header{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px}
@@ -220,8 +208,6 @@
     .ha-stat-label{font-size:13px;color:#aaa}
     .ha-stat-value{font-size:13px;color:var(--accent);font-weight:700}
     .ha-footer{padding:14px;border-top:1px solid var(--border);display:flex;gap:8px}
-
-    /* Messages notification overlay */
     #msg-notif{position:fixed;top:14px;right:14px;width:320px;background:rgba(12,12,12,0.97);border:1px solid rgba(0,235,132,0.3);border-radius:16px;z-index:60000;display:none;flex-direction:column;overflow:hidden;box-shadow:0 15px 50px rgba(0,0,0,0.8);backdrop-filter:blur(20px);animation:slideInRight .3s ease}
     #msg-notif.show{display:flex}
     @keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
@@ -233,8 +219,6 @@
     .msg-notif-btn{flex:1;padding:8px;border-radius:10px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:.15s}
     .msg-notif-btn.open{background:var(--accent);color:#000}
     .msg-notif-btn.dismiss{background:rgba(255,255,255,0.06);color:#ccc;border:1px solid var(--border)}
-
-    /* Call notification */
     #call-notif{position:fixed;top:14px;right:14px;width:320px;background:rgba(12,12,12,0.97);border:1px solid rgba(108,99,255,0.4);border-radius:16px;z-index:61000;display:none;flex-direction:column;overflow:hidden;box-shadow:0 15px 50px rgba(0,0,0,0.8);backdrop-filter:blur(20px);animation:slideInRight .3s ease}
     #call-notif.show{display:flex}
     .call-notif-header{padding:12px 14px;background:rgba(108,99,255,0.15);border-bottom:1px solid rgba(108,99,255,0.25);display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#a78bfa}
@@ -248,8 +232,6 @@
     .call-notif-btn{flex:1;padding:10px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer}
     .call-notif-btn.accept{background:#22d3a0;color:#000}
     .call-notif-btn.decline{background:rgba(244,63,94,0.15);color:#f43f5e;border:1px solid rgba(244,63,94,0.3)}
-
-    /* WiFi panel */
     #wifi-panel{position:fixed;top:56px;right:10px;width:340px;background:rgba(10,10,10,0.97);border:1px solid rgba(0,235,132,0.25);border-radius:18px;z-index:18000;display:none;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.8);backdrop-filter:blur(20px)}
     #wifi-panel.open{display:flex}
     .wifi-header{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
@@ -272,9 +254,6 @@
     .wifi-network.connected{background:rgba(0,235,132,0.08);border:1px solid rgba(0,235,132,0.2)}
     .wifi-network .wn-name{font-size:13px;color:#ddd}
     .wifi-network .wn-detail{font-size:11px;color:#666}
-    .bt-device{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;margin-bottom:6px;background:rgba(255,255,255,0.03);border:1px solid var(--border)}
-
-    /* Weather */
     .weather-dropdown{position:absolute;top:50px;width:min(480px,88vw);max-height:420px;overflow:auto;background:rgba(10,10,10,0.97);border:1px solid rgba(0,235,132,0.25);border-radius:16px;box-shadow:0 15px 50px rgba(0,0,0,0.7);display:none;z-index:19000;backdrop-filter:blur(20px)}
     .weather-hero{padding:20px;display:flex;align-items:center;gap:18px;border-bottom:1px solid var(--border)}
     .weather-hero-temp{font-size:42px;font-weight:900;color:#fff;line-height:1}
@@ -283,12 +262,8 @@
     .weather-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px}
     .weather-card .v{color:var(--accent);font-weight:700;font-size:16px}
     .weather-card .k{color:#666;font-size:10px;text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
-
-    /* Horizen Messages iframe tab */
     .hm-iframe-container{position:relative;width:100%;height:100%}
     .hm-iframe-container iframe{width:100%;height:100%;border:none}
-
-    /* Family locked overlay */
     #family-lock-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:none;flex-direction:column;align-items:center;justify-content:center;backdrop-filter:blur(20px)}
     #family-lock-overlay.show{display:flex}
     .lock-icon{font-size:60px;margin-bottom:20px}
@@ -298,16 +273,16 @@
     .lock-code-input input{padding:11px 16px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:#fff;outline:none;font-size:16px;width:200px;text-align:center;letter-spacing:4px}
     .lock-code-input button{padding:11px 20px;border-radius:12px;border:none;background:var(--accent);color:#000;font-weight:700;cursor:pointer;font-size:13px}
     .lock-parent-msg{margin-top:16px;font-size:12px;color:#555}
-
-    /* Screen time warning */
     #screen-time-warning{position:fixed;bottom:80px;right:20px;background:rgba(255,149,0,0.15);border:1px solid rgba(255,149,0,0.4);border-radius:14px;padding:14px 18px;z-index:40000;display:none;animation:slideInRight .3s ease;max-width:300px}
     #screen-time-warning.show{display:block}
     .stw-title{font-size:13px;font-weight:700;color:#ff9500;margin-bottom:4px}
     .stw-msg{font-size:12px;color:#aaa}
-
-    /* Chat button in status bar */
     #chat-status-btn{position:relative}
-
+    /* Location tracking indicator */
+    .loc-indicator{display:flex;align-items:center;gap:5px;font-size:11px;color:#555;padding:3px 8px;border-radius:6px}
+    .loc-indicator.tracking{color:var(--accent)}
+    .loc-indicator .loc-dot{width:6px;height:6px;border-radius:50%;background:#555}
+    .loc-indicator.tracking .loc-dot{background:var(--accent);animation:pulse 2s infinite}
     @media(max-width:600px){
       .logo{font-size:3rem}
       #bot-panel{width:calc(100vw - 40px);left:10px;bottom:70px}
@@ -320,7 +295,6 @@
 </head>
 <body oncontextmenu="handleGlobalContextMenu(event)">
 
-  <!-- LOCKED OVERLAY (HorizenFamily) -->
   <div id="family-lock-overlay">
     <div class="lock-icon">🔒</div>
     <div class="lock-title">Browser Locked</div>
@@ -332,13 +306,11 @@
     <div class="lock-parent-msg">Contact your parent if you need access</div>
   </div>
 
-  <!-- SCREEN TIME WARNING -->
   <div id="screen-time-warning">
     <div class="stw-title">⚠️ Screen Time Limit</div>
     <div class="stw-msg" id="stw-msg">You have 10 minutes remaining today.</div>
   </div>
 
-  <!-- MESSAGES NOTIFICATION -->
   <div id="msg-notif">
     <div class="msg-notif-header"><i class="fas fa-comment"></i> HorizenMessages</div>
     <div class="msg-notif-body">
@@ -351,7 +323,6 @@
     </div>
   </div>
 
-  <!-- CALL NOTIFICATION -->
   <div id="call-notif">
     <div class="call-notif-header"><i class="fas fa-phone-volume"></i> Incoming Call</div>
     <div class="call-notif-body">
@@ -367,7 +338,6 @@
     </div>
   </div>
 
-  <!-- CONTEXT MENU -->
   <div id="context-menu">
     <div class="menu-item" onclick="toggleWPPicker()"><i class="fas fa-image"></i> Change Wallpaper</div>
     <div class="menu-item" onclick="resetBG()"><i class="fas fa-undo"></i> Reset Wallpaper</div>
@@ -379,7 +349,6 @@
     <div class="menu-item" onclick="location.reload()"><i class="fas fa-power-off"></i> Restart OS</div>
   </div>
 
-  <!-- DEV TOOLS -->
   <div id="dev-tools-modal">
     <div class="dev-tools-box">
       <div class="dev-tools-header">
@@ -396,7 +365,6 @@
     </div>
   </div>
 
-  <!-- NEW WINDOW MODAL -->
   <div id="new-win-modal">
     <div class="new-win-box">
       <h3><i class="fas fa-window-restore" style="color:var(--accent);"></i> New Window</h3>
@@ -408,13 +376,11 @@
     </div>
   </div>
 
-  <!-- FINGERPRINT DISPLAY -->
   <div id="hz-addr-display" onclick="toggleFPPopup()" title="Click for options">
     <i class="fas fa-fingerprint"></i>
     <span id="hz-addr-text">Loading...</span>
   </div>
 
-  <!-- FP POPUP MENU -->
   <div id="fp-popup">
     <div class="fp-popup-item" onclick="copyAddress()"><i class="fas fa-copy"></i> Copy Fingerprint</div>
     <div class="fp-popup-item" onclick="openHorizenSignIn()" id="fp-horizen-btn"><i class="fas fa-user-circle"></i> Horizen Sign-In <span class="fp-tag fp-tag-horizen" id="fp-horizen-tag" style="display:none">●</span></div>
@@ -422,7 +388,6 @@
     <div class="fp-popup-item" onclick="openSignInsPanel()"><i class="fas fa-users"></i> Sign-In's</div>
   </div>
 
-  <!-- HORIZEN SIGN-IN MODAL -->
   <div id="horizen-signin-modal" class="modal-base">
     <div class="modal-card" style="max-width:420px">
       <h3><i class="fas fa-user-circle" style="color:var(--accent);"></i> Horizen Sign-In</h3>
@@ -449,7 +414,6 @@
     </div>
   </div>
 
-  <!-- ADMIN LOGIN MODAL -->
   <div id="admin-login-modal">
     <div class="modal-card">
       <h3><i class="fas fa-shield-halved" style="color:var(--accent);"></i> Admin Sign In</h3>
@@ -464,7 +428,6 @@
     </div>
   </div>
 
-  <!-- ADMIN CODES MODAL -->
   <div id="admin-codes-modal">
     <div class="codes-box">
       <h3 id="codes-modal-title" style="font-size:17px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px;"><i class="fas fa-code" style="color:var(--accent);"></i> Codes</h3>
@@ -476,7 +439,6 @@
     </div>
   </div>
 
-  <!-- SIGN-IN'S PANEL -->
   <div id="signins-panel" class="modal-base">
     <div class="modal-card" style="max-width:480px;max-height:80vh;display:flex;flex-direction:column;">
       <h3 style="margin-bottom:4px;"><i class="fas fa-users" style="color:var(--accent);"></i> Sign-In's</h3>
@@ -489,7 +451,6 @@
     </div>
   </div>
 
-  <!-- HORIZEN ACCOUNT PANEL -->
   <div class="panel-overlay" id="ha-overlay" onclick="closeHorizenAccountPanel()"></div>
   <div id="horizen-account-panel">
     <div class="ha-header">
@@ -512,6 +473,10 @@
         <div id="ha-family-info" style="color:#888;font-size:13px;">Not connected to a family</div>
       </div>
       <div class="ha-section">
+        <div class="ha-section-title"><i class="fas fa-location-dot"></i> Location Sharing</div>
+        <div id="ha-location-info" style="color:#888;font-size:13px;">Not active</div>
+      </div>
+      <div class="ha-section">
         <div class="ha-section-title"><i class="fas fa-history"></i> Recent Searches</div>
         <div id="ha-recent-searches" style="color:#888;font-size:13px;">No searches yet</div>
       </div>
@@ -522,7 +487,6 @@
     </div>
   </div>
 
-  <!-- TOAST -->
   <div id="toast" class="toast">
     <div class="toast-icon" id="toast-icon">🔔</div>
     <div class="toast-body">
@@ -531,7 +495,6 @@
     </div>
   </div>
 
-  <!-- HISTORY PANEL -->
   <div class="panel-overlay" id="history-overlay" onclick="toggleHistory()"></div>
   <div id="history-panel">
     <div class="history-header">
@@ -544,7 +507,6 @@
     </div>
   </div>
 
-  <!-- BOT -->
   <button id="bot-btn" onclick="toggleBot()"><i class="fas fa-robot"></i></button>
   <div id="bot-panel">
     <div class="bot-header"><div class="bot-dot"></div> Horizon Assistant</div>
@@ -557,7 +519,6 @@
     </div>
   </div>
 
-  <!-- WIFI PANEL -->
   <div id="wifi-panel">
     <div class="wifi-header">
       <h3 style="font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;"><i class="fas fa-wifi" style="color:var(--accent);"></i> Network</h3>
@@ -570,18 +531,16 @@
     <div class="wifi-body" id="wifi-body"></div>
   </div>
 
-  <!-- WP PICKER -->
   <div class="panel-overlay" id="wp-overlay" onclick="toggleWPPicker()"></div>
   <div id="wp-picker">
     <div style="display:flex;justify-content:space-between;align-items:center;">
-      <h3 style="font-size:16px;font-weight:700;"><i class="fas fa-palette" style="color:var(--accent);margin-right:8px;"></i>Wallpaper Engine</h3>
+      <h3 style="font-size:16px;font-weight:700;"><i class="fas fa-palette" style="color:var(--accent);margin-right:8px;"></i> Wallpaper Engine</h3>
       <button class="nav-btn" onclick="toggleWPPicker()" style="width:30px;height:30px;font-size:12px;"><i class="fas fa-xmark"></i></button>
     </div>
     <input type="text" id="wp-search" placeholder="Search wallpapers..." style="width:100%;padding:10px 14px;margin-top:10px;background:rgba(255,255,255,0.06);color:white;border:1px solid var(--border);border-radius:12px;outline:none;font-size:13px;">
     <div id="wp-grid"></div>
   </div>
 
-  <!-- TAB BAR -->
   <div id="tab-bar">
     <div class="tab active" id="tab-home" onclick="switchTab('home')"><span class="tab-label">Horizon</span></div>
     <div class="tab" id="tab-results" onclick="switchTab('results')" style="display:none;"><span class="tab-label">Search</span></div>
@@ -589,7 +548,6 @@
     <div id="add-win-btn" onclick="openNewWinModal()" title="Open New Window"><i class="fas fa-plus"></i> Window</div>
   </div>
 
-  <!-- NAV -->
   <div id="nav-tools">
     <button class="nav-btn" onclick="switchTab('home')" title="Home"><i class="fas fa-house"></i></button>
     <div id="addr-bar-wrap">
@@ -598,6 +556,10 @@
     </div>
     <button class="nav-btn" onclick="handleTopBar()" style="background:var(--accent);color:#000;border-color:var(--accent);"><i class="fas fa-arrow-right"></i></button>
     <div id="status-bar">
+      <div class="loc-indicator" id="loc-indicator" title="Location sharing status">
+        <span class="loc-dot"></span>
+        <span id="loc-indicator-text">Loc</span>
+      </div>
       <button class="status-btn" id="weather-btn" onclick="toggleWeather()" style="position:relative;">
         <i class="fas fa-sun" id="weather-icon"></i> <span id="weather-temp">--°</span>
         <div class="weather-dropdown" id="weather-dropdown"></div>
@@ -612,7 +574,6 @@
     </div>
   </div>
 
-  <!-- VIEWPORT -->
   <div id="viewport">
     <div id="view-home" class="view-pane active">
       <div id="home-view">
@@ -675,34 +636,32 @@
   </div>
 
 <script>
-/* ===== CONFIG ===== */
 const PEXELS_KEY='QmebQALowGk9LoYQqUGaPhQ5zUMQWwd1mRaFTV4HvNQyYS1i6v9H5V68';
 const SUPABASE_URL='https://xlisbmtenekjmundxbcn.supabase.co';
 const SUPABASE_KEY='sb_publishable_Cvs-AiKPTHrC_tfGfwlpSQ_4Hir5Cva';
 const HM_URL='https://messages.horizensearch.com';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-/* ===== STATE ===== */
 let openTabs=[],myAddress='',blockChannel=null,appCache=[],blockPollInterval=null;
 let browsingHistory=JSON.parse(localStorage.getItem('hz_history')||'[]');
 let contextUrl='',contextTabId='',speedTestRunning=false,wifiTabState='networks';
 let groqKeyCache='',msgNotifTimer=null;
 let aiSearchCache=JSON.parse(localStorage.getItem('hz_ai_cache')||'{}');
 let currentAdmin=null;
-// Horizen Account
 let horizenAccount=JSON.parse(localStorage.getItem('hz_account')||'null');
 let horizenAuthTab='login';
-// Screen time
 let screenTimeStart=Date.now();
 let screenTimeInterval=null;
 let screenTimeLimitMinutes=0;
 let todayScreenMinutes=0;
-// Family
 let familyRestrictions=null;
 let familyLocked=false;
-let hmTabId=null; // id of the messages tab
+let hmTabId=null;
+// Location tracking
+let locationTrackingEnabled=false;
+let locationTrackingInterval=null;
+let lastLocationSent=null;
 
-/* ===== TOAST ===== */
 function showToast(msg,title,icon){
   title=title||'Horizon OS';icon=icon||'🔔';
   const t=document.getElementById('toast');
@@ -714,7 +673,6 @@ function showToast(msg,title,icon){
   t._timer=setTimeout(()=>t.classList.remove('show'),4000);
 }
 
-/* ===== UTILS ===== */
 function escHtml(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
 function timeAgo(ts){const s=Math.floor((Date.now()-ts)/1000);if(s<60)return'Just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
 async function sha256(message){const msgBuffer=new TextEncoder().encode(message);const hashBuffer=await crypto.subtle.digest('SHA-256',msgBuffer);return Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,'0')).join('');}
@@ -764,7 +722,6 @@ async function doHorizenLogin(){
     if(error||!data){errEl.textContent='Invalid username/email or password';errEl.style.display='block';btn.disabled=false;btn.textContent='Sign In';return;}
     horizenAccount=data;
     localStorage.setItem('hz_account',JSON.stringify(data));
-    // Save session linked to fingerprint - FIXED: removed .catch()
     const { error: sessionError } = await sb.from('horizen_sessions').upsert({account_id:data.id,fingerprint:myAddress,last_active:new Date().toISOString()},{onConflict:'account_id,fingerprint'});
     if(sessionError) console.error('Session save error:', sessionError);
     closeHorizenSignIn();
@@ -789,36 +746,31 @@ async function doHorizenSignup(){
     if(error){errEl.textContent=error.message.includes('duplicate')?'Username or email already taken':error.message;errEl.style.display='block';btn.disabled=false;btn.textContent='Create Account';return;}
     horizenAccount=data;
     localStorage.setItem('hz_account',JSON.stringify(data));
-    // FIXED: removed .catch()
     const { error: sessionError } = await sb.from('horizen_sessions').insert({account_id:data.id,fingerprint:myAddress});
     if(sessionError) console.error('Session save error:', sessionError);
     closeHorizenSignIn();
     onHorizenAccountLoaded();
-    showToast('Account created! Welcome, '+display+'!','Horizen','🎉');
+    showToast('Account created! Welcome, '+display+'!','Horizon','🎉');
   }catch(e){errEl.textContent='Signup failed: '+e.message;errEl.style.display='block';}
   btn.disabled=false;btn.textContent='Create Account';
 }
 function doHorizenLogout(){
+  stopLocationTracking();
   horizenAccount=null;
   localStorage.removeItem('hz_account');
   closeHorizenAccountPanel();
   document.getElementById('fp-horizen-tag').style.display='none';
   document.getElementById('messages-status-btn').style.display='none';
-  showToast('Signed out of Horizen account','Horizen','👋');
+  showToast('Signed out of Horizen account','Horizon','👋');
 }
 function onHorizenAccountLoaded(){
   if(!horizenAccount)return;
   document.getElementById('fp-horizen-tag').style.display='inline-flex';
   document.getElementById('messages-status-btn').style.display='flex';
-  // Apply saved wallpaper
   if(horizenAccount.wallpaper_url&&!localStorage.getItem('horizon_bg')){setBG(horizenAccount.wallpaper_url);}
-  // Load family restrictions
   loadFamilyRestrictions();
-  // Start screen time tracking
   startScreenTimeTracking();
-  // Auto-login to HorizenMessages via localStorage
   autoLoginMessages();
-  showToast('Signed in as '+horizenAccount.display_name,'Horizen','✅');
 }
 
 function openHorizenAccountPanel(){
@@ -842,9 +794,12 @@ async function loadAccountStats(){
     document.getElementById('ha-searches').textContent=(searches||[]).length;
     document.getElementById('ha-apps').textContent=(apps||[]).length;
     if(searches&&searches.length){document.getElementById('ha-recent-searches').innerHTML=(searches||[]).map(s=>`<div style="padding:5px 0;font-size:12px;color:#bbb;border-bottom:1px solid rgba(255,255,255,0.04)">${escHtml(s.query)}</div>`).join('');}
-    // Family info
     const{data:member}=await sb.from('family_members').select('*,family:horizen_family(*)').eq('account_id',horizenAccount.id).maybeSingle();
-    if(member){document.getElementById('ha-family-info').innerHTML=`<div style="font-size:13px;color:var(--accent);font-weight:700">${escHtml(member.family?.family_name||'My Family')}</div><div style="font-size:12px;color:#888;margin-top:4px">Role: ${member.role}</div>`;}
+    if(member){
+      document.getElementById('ha-family-info').innerHTML=`<div style="font-size:13px;color:var(--accent);font-weight:700">${escHtml(member.family?.family_name||'My Family')}</div><div style="font-size:12px;color:#888;margin-top:4px">Role: ${member.role}</div>`;
+    }
+    // Location info
+    updateLocationIndicator();
   }catch(e){}
 }
 
@@ -854,7 +809,6 @@ function openSignInsPanel(){
   const body=document.getElementById('signins-body');
   body.innerHTML='<div style="padding:20px;text-align:center;color:#888"><span class="spinner"></span></div>';
   document.getElementById('signins-panel').classList.add('open');
-  // Show current accounts
   const rows=[];
   if(horizenAccount){
     rows.push(`<div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(0,235,132,0.06);border:1px solid rgba(0,235,132,0.2);border-radius:12px;margin-bottom:8px">
@@ -876,7 +830,6 @@ function closeSignInsPanel(){document.getElementById('signins-panel').classList.
 /* ===== AUTO-LOGIN HORIZEN MESSAGES ===== */
 function autoLoginMessages(){
   if(!horizenAccount)return;
-  // Store credentials for HorizenMessages iframe to pick up
   const hmCreds={email:horizenAccount.email,autoLogin:true,accountId:horizenAccount.id};
   localStorage.setItem('hm_auto_login',JSON.stringify(hmCreds));
 }
@@ -885,7 +838,6 @@ function autoLoginMessages(){
 function openMessagesTab(){
   dismissMsgNotif();dismissCallNotif();
   if(hmTabId&&document.getElementById('tab-'+hmTabId)){switchTab(hmTabId);return;}
-  // Create messages tab with iframe
   const id='t_'+Math.random().toString(36).slice(2,10);
   hmTabId=id;
   const tab=document.createElement('div');tab.className='tab';tab.id='tab-'+id;tab.setAttribute('draggable','true');
@@ -893,50 +845,28 @@ function openMessagesTab(){
   tab.onclick=()=>switchTab(id);enableDrag(tab);
   document.getElementById('tab-bar').insertBefore(tab,document.getElementById('add-win-btn'));
   const pane=document.createElement('div');pane.className='view-pane';pane.id='view-'+id;
-  const ifr=document.createElement('iframe');
-  ifr.src=HM_URL;
-  ifr.allow='camera;microphone;notifications';
-  pane.appendChild(ifr);
-  document.getElementById('viewport').appendChild(pane);
-  openTabs.push(id);
-  switchTab(id);
-  // Try to send auto-login data to iframe after load
+  const ifr=document.createElement('iframe');ifr.src=HM_URL;ifr.allow='camera;microphone;notifications';
+  pane.appendChild(ifr);document.getElementById('viewport').appendChild(pane);
+  openTabs.push(id);switchTab(id);
   ifr.addEventListener('load',()=>{
-    try{
-      ifr.contentWindow.postMessage({type:'horizen_autologin',data:JSON.parse(localStorage.getItem('hm_auto_login')||'null')},'*');
-    }catch(e){}
-    // Try to fetch title from iframe
-    try{
-      const title=ifr.contentDocument?.title||'Messages';
-      document.querySelector('#tab-'+id+' .tab-label').innerHTML=`<i class="fas fa-comment-dots" style="color:var(--accent);margin-right:4px;font-size:10px;"></i> ${escHtml(title)}`;
-    }catch(e){}
+    try{ifr.contentWindow.postMessage({type:'horizen_autologin',data:JSON.parse(localStorage.getItem('hm_auto_login')||'null')},'*');}catch(e){}
+    try{const title=ifr.contentDocument?.title||'Messages';document.querySelector('#tab-'+id+' .tab-label').innerHTML=`<i class="fas fa-comment-dots" style="color:var(--accent);margin-right:4px;font-size:10px;"></i> ${escHtml(title)}`;}catch(e){}
   });
   addToHistory('HorizenMessages',HM_URL);
 }
 function closeMessagesTab(e,id){e.stopPropagation();hmTabId=null;document.getElementById('tab-'+id)?.remove();document.getElementById('view-'+id)?.remove();openTabs=openTabs.filter(t=>t!==id);switchTab('home');saveTabs();}
 
-/* ===== MESSAGE NOTIFICATIONS FROM IFRAME ===== */
 window.addEventListener('message',e=>{
   if(!e.data||typeof e.data!=='object')return;
-  // New message notification
   if(e.data.type==='hm_new_message'){
     const{senderName,text,callType}=e.data;
-    if(callType){
-      showCallNotif(senderName,callType);
-    }else{
-      showMsgNotif(senderName,text);
-    }
-    // Update badges
+    if(callType){showCallNotif(senderName,callType);}
+    else{showMsgNotif(senderName,text);}
     const chatBadge=document.getElementById('chat-unread-badge');
     const msgBadge=document.getElementById('msg-unread-badge');
-    chatBadge.style.display='inline-flex';
-    chatBadge.textContent=(parseInt(chatBadge.textContent||'0')+1);
-    if(msgBadge){
-      msgBadge.style.display='inline-flex';
-      msgBadge.textContent=(parseInt(msgBadge.textContent||'0')+1);
-    }
+    chatBadge.style.display='inline-flex';chatBadge.textContent=(parseInt(chatBadge.textContent||'0')+1);
+    if(msgBadge){msgBadge.style.display='inline-flex';msgBadge.textContent=(parseInt(msgBadge.textContent||'0')+1);}
   }
-  // Title update
   if(e.data.type==='hm_title'&&e.data.title&&hmTabId){
     const lbl=document.querySelector('#tab-'+hmTabId+' .tab-label');
     if(lbl)lbl.innerHTML=`<i class="fas fa-comment-dots" style="color:var(--accent);margin-right:4px;font-size:10px;"></i> ${escHtml(e.data.title)}`;
@@ -947,20 +877,9 @@ function showMsgNotif(sender,text){
   document.getElementById('notif-sender').textContent=sender||'Someone';
   document.getElementById('notif-text').textContent=text||'sent you a message';
   document.getElementById('msg-notif').classList.add('show');
-  clearTimeout(msgNotifTimer);
-  msgNotifTimer=setTimeout(dismissMsgNotif,8000);
+  clearTimeout(msgNotifTimer);msgNotifTimer=setTimeout(dismissMsgNotif,8000);
 }
-function dismissMsgNotif(){
-  document.getElementById('msg-notif').classList.remove('show');
-  // Clear badge when dismissed
-  document.getElementById('chat-unread-badge').style.display='none';
-  document.getElementById('chat-unread-badge').textContent='0';
-  const msgBadge=document.getElementById('msg-unread-badge');
-  if(msgBadge){
-    msgBadge.style.display='none';
-    msgBadge.textContent='0';
-  }
-}
+function dismissMsgNotif(){document.getElementById('msg-notif').classList.remove('show');document.getElementById('chat-unread-badge').style.display='none';document.getElementById('chat-unread-badge').textContent='0';const msgBadge=document.getElementById('msg-unread-badge');if(msgBadge){msgBadge.style.display='none';msgBadge.textContent='0';}}
 function showCallNotif(name,type){
   document.getElementById('call-notif-av').textContent=(name||'?')[0].toUpperCase();
   document.getElementById('call-notif-name').textContent=name||'Someone';
@@ -972,38 +891,27 @@ function dismissCallNotif(){document.getElementById('call-notif').classList.remo
 /* ===== SCREEN TIME TRACKING ===== */
 function startScreenTimeTracking(){
   if(screenTimeInterval)clearInterval(screenTimeInterval);
-  screenTimeLimitMinutes=familyRestrictions?.screen_time_limit_minutes||horizenAccount?.screen_time_limit_minutes||0;
-  // Load today's usage
+  screenTimeLimitMinutes=familyRestrictions?.screen_time_limit_minutes||0;
   loadTodayScreenTime();
   screenTimeInterval=setInterval(async()=>{
     todayScreenMinutes++;
     document.getElementById('ha-screentime').textContent=todayScreenMinutes+' min';
-    // Save to DB every 5 min
     if(todayScreenMinutes%5===0)saveScreenTime();
-    // Check limit
     if(screenTimeLimitMinutes>0){
       const remaining=screenTimeLimitMinutes-todayScreenMinutes;
       if(remaining===10)showScreenTimeWarning('You have 10 minutes of screen time remaining today.');
       if(remaining===5)showScreenTimeWarning('You have 5 minutes of screen time remaining today.');
       if(remaining<=0){showScreenTimeWarning('Screen time limit reached. Please take a break!');lockBrowser();}
     }
-  },60000); // every minute
+  },60000);
 }
 async function loadTodayScreenTime(){
   if(!horizenAccount)return;
-  try{
-    const today=new Date().toISOString().split('T')[0];
-    const{data}=await sb.from('screen_time_logs').select('minutes_used').eq('account_id',horizenAccount.id).eq('date',today).maybeSingle();
-    todayScreenMinutes=data?.minutes_used||0;
-    document.getElementById('ha-screentime').textContent=todayScreenMinutes+' min';
-  }catch(e){}
+  try{const today=new Date().toISOString().split('T')[0];const{data}=await sb.from('screen_time_logs').select('minutes_used').eq('account_id',horizenAccount.id).eq('date',today).maybeSingle();todayScreenMinutes=data?.minutes_used||0;document.getElementById('ha-screentime').textContent=todayScreenMinutes+' min';}catch(e){}
 }
 async function saveScreenTime(){
   if(!horizenAccount)return;
-  try{
-    const today=new Date().toISOString().split('T')[0];
-    await sb.from('screen_time_logs').upsert({account_id:horizenAccount.id,date:today,minutes_used:todayScreenMinutes},{onConflict:'account_id,date'});
-  }catch(e){}
+  try{const today=new Date().toISOString().split('T')[0];await sb.from('screen_time_logs').upsert({account_id:horizenAccount.id,date:today,minutes_used:todayScreenMinutes},{onConflict:'account_id,date'});}catch(e){}
 }
 function showScreenTimeWarning(msg){const el=document.getElementById('screen-time-warning');document.getElementById('stw-msg').textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),8000);}
 
@@ -1017,61 +925,165 @@ async function loadFamilyRestrictions(){
     familyRestrictions=restrictions;
     if(restrictions){
       if(restrictions.locked)lockBrowser();
-      if(restrictions.safe_search)applySafeSearch();
       screenTimeLimitMinutes=restrictions.screen_time_limit_minutes||0;
+      // Start location tracking if enabled
+      if(restrictions.location_tracking){startLocationTracking();}
     }
-    // Subscribe to restriction changes
     sb.channel(`restrictions:${horizenAccount.id}`).on('postgres_changes',{event:'UPDATE',schema:'public',table:'family_restrictions',filter:'child_account_id=eq.'+horizenAccount.id},p=>{
       familyRestrictions=p.new;
       if(p.new.locked)lockBrowser();else unlockBrowserSilent();
-      if(p.new.safe_search)applySafeSearch();
       screenTimeLimitMinutes=p.new.screen_time_limit_minutes||0;
+      // Handle location tracking toggle
+      if(p.new.location_tracking&&!locationTrackingEnabled){startLocationTracking();}
+      else if(!p.new.location_tracking&&locationTrackingEnabled){stopLocationTracking();}
       showToast('Parental controls updated','HorizenFamily','👨‍👧');
     }).subscribe();
-    // Check family invites
     checkFamilyInvites();
   }catch(e){}
 }
 function lockBrowser(){familyLocked=true;document.getElementById('family-lock-overlay').classList.add('show');}
 function unlockBrowserSilent(){familyLocked=false;document.getElementById('family-lock-overlay').classList.remove('show');}
-function applySafeSearch(){/* Safe search flag - used when performing searches */}
 async function tryUnlockBrowser(){
   const code=document.getElementById('lock-code-input').value.trim();
   if(!code){showToast('Enter unlock code','Lock','⚠️');return;}
-  // Check against family restrictions unlock code
-  try{
-    const{data}=await sb.from('family_restrictions').select('unlock_code').eq('child_account_id',horizenAccount?.id).maybeSingle();
-    if(data?.unlock_code&&data.unlock_code===code){unlockBrowserSilent();showToast('Browser unlocked','Lock','🔓');}
-    else showToast('Incorrect code','Lock','❌');
-  }catch(e){showToast('Error checking code','Lock','❌');}
+  try{const{data}=await sb.from('family_restrictions').select('unlock_code').eq('child_account_id',horizenAccount?.id).maybeSingle();if(data?.unlock_code&&data.unlock_code===code){unlockBrowserSilent();showToast('Browser unlocked','Lock','🔓');}else showToast('Incorrect code','Lock','❌');}catch(e){showToast('Error checking code','Lock','❌');}
 }
 async function checkFamilyInvites(){
   if(!horizenAccount)return;
   try{
     const{data:invites}=await sb.from('family_invites').select('*,from_account:horizen_accounts!family_invites_from_account_id_fkey(display_name,username),family:horizen_family(family_name)').eq('to_account_id',horizenAccount.id).eq('status','pending');
-    if(invites&&invites.length>0){
-      const inv=invites[0];
-      const parentName=inv.from_account?.display_name||inv.from_account?.username||'Someone';
-      const familyName=inv.family?.family_name||'a family';
-      showFamilyInviteToast(inv.id,parentName,familyName);
-    }
+    if(invites&&invites.length>0){const inv=invites[0];showFamilyInviteToast(inv.id,inv.from_account?.display_name||inv.from_account?.username||'Someone',inv.family?.family_name||'a family',inv.role);}
   }catch(e){}
-  // Subscribe to new invites
   sb.channel(`invites:${horizenAccount.id}`).on('postgres_changes',{event:'INSERT',schema:'public',table:'family_invites',filter:'to_account_id=eq.'+horizenAccount.id},async p=>{
     const inv=p.new;
     const{data:from}=await sb.from('horizen_accounts').select('display_name,username').eq('id',inv.from_account_id).maybeSingle();
     const{data:fam}=await sb.from('horizen_family').select('family_name').eq('id',inv.family_id).maybeSingle();
-    showFamilyInviteToast(inv.id,from?.display_name||from?.username||'Someone',fam?.family_name||'a family');
+    showFamilyInviteToast(inv.id,from?.display_name||from?.username||'Someone',fam?.family_name||'a family',inv.role);
   }).subscribe();
 }
-function showFamilyInviteToast(inviteId,parentName,familyName){
-  showToast(`${parentName} wants to add you to "${familyName}". Check HorizenFamily to accept.`,'HorizenFamily Invite','👨‍👧');
+function showFamilyInviteToast(inviteId,parentName,familyName,role){
+  const roleText=role==='parent'?'as a Parent':'as a Child';
+  showToast(`${parentName} wants to add you to "${familyName}" ${roleText}. Open HorizenFamily to accept.`,'HorizenFamily Invite','👨‍👧');
 }
 
-/* ===== HORIZEN FAMILY OPENER ===== */
 function openHorizenFamily(){
   if(!horizenAccount){showToast('Sign in to your Horizen account first','HorizenFamily','⚠️');openHorizenSignIn();return;}
-  openURL('HorizenFamily',null,'family.horizensearch.com',null,true);
+  openURL('https://family.horizensearch.com','HorizenFamily');
+}
+
+/* ===== LOCATION TRACKING ===== */
+function startLocationTracking(){
+  if(locationTrackingEnabled)return;
+  if(!navigator.geolocation){
+    devLog('Geolocation not available','warn');
+    return;
+  }
+  locationTrackingEnabled=true;
+  updateLocationIndicator();
+  devLog('Location tracking started','info');
+
+  // Request permission and send first location
+  sendLocationUpdate();
+
+  // Send location every 5 minutes
+  if(locationTrackingInterval)clearInterval(locationTrackingInterval);
+  locationTrackingInterval=setInterval(sendLocationUpdate,5*60*1000);
+
+  // Also send on significant position change (if supported)
+  if(navigator.geolocation.watchPosition){
+    navigator.geolocation.watchPosition(
+      (pos)=>{
+        // Only send if position changed significantly (>50m)
+        if(lastLocationSent){
+          const dist=getDistance(lastLocationSent.lat,lastLocationSent.lng,pos.coords.latitude,pos.coords.longitude);
+          if(dist>50)sendLocationUpdate();
+        }
+      },
+      ()=>{},
+      {enableHighAccuracy:false,timeout:60000,maximumAge:300000}
+    );
+  }
+}
+
+function stopLocationTracking(){
+  locationTrackingEnabled=false;
+  if(locationTrackingInterval){clearInterval(locationTrackingInterval);locationTrackingInterval=null;}
+  updateLocationIndicator();
+  devLog('Location tracking stopped','info');
+}
+
+async function sendLocationUpdate(){
+  if(!locationTrackingEnabled||!horizenAccount)return;
+  if(!navigator.geolocation)return;
+
+  return new Promise((resolve)=>{
+    navigator.geolocation.getCurrentPosition(
+      async (position)=>{
+        const {latitude,longitude,accuracy}=position.coords;
+        lastLocationSent={lat:latitude,lng:longitude};
+
+        try{
+          const{error}=await sb.from('child_locations').insert({
+            account_id:horizenAccount.id,
+            latitude:latitude,
+            longitude:longitude,
+            accuracy:accuracy
+          });
+          if(error){
+            devLog('Location send error: '+error.message,'error');
+          }else{
+            devLog(`Location sent: ${latitude.toFixed(5)}, ${longitude.toFixed(5)} (±${Math.round(accuracy)}m)`,'info');
+            updateLocationIndicator();
+          }
+        }catch(e){
+          devLog('Location send failed: '+e.message,'error');
+        }
+        resolve();
+      },
+      (error)=>{
+        let msg='Location error';
+        switch(error.code){
+          case error.PERMISSION_DENIED:msg='Location permission denied';break;
+          case error.POSITION_UNAVAILABLE:msg='Position unavailable';break;
+          case error.TIMEOUT:msg='Location timeout';break;
+        }
+        devLog(msg,'warn');
+        resolve();
+      },
+      {enableHighAccuracy:true,timeout:15000,maximumAge:300000}
+    );
+  });
+}
+
+function getDistance(lat1,lon1,lat2,lon2){
+  const R=6371000;
+  const dLat=(lat2-lat1)*Math.PI/180;
+  const dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function updateLocationIndicator(){
+  const indicator=document.getElementById('loc-indicator');
+  const text=document.getElementById('loc-indicator-text');
+  const haLocInfo=document.getElementById('ha-location-info');
+
+  if(locationTrackingEnabled&&horizenAccount){
+    indicator.classList.add('tracking');
+    text.textContent='Loc';
+    indicator.title='Location sharing active';
+    const timeStr=lastLocationSent?timeAgo(Date.now()):'Active';
+    haLocInfo.innerHTML=`<div style="display:flex;align-items:center;gap:8px;color:var(--accent);font-size:13px;font-weight:700"><span class="loc-dot" style="background:var(--accent);animation:pulse 2s infinite;width:6px;height:6px;border-radius:50%;display:inline-block"></span> Sharing Location</div><div style="font-size:11px;color:#888;margin-top:4px">${lastLocationSent?`${lastLocationSent.lat.toFixed(4)}, ${lastLocationSent.lng.toFixed(4)}`:'Waiting for GPS...'}</div><div style="font-size:11px;color:#666;margin-top:2px">Updates every 5 minutes</div>`;
+  }else{
+    indicator.classList.remove('tracking');
+    text.textContent='Loc';
+    indicator.title='Location sharing inactive';
+    if(horizenAccount){
+      haLocInfo.innerHTML=`<div style="font-size:13px;color:#888">Location sharing not enabled</div><div style="font-size:11px;color:#666;margin-top:4px">Your parent can enable this in HorizenFamily</div>`;
+    }else{
+      haLocInfo.innerHTML=`<div style="font-size:13px;color:#888">Not active</div><div style="font-size:11px;color:#666;margin-top:4px">Sign in to enable</div>`;
+    }
+  }
 }
 
 /* ===== HISTORY ===== */
@@ -1086,18 +1098,12 @@ function restoreTabs(){try{JSON.parse(localStorage.getItem('hz_open_tabs')||'[]'
 function switchTab(id){document.querySelectorAll('.view-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));const vp=document.getElementById('view-'+id),tb=document.getElementById('tab-'+id);if(vp)vp.classList.add('active');if(tb){tb.classList.add('active');tb.style.display='flex';}if(id==='store')loadAppStore();}
 function enableDrag(tab){tab.addEventListener('dragstart',()=>tab.classList.add('dragging'));tab.addEventListener('dragend',()=>{tab.classList.remove('dragging');saveTabs();});tab.addEventListener('dragover',e=>{e.preventDefault();const d=document.querySelector('.tab.dragging');if(!d||d===tab)return;const r=tab.getBoundingClientRect();tab.parentNode.insertBefore(d,(e.clientX-r.left)<r.width/2?tab:tab.nextSibling);});}
 
-const quickMap={'docs.google.com':'Google Docs','drive.google.com':'Google Drive','mail.google.com':'Gmail','youtube.com':'YouTube','twitter.com':'X','x.com':'X','facebook.com':'Facebook','instagram.com':'Instagram','reddit.com':'Reddit','github.com':'GitHub','wikipedia.org':'Wikipedia','amazon.com':'Amazon','netflix.com':'Netflix','spotify.com':'Spotify','discord.com':'Discord','twitch.tv':'Twitch','linkedin.com':'LinkedIn','tiktok.com':'TikTok','horizensearch.com':'Horizon Search','ai.horizensearch.com':'Horizen AI','gd.horizensearch.com':'Geometry Dash','messages.horizensearch.com':'HorizenMessages','chat.openai.com':'ChatGPT','claude.ai':'Claude','google.com':'Google'};
+const quickMap={'docs.google.com':'Google Docs','drive.google.com':'Google Drive','mail.google.com':'Gmail','youtube.com':'YouTube','twitter.com':'X','x.com':'X','facebook.com':'Facebook','instagram.com':'Instagram','reddit.com':'Reddit','github.com':'GitHub','wikipedia.org':'Wikipedia','amazon.com':'Amazon','netflix.com':'Netflix','spotify.com':'Spotify','discord.com':'Discord','twitch.tv':'Twitch','linkedin.com':'LinkedIn','tiktok.com':'TikTok','horizensearch.com':'Horizon Search','ai.horizensearch.com':'Horizen AI','gd.horizensearch.com':'Geometry Dash','messages.horizensearch.com':'HorizenMessages','chat.openai.com':'ChatGPT','claude.ai':'Claude','google.com':'Google','family.horizensearch.com':'HorizenFamily'};
 function quickShorten(url){try{const u=new URL(url),h=u.hostname.replace(/^www\./,'');if(quickMap[h])return quickMap[h];for(const[d,l]of Object.entries(quickMap)){if(h.endsWith('.'+d))return l;}return null;}catch(e){return null;}}
 function fallbackShorten(url){try{return new URL(url).hostname.replace(/^www\./, '');}catch(e){return url.length>25?url.substring(0,25)+'...':url;}}
 
-async function fetchIframeTitle(url){
-  // Try to get actual page title via a proxy or just use quickShorten
-  return quickShorten(url)||fallbackShorten(url);
-}
-
 async function createNewTab(name,html,url,srcdoc,doSwitch=true){
   if(familyLocked){showToast('Browser is locked by your parent','HorizenFamily','🔒');return;}
-  // Check blocked URLs
   if(url&&familyRestrictions?.blocked_urls?.length){
     const blocked=familyRestrictions.blocked_urls.some(b=>url.includes(b));
     if(blocked){showToast('This site is blocked by your parent','HorizenFamily','🚫');return;}
@@ -1115,23 +1121,12 @@ async function createNewTab(name,html,url,srcdoc,doSwitch=true){
   pane.appendChild(ifr);document.getElementById('viewport').appendChild(pane);
   openTabs.push(safeId);
   if(doSwitch)switchTab(safeId);
-  saveTabs();
-  addToHistory(displayName,url||'');
-  // Track app usage
+  saveTabs();addToHistory(displayName,url||'');
   if(horizenAccount&&url){
     const { error: appError } = await sb.from('account_app_history').insert({account_id:horizenAccount.id,app_name:displayName,app_url:url}).single();
     if(appError) console.error('App history error:', appError);
   }
-  // Try to get actual title from iframe
-  ifr.addEventListener('load',()=>{
-    try{
-      const title=ifr.contentDocument?.title;
-      if(title&&title.trim()){
-        const lbl=document.querySelector('#tab-'+safeId+' .tab-label');
-        if(lbl)lbl.textContent=title.trim().substring(0,30);
-      }
-    }catch(e){}
-  });
+  ifr.addEventListener('load',()=>{try{const title=ifr.contentDocument?.title;if(title&&title.trim()){const lbl=document.querySelector('#tab-'+safeId+' .tab-label');if(lbl)lbl.textContent=title.trim().substring(0,30);}}catch(e){}});
   return safeId;
 }
 function closeTab(e,id){e.stopPropagation();document.getElementById('tab-'+id)?.remove();document.getElementById('view-'+id)?.remove();openTabs=openTabs.filter(t=>t!==id);switchTab('home');saveTabs();}
@@ -1146,22 +1141,15 @@ function switchFilter(fId,btn){document.querySelectorAll('.filter-btn').forEach(
 async function performSearch(customQuery){
   const q=(customQuery||document.getElementById('search-input').value||'').trim();
   if(!q)return;
-  // Safe search filter
-  if(familyRestrictions?.safe_search){/* Could filter results */}
-  document.getElementById('search-input').value='';
-  document.getElementById('home-suggestions').style.display='none';
-  addToHistory(q,'');
-  saveSuggestion(q);
-  // Save to account
+  document.getElementById('search-input').value='';document.getElementById('home-suggestions').style.display='none';
+  addToHistory(q,'');saveSuggestion(q);
   if(horizenAccount){
     const { error: searchError } = await sb.from('account_search_history').insert({account_id:horizenAccount.id,query:q}).single();
     if(searchError) console.error('Search history error:', searchError);
   }
   document.getElementById('search-title').innerText='Results for: '+q;
-  document.getElementById('tab-results').style.display='flex';
-  switchTab('results');
-  document.getElementById('all-images-preview').innerHTML='';
-  document.getElementById('full-images-grid').innerHTML='';
+  document.getElementById('tab-results').style.display='flex';switchTab('results');
+  document.getElementById('all-images-preview').innerHTML='';document.getElementById('full-images-grid').innerHTML='';
   switchFilter('all',document.querySelector('.filter-btn'));
   const cacheKey=q.toLowerCase();
   if(aiSearchCache[cacheKey]){document.getElementById('inline-ai-box').innerText=aiSearchCache[cacheKey];document.getElementById('facts-content').innerText=aiSearchCache[cacheKey];}
@@ -1178,9 +1166,7 @@ async function loadAppStore(){
   appCache=(data||[]).filter(app=>{const h=(app.name||'')+' '+(app.description||'')+' '+(app.category||'');return!q||h.toLowerCase().includes(q);});
   document.getElementById('app-store-grid').innerHTML=appCache.length?appCache.map(app=>`<div class="store-card" onclick="openApp('${app.id}')"><img src="${escHtml(app.icon_url||'')}" alt="" onerror="this.style.display='none'"><h3>${escHtml(app.name||'Untitled')}</h3><p>${escHtml(app.description||'')}</p><div class="meta-line">${escHtml(app.category||'General')}</div></div>`).join(''):'<div style="color:#888;padding:20px;">No apps found.</div>';
 }
-function openApp(id){const app=appCache.find(a=>String(a.id)===String(id));if(!app)return;createNewTab(app.name||'App',null,null,app.html||'<h1 style="color:#fff;padding:20px;">Empty App</h1>',true);if(horizenAccount){
-  sb.from('account_app_history').insert({account_id:horizenAccount.id,app_name:app.name||'App'}).then(() => {}).catch(e => console.error('App history error:', e));
-}}
+function openApp(id){const app=appCache.find(a=>String(a.id)===String(id));if(!app)return;createNewTab(app.name||'App',null,null,app.html||'<h1 style="color:#fff;padding:20px;">Empty App</h1>',true);if(horizenAccount){sb.from('account_app_history').insert({account_id:horizenAccount.id,app_name:app.name||'App'}).then(()=>{}).catch(e=>console.error('App history error:',e));}}
 
 /* ===== CONTEXT MENU ===== */
 function handleGlobalContextMenu(e){e.preventDefault();const m=document.getElementById('context-menu');let clickedOnSite=false;const activePane=document.querySelector('.view-pane.active');if(activePane){const ifr=activePane.querySelector('iframe');if(ifr){const r=ifr.getBoundingClientRect();if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){clickedOnSite=true;contextUrl=ifr.src||'';}}}document.getElementById('ctx-search-ai').style.display=clickedOnSite&&contextUrl?'flex':'none';document.getElementById('ctx-ai-divider').style.display=clickedOnSite&&contextUrl?'block':'none';m.style.display='block';m.style.left=Math.min(e.pageX,window.innerWidth-220)+'px';m.style.top=Math.min(e.pageY,window.innerHeight-200)+'px';}
@@ -1189,10 +1175,7 @@ function handleSearchWithAI(){document.getElementById('context-menu').style.disp
 
 /* ===== WALLPAPER ===== */
 function toggleWPPicker(){const p=document.getElementById('wp-picker'),o=document.getElementById('wp-overlay');const isOpen=p.style.display==='flex';p.style.display=isOpen?'none':'flex';o.classList.toggle('show',!isOpen);}
-function setBG(url){document.body.style.backgroundImage="url('"+url+"')";localStorage.setItem('horizon_bg',url);if(horizenAccount){
-  sb.from('horizen_accounts').update({wallpaper_url:url}).eq('id',horizenAccount.id).then(() => {}).catch(e => console.error('Wallpaper save error:', e));
-  horizenAccount.wallpaper_url=url;localStorage.setItem('hz_account',JSON.stringify(horizenAccount));
-}showToast('Wallpaper applied','Wallpaper','🖼️');}
+function setBG(url){document.body.style.backgroundImage="url('"+url+"')";localStorage.setItem('horizon_bg',url);if(horizenAccount){sb.from('horizen_accounts').update({wallpaper_url:url}).eq('id',horizenAccount.id).then(()=>{}).catch(e=>console.error('Wallpaper save error:',e));horizenAccount.wallpaper_url=url;localStorage.setItem('hz_account',JSON.stringify(horizenAccount));}showToast('Wallpaper applied','Wallpaper','🖼️');}
 function resetBG(){document.body.style.backgroundImage='none';localStorage.removeItem('horizon_bg');showToast('Wallpaper reset','Wallpaper','🖼️');}
 document.getElementById('wp-search').addEventListener('keypress',e=>{if(e.key==='Enter'){const q=e.target.value.trim();if(!q)return;document.getElementById('wp-grid').innerHTML='<div style="text-align:center;padding:30px;"><span class="spinner"></span></div>';fetch('https://api.pexels.com/v1/search?query='+encodeURIComponent(q)+'&per_page=20',{headers:{Authorization:PEXELS_KEY}}).then(r=>r.json()).then(d=>{document.getElementById('wp-grid').innerHTML=(d.photos||[]).map(p=>`<img src="${p.src.medium}" class="wp-item" onclick="setBG('${p.src.large2x}')">`).join('')||'<div style="text-align:center;padding:30px;color:#888;">No results</div>';}).catch(()=>{});}});
 
@@ -1257,8 +1240,7 @@ async function checkIfBlocked(id){try{const{data}=await sb.from('users').select(
 async function initHorizenBlocker(){
   let id=localStorage.getItem('horizen_computer_id');
   if(!id){id=await generateFingerprint();localStorage.setItem('horizen_computer_id',id);}
-  myAddress=id;
-  document.getElementById('hz-addr-text').innerText=id;
+  myAddress=id;document.getElementById('hz-addr-text').innerText=id;
   const { error: upsertError } = await sb.from('users').upsert({computer_id:id},{onConflict:'computer_id'});
   if(upsertError) console.error('User upsert error:', upsertError);
   if(await checkIfBlocked(id))return false;
@@ -1312,13 +1294,8 @@ window.onload=async()=>{
   devLog('Horizon OS Pro Edition Initialized','info');
   const ok=await initHorizenBlocker();
   if(!ok){document.body.style.display='none';return;}
-  // Auto-login Horizen account from localStorage
   if(horizenAccount){
-    // Re-fetch fresh account data
-    try{
-      const{data}=await sb.from('horizen_accounts').select('*').eq('id',horizenAccount.id).maybeSingle();
-      if(data){horizenAccount=data;localStorage.setItem('hz_account',JSON.stringify(data));}
-    }catch(e){}
+    try{const{data}=await sb.from('horizen_accounts').select('*').eq('id',horizenAccount.id).maybeSingle();if(data){horizenAccount=data;localStorage.setItem('hz_account',JSON.stringify(data));}}catch(e){}
     onHorizenAccountLoaded();
   }
   loadAppStore();fetchWeather();
