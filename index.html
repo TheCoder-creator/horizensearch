@@ -305,6 +305,9 @@
     .stw-title{font-size:13px;font-weight:700;color:#ff9500;margin-bottom:4px}
     .stw-msg{font-size:12px;color:#aaa}
 
+    /* Chat button in status bar */
+    #chat-status-btn{position:relative}
+
     @media(max-width:600px){
       .logo{font-size:3rem}
       #bot-panel{width:calc(100vw - 40px);left:10px;bottom:70px}
@@ -515,7 +518,7 @@
     </div>
     <div class="ha-footer">
       <button class="speed-btn" style="flex:1;padding:10px;margin:0;font-size:12px;background:rgba(0,235,132,0.12);color:var(--accent);border:1px solid rgba(0,235,132,0.3);" onclick="doHorizenLogout()"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
-      <button class="speed-btn" style="flex:1;padding:10px;margin:0;font-size:12px;" onclick="openHorizenFamily()"><i class="fas fa-family"></i> HorizenFamily</button>
+      <button class="speed-btn" style="flex:1;padding:10px;margin:0;font-size:12px;" onclick="openHorizenFamily()"><i class="fas fa-users"></i> HorizenFamily</button>
     </div>
   </div>
 
@@ -600,6 +603,7 @@
         <div class="weather-dropdown" id="weather-dropdown"></div>
       </button>
       <div class="status-item" onclick="toggleWifi()"><i class="fas fa-wifi" id="wifi-icon"></i></div>
+      <button class="status-btn" id="chat-status-btn" onclick="openMessagesTab()" title="Messages"><i class="fas fa-comment-dots"></i> <span class="msg-badge" id="chat-unread-badge" style="display:none;">0</span></button>
       <div class="status-item" id="battery"><i class="fas fa-battery-full"></i> --%</div>
       <button class="status-btn" id="messages-status-btn" onclick="openMessagesTab()" title="HorizenMessages" style="display:none;"><i class="fas fa-comment-dots"></i> <span class="msg-badge" id="msg-unread-badge" style="display:none;">0</span></button>
       <button class="status-btn" id="role-mode-btn" onclick="openCodesModal()" title="Role Codes" style="display:none;"><i class="fas fa-shield-halved"></i> <span id="role-mode-label">Mode</span></button>
@@ -760,11 +764,12 @@ async function doHorizenLogin(){
     if(error||!data){errEl.textContent='Invalid username/email or password';errEl.style.display='block';btn.disabled=false;btn.textContent='Sign In';return;}
     horizenAccount=data;
     localStorage.setItem('hz_account',JSON.stringify(data));
-    // Save session linked to fingerprint
-    await sb.from('horizen_sessions').upsert({account_id:data.id,fingerprint:myAddress,last_active:new Date().toISOString()},{onConflict:'account_id,fingerprint'}).catch(()=>{});
+    // Save session linked to fingerprint - FIXED: removed .catch()
+    const { error: sessionError } = await sb.from('horizen_sessions').upsert({account_id:data.id,fingerprint:myAddress,last_active:new Date().toISOString()},{onConflict:'account_id,fingerprint'});
+    if(sessionError) console.error('Session save error:', sessionError);
     closeHorizenSignIn();
     onHorizenAccountLoaded();
-    showToast('Welcome back, '+data.display_name+'!','Horizen','✅');
+    showToast('Welcome back, '+data.display_name+'!','Horizon','✅');
   }catch(e){errEl.textContent='Login failed: '+e.message;errEl.style.display='block';}
   btn.disabled=false;btn.textContent='Sign In';
 }
@@ -784,7 +789,9 @@ async function doHorizenSignup(){
     if(error){errEl.textContent=error.message.includes('duplicate')?'Username or email already taken':error.message;errEl.style.display='block';btn.disabled=false;btn.textContent='Create Account';return;}
     horizenAccount=data;
     localStorage.setItem('hz_account',JSON.stringify(data));
-    await sb.from('horizen_sessions').insert({account_id:data.id,fingerprint:myAddress}).catch(()=>{});
+    // FIXED: removed .catch()
+    const { error: sessionError } = await sb.from('horizen_sessions').insert({account_id:data.id,fingerprint:myAddress});
+    if(sessionError) console.error('Session save error:', sessionError);
     closeHorizenSignIn();
     onHorizenAccountLoaded();
     showToast('Account created! Welcome, '+display+'!','Horizen','🎉');
@@ -919,10 +926,15 @@ window.addEventListener('message',e=>{
     }else{
       showMsgNotif(senderName,text);
     }
-    // Update badge
-    const badge=document.getElementById('msg-unread-badge');
-    badge.style.display='inline-flex';
-    badge.textContent=(parseInt(badge.textContent||'0')+1);
+    // Update badges
+    const chatBadge=document.getElementById('chat-unread-badge');
+    const msgBadge=document.getElementById('msg-unread-badge');
+    chatBadge.style.display='inline-flex';
+    chatBadge.textContent=(parseInt(chatBadge.textContent||'0')+1);
+    if(msgBadge){
+      msgBadge.style.display='inline-flex';
+      msgBadge.textContent=(parseInt(msgBadge.textContent||'0')+1);
+    }
   }
   // Title update
   if(e.data.type==='hm_title'&&e.data.title&&hmTabId){
@@ -938,7 +950,17 @@ function showMsgNotif(sender,text){
   clearTimeout(msgNotifTimer);
   msgNotifTimer=setTimeout(dismissMsgNotif,8000);
 }
-function dismissMsgNotif(){document.getElementById('msg-notif').classList.remove('show');}
+function dismissMsgNotif(){
+  document.getElementById('msg-notif').classList.remove('show');
+  // Clear badge when dismissed
+  document.getElementById('chat-unread-badge').style.display='none';
+  document.getElementById('chat-unread-badge').textContent='0';
+  const msgBadge=document.getElementById('msg-unread-badge');
+  if(msgBadge){
+    msgBadge.style.display='none';
+    msgBadge.textContent='0';
+  }
+}
 function showCallNotif(name,type){
   document.getElementById('call-notif-av').textContent=(name||'?')[0].toUpperCase();
   document.getElementById('call-notif-name').textContent=name||'Someone';
@@ -1097,7 +1119,8 @@ async function createNewTab(name,html,url,srcdoc,doSwitch=true){
   addToHistory(displayName,url||'');
   // Track app usage
   if(horizenAccount&&url){
-    sb.from('account_app_history').insert({account_id:horizenAccount.id,app_name:displayName,app_url:url}).catch(()=>{});
+    const { error: appError } = await sb.from('account_app_history').insert({account_id:horizenAccount.id,app_name:displayName,app_url:url}).single();
+    if(appError) console.error('App history error:', appError);
   }
   // Try to get actual title from iframe
   ifr.addEventListener('load',()=>{
@@ -1130,7 +1153,10 @@ async function performSearch(customQuery){
   addToHistory(q,'');
   saveSuggestion(q);
   // Save to account
-  if(horizenAccount){sb.from('account_search_history').insert({account_id:horizenAccount.id,query:q}).catch(()=>{});}
+  if(horizenAccount){
+    const { error: searchError } = await sb.from('account_search_history').insert({account_id:horizenAccount.id,query:q}).single();
+    if(searchError) console.error('Search history error:', searchError);
+  }
   document.getElementById('search-title').innerText='Results for: '+q;
   document.getElementById('tab-results').style.display='flex';
   switchTab('results');
@@ -1152,7 +1178,9 @@ async function loadAppStore(){
   appCache=(data||[]).filter(app=>{const h=(app.name||'')+' '+(app.description||'')+' '+(app.category||'');return!q||h.toLowerCase().includes(q);});
   document.getElementById('app-store-grid').innerHTML=appCache.length?appCache.map(app=>`<div class="store-card" onclick="openApp('${app.id}')"><img src="${escHtml(app.icon_url||'')}" alt="" onerror="this.style.display='none'"><h3>${escHtml(app.name||'Untitled')}</h3><p>${escHtml(app.description||'')}</p><div class="meta-line">${escHtml(app.category||'General')}</div></div>`).join(''):'<div style="color:#888;padding:20px;">No apps found.</div>';
 }
-function openApp(id){const app=appCache.find(a=>String(a.id)===String(id));if(!app)return;createNewTab(app.name||'App',null,null,app.html||'<h1 style="color:#fff;padding:20px;">Empty App</h1>',true);if(horizenAccount){sb.from('account_app_history').insert({account_id:horizenAccount.id,app_name:app.name||'App'}).catch(()=>{});}}
+function openApp(id){const app=appCache.find(a=>String(a.id)===String(id));if(!app)return;createNewTab(app.name||'App',null,null,app.html||'<h1 style="color:#fff;padding:20px;">Empty App</h1>',true);if(horizenAccount){
+  sb.from('account_app_history').insert({account_id:horizenAccount.id,app_name:app.name||'App'}).then(() => {}).catch(e => console.error('App history error:', e));
+}}
 
 /* ===== CONTEXT MENU ===== */
 function handleGlobalContextMenu(e){e.preventDefault();const m=document.getElementById('context-menu');let clickedOnSite=false;const activePane=document.querySelector('.view-pane.active');if(activePane){const ifr=activePane.querySelector('iframe');if(ifr){const r=ifr.getBoundingClientRect();if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){clickedOnSite=true;contextUrl=ifr.src||'';}}}document.getElementById('ctx-search-ai').style.display=clickedOnSite&&contextUrl?'flex':'none';document.getElementById('ctx-ai-divider').style.display=clickedOnSite&&contextUrl?'block':'none';m.style.display='block';m.style.left=Math.min(e.pageX,window.innerWidth-220)+'px';m.style.top=Math.min(e.pageY,window.innerHeight-200)+'px';}
@@ -1161,7 +1189,10 @@ function handleSearchWithAI(){document.getElementById('context-menu').style.disp
 
 /* ===== WALLPAPER ===== */
 function toggleWPPicker(){const p=document.getElementById('wp-picker'),o=document.getElementById('wp-overlay');const isOpen=p.style.display==='flex';p.style.display=isOpen?'none':'flex';o.classList.toggle('show',!isOpen);}
-function setBG(url){document.body.style.backgroundImage="url('"+url+"')";localStorage.setItem('horizon_bg',url);if(horizenAccount){sb.from('horizen_accounts').update({wallpaper_url:url}).eq('id',horizenAccount.id).catch(()=>{});horizenAccount.wallpaper_url=url;localStorage.setItem('hz_account',JSON.stringify(horizenAccount));}showToast('Wallpaper applied','Wallpaper','🖼️');}
+function setBG(url){document.body.style.backgroundImage="url('"+url+"')";localStorage.setItem('horizon_bg',url);if(horizenAccount){
+  sb.from('horizen_accounts').update({wallpaper_url:url}).eq('id',horizenAccount.id).then(() => {}).catch(e => console.error('Wallpaper save error:', e));
+  horizenAccount.wallpaper_url=url;localStorage.setItem('hz_account',JSON.stringify(horizenAccount));
+}showToast('Wallpaper applied','Wallpaper','🖼️');}
 function resetBG(){document.body.style.backgroundImage='none';localStorage.removeItem('horizon_bg');showToast('Wallpaper reset','Wallpaper','🖼️');}
 document.getElementById('wp-search').addEventListener('keypress',e=>{if(e.key==='Enter'){const q=e.target.value.trim();if(!q)return;document.getElementById('wp-grid').innerHTML='<div style="text-align:center;padding:30px;"><span class="spinner"></span></div>';fetch('https://api.pexels.com/v1/search?query='+encodeURIComponent(q)+'&per_page=20',{headers:{Authorization:PEXELS_KEY}}).then(r=>r.json()).then(d=>{document.getElementById('wp-grid').innerHTML=(d.photos||[]).map(p=>`<img src="${p.src.medium}" class="wp-item" onclick="setBG('${p.src.large2x}')">`).join('')||'<div style="text-align:center;padding:30px;color:#888;">No results</div>';}).catch(()=>{});}});
 
@@ -1228,7 +1259,8 @@ async function initHorizenBlocker(){
   if(!id){id=await generateFingerprint();localStorage.setItem('horizen_computer_id',id);}
   myAddress=id;
   document.getElementById('hz-addr-text').innerText=id;
-  try{await sb.from('users').upsert({computer_id:id},{onConflict:'computer_id'});}catch(e){}
+  const { error: upsertError } = await sb.from('users').upsert({computer_id:id},{onConflict:'computer_id'});
+  if(upsertError) console.error('User upsert error:', upsertError);
   if(await checkIfBlocked(id))return false;
   try{blockChannel=sb.channel('user-block-watch').on('postgres_changes',{event:'UPDATE',schema:'public',table:'users',filter:'computer_id=eq.'+id},p=>{if(p.new?.is_blocked)location.href='https://blocked.horizensearch.com';}).subscribe();}catch(e){}
   blockPollInterval=setInterval(()=>checkIfBlocked(id),2000);
